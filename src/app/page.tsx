@@ -15,11 +15,22 @@ export default function Home() {
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
   const [mounted, setMounted] = useState(false);
+
+  // Text size customization
+  const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1); // 0.6 to 1.4 range
+
   const storyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Reset font size when new review loads
+  useEffect(() => {
+    if (reviewData) {
+      setFontSizeMultiplier(1);
+    }
+  }, [reviewData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,11 +100,11 @@ export default function Home() {
 
     switch (selectedTemplate) {
       case 'bottom':
-        return <TemplateBottom data={reviewData} />;
+        return <TemplateBottom data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
       case 'topLeft':
-        return <TemplateTopLeft data={reviewData} />;
+        return <TemplateTopLeft data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
       case 'centered':
-        return <TemplateCentered data={reviewData} />;
+        return <TemplateCentered data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
     }
   };
 
@@ -175,59 +186,145 @@ export default function Home() {
           </div>
         )}
 
-        {/* Preview Section */}
+        {/* Preview Section - Side by Side Layout */}
         {reviewData && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-            {/* Template Selection - Visual Cards */}
-            <div>
-              <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4 text-center">Choose Style</h3>
-              <div className="flex justify-center gap-3">
-                {([
-                  { id: 'bottom', label: 'Classic', desc: 'Info at bottom' },
-                  { id: 'topLeft', label: 'Editorial', desc: 'Top left card' },
-                  { id: 'centered', label: 'Focused', desc: 'Center card' },
-                ] as { id: TemplateType; label: string; desc: string }[]).map((template) => (
+            {/* Side by side container */}
+            <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+
+              {/* Left: Controls */}
+              <div className="w-full lg:w-80 space-y-6">
+
+                {/* Template Selection */}
+                <div>
+                  <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Style</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { id: 'bottom', label: 'Classic' },
+                      { id: 'topLeft', label: 'Editorial' },
+                      { id: 'centered', label: 'Focused' },
+                    ] as { id: TemplateType; label: string }[]).map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => setSelectedTemplate(template.id)}
+                        className={`relative p-3 rounded-xl border-2 transition-all duration-300 ${
+                          selectedTemplate === template.id
+                            ? 'border-[#00e054] bg-[#00e054]/10'
+                            : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                        }`}
+                      >
+                        {selectedTemplate === template.id && (
+                          <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#00e054] rounded-full flex items-center justify-center">
+                            <svg className="w-2.5 h-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                        <p className={`font-medium text-xs ${selectedTemplate === template.id ? 'text-white' : 'text-zinc-400'}`}>
+                          {template.label}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text Size Slider */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-sm text-zinc-400">Text Size</label>
+                    <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded">
+                      {fontSizeMultiplier === 1 ? 'Auto' : `${Math.round(fontSizeMultiplier * 100)}%`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-zinc-500">A</span>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="1.4"
+                      step="0.1"
+                      value={fontSizeMultiplier}
+                      onChange={(e) => setFontSizeMultiplier(parseFloat(e.target.value))}
+                      className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
+                    />
+                    <span className="text-sm text-zinc-500">A</span>
+                  </div>
                   <button
-                    key={template.id}
-                    onClick={() => setSelectedTemplate(template.id)}
-                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 min-w-[100px] ${
-                      selectedTemplate === template.id
-                        ? 'border-[#00e054] bg-[#00e054]/10 scale-105'
-                        : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-900'
-                    }`}
+                    onClick={() => setFontSizeMultiplier(1)}
+                    className="text-xs text-zinc-500 hover:text-[#00e054] mt-2 transition-colors"
                   >
-                    {selectedTemplate === template.id && (
-                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#00e054] rounded-full flex items-center justify-center">
-                        <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
-                    <p className={`font-semibold text-sm ${selectedTemplate === template.id ? 'text-white' : 'text-zinc-400'}`}>
-                      {template.label}
-                    </p>
-                    <p className="text-xs text-zinc-600 mt-1">{template.desc}</p>
+                    Reset to Auto
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            {/* Story Preview */}
-            <div className="flex justify-center">
-              <div className="relative">
-                {/* Phone frame mockup */}
-                <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl shadow-black/50">
-                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
-                    {/* Notch */}
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-6 bg-black rounded-full z-10" />
-                    {/* Preview content */}
-                    <div className="transform scale-[0.25] origin-top-left">
-                      {renderTemplate()}
+                {/* Download Button - Desktop */}
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="hidden lg:flex w-full bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 items-center justify-center gap-2"
+                >
+                  {downloading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Download Story
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Right: Phone Preview */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  {/* Phone frame mockup */}
+                  <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl shadow-black/50">
+                    <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
+                      {/* Notch */}
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-6 bg-black rounded-full z-10" />
+                      {/* Preview content */}
+                      <div className="transform scale-[0.25] origin-top-left">
+                        {renderTemplate()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Download Button - Mobile (below preview) */}
+            <div className="lg:hidden mt-6 flex justify-center">
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-8 rounded-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+              >
+                {downloading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Story
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Hidden full-size render target for download */}
@@ -240,33 +337,6 @@ export default function Home() {
               }}
             >
               {renderTemplate()}
-            </div>
-
-            {/* Download Button */}
-            <div className="flex flex-col items-center gap-4">
-              <button
-                onClick={handleDownload}
-                disabled={downloading}
-                className="group relative bg-[#00e054] text-black font-bold px-10 py-4 rounded-xl hover:bg-[#00c948] transition-all duration-300 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/25 hover:shadow-[#00e054]/40 hover:scale-105"
-              >
-                {downloading ? (
-                  <>
-                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    <span>Generating...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    <span>Download Story</span>
-                  </>
-                )}
-              </button>
-              <p className="text-zinc-600 text-sm">Ready for Instagram Stories</p>
             </div>
           </div>
         )}

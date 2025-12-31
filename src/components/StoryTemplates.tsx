@@ -4,6 +4,7 @@ import { ReviewData } from '@/app/api/scrape/route';
 
 interface TemplateProps {
   data: ReviewData;
+  fontSizeMultiplier?: number;
 }
 
 // Helper to proxy image URLs to avoid CORS issues
@@ -14,6 +15,16 @@ function proxyUrl(url: string): string {
 
 // Common font family for all templates
 const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
+// Auto-scale font size based on text length
+function getAutoScale(textLength: number): number {
+  if (textLength <= 80) return 1.1;      // Short text - slightly bigger
+  if (textLength <= 150) return 1.0;     // Normal
+  if (textLength <= 250) return 0.85;    // Medium - slightly smaller
+  if (textLength <= 400) return 0.7;     // Long - smaller
+  if (textLength <= 600) return 0.55;    // Very long - much smaller
+  return 0.45;                           // Extremely long - minimum
+}
 
 // Helper to render star rating with inline styles
 function StarRating({ rating, size = 48 }: { rating: number; size?: number }) {
@@ -35,7 +46,11 @@ function StarRating({ rating, size = 48 }: { rating: number; size?: number }) {
 }
 
 // Template 1: Info at bottom (like screenshot 1)
-export function TemplateBottom({ data }: TemplateProps) {
+export function TemplateBottom({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(52 * scale);
+
   return (
     <div style={{
       position: 'relative',
@@ -72,7 +87,7 @@ export function TemplateBottom({ data }: TemplateProps) {
         {/* Review text */}
         <p style={{
           color: '#ffffff',
-          fontSize: '52px',
+          fontSize: `${reviewFontSize}px`,
           fontWeight: 400,
           marginBottom: '48px',
           lineHeight: 1.5,
@@ -111,7 +126,11 @@ export function TemplateBottom({ data }: TemplateProps) {
 }
 
 // Template 2: Info card at top-left (like screenshot 2)
-export function TemplateTopLeft({ data }: TemplateProps) {
+export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(48 * scale);
+
   return (
     <div style={{
       position: 'relative',
@@ -196,7 +215,7 @@ export function TemplateTopLeft({ data }: TemplateProps) {
       }}>
         <p style={{
           color: '#ffffff',
-          fontSize: '48px',
+          fontSize: `${reviewFontSize}px`,
           fontWeight: 400,
           lineHeight: 1.5,
           textShadow: '0 2px 20px rgba(0,0,0,0.5)',
@@ -209,7 +228,11 @@ export function TemplateTopLeft({ data }: TemplateProps) {
 }
 
 // Template 3: Centered floating card (like screenshot 3)
-export function TemplateCentered({ data }: TemplateProps) {
+export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(44 * scale);
+
   return (
     <div style={{
       position: 'relative',
@@ -293,7 +316,7 @@ export function TemplateCentered({ data }: TemplateProps) {
           {/* Review text */}
           <p style={{
             color: '#ffffff',
-            fontSize: '44px',
+            fontSize: `${reviewFontSize}px`,
             fontWeight: 400,
             lineHeight: 1.5,
             marginBottom: '48px',
