@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { ReviewData } from '@/app/api/scrape/route';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered } from '@/components/StoryTemplates';
@@ -14,7 +14,12 @@ export default function Home() {
   const [error, setError] = useState('');
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
+  const [mounted, setMounted] = useState(false);
   const storyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,96 +98,134 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-2">
-          StoryBoxd
-        </h1>
-        <p className="text-gray-400 mb-8">
-          Turn your Letterboxd reviews into beautiful Instagram stories
-        </p>
+    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="fixed inset-0 opacity-30 pointer-events-none">
+        <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
+        <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      {/* Main Content */}
+      <div className={`relative z-10 max-w-2xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-4 py-2 mb-6">
+            <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
+            <span className="text-sm text-zinc-400">Letterboxd → Instagram</span>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight">
+            <span className="bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">Story</span>
+            <span className="bg-gradient-to-r from-[#00e054] to-emerald-400 bg-clip-text text-transparent">Boxd</span>
+          </h1>
+
+          <p className="text-lg md:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
+            Transform your Letterboxd reviews into stunning Instagram stories
+          </p>
+        </div>
 
         {/* URL Input Form */}
-        <form onSubmit={handleSubmit} className="mb-8">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste your Letterboxd review URL..."
-              className="flex-1 bg-zinc-900 border border-zinc-700 rounded-full px-6 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#00e054]"
-            />
-            <button
-              type="submit"
-              disabled={loading || !url}
-              className="bg-white text-black font-semibold px-8 py-4 rounded-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? 'Loading...' : 'Create story'}
-            </button>
+        <form onSubmit={handleSubmit} className="mb-10">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+            <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Paste your Letterboxd review URL..."
+                  className="flex-1 bg-transparent px-5 py-4 text-white placeholder-zinc-500 focus:outline-none text-base"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !url}
+                  className="bg-[#00e054] text-black font-semibold px-8 py-4 rounded-xl hover:bg-[#00c948] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Create Story</span>
+                      <svg className="w-5 h-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-          <p className="text-gray-500 text-sm mt-3 text-center sm:text-left">
-            Works with reviews, movies and profiles
+          <p className="text-zinc-600 text-sm mt-4 text-center">
+            Paste any Letterboxd review URL to get started
           </p>
         </form>
 
         {/* Error message */}
         {error && (
-          <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 mb-8">
-            <p className="text-red-300">{error}</p>
+          <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+            <p className="text-red-400 text-center">{error}</p>
           </div>
         )}
 
         {/* Preview Section */}
         {reviewData && (
-          <div className="space-y-8">
-            {/* Movie Info */}
-            <div className="bg-zinc-900 rounded-xl p-6 text-center">
-              <h2 className="text-2xl font-bold text-white mb-1">
-                {reviewData.movieTitle} <span className="text-gray-400">({reviewData.year})</span>
-              </h2>
-              <p className="text-[#00e054] text-xl mb-2">
-                {'★'.repeat(Math.floor(reviewData.ratingNumber))}
-                {reviewData.ratingNumber % 1 !== 0 && '½'}
-              </p>
-              <p className="text-gray-400 text-sm italic max-w-lg mx-auto">
-                &ldquo;{reviewData.reviewText.length > 150
-                  ? reviewData.reviewText.substring(0, 150) + '...'
-                  : reviewData.reviewText}&rdquo;
-              </p>
-              <p className="text-gray-500 text-xs mt-2">by {reviewData.username}</p>
-            </div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-            {/* Template Selection */}
+            {/* Template Selection - Visual Cards */}
             <div>
-              <h2 className="text-xl font-semibold mb-4 text-center">Select style</h2>
-              <div className="flex justify-center gap-2 flex-wrap">
+              <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4 text-center">Choose Style</h3>
+              <div className="flex justify-center gap-3">
                 {([
-                  { id: 'bottom', label: 'Bottom', icon: '▼' },
-                  { id: 'topLeft', label: 'Top Left', icon: '◤' },
-                  { id: 'centered', label: 'Centered', icon: '◉' },
-                ] as { id: TemplateType; label: string; icon: string }[]).map((template) => (
+                  { id: 'bottom', label: 'Classic', desc: 'Info at bottom' },
+                  { id: 'topLeft', label: 'Editorial', desc: 'Top left card' },
+                  { id: 'centered', label: 'Focused', desc: 'Center card' },
+                ] as { id: TemplateType; label: string; desc: string }[]).map((template) => (
                   <button
                     key={template.id}
                     onClick={() => setSelectedTemplate(template.id)}
-                    className={`px-4 py-2 rounded-full border-2 flex items-center gap-2 transition-all ${
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 min-w-[100px] ${
                       selectedTemplate === template.id
-                        ? 'border-[#00e054] bg-[#00e054]/20 text-[#00e054]'
-                        : 'border-gray-600 hover:border-gray-400 text-gray-400'
+                        ? 'border-[#00e054] bg-[#00e054]/10 scale-105'
+                        : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-900'
                     }`}
                   >
-                    <span>{template.icon}</span>
-                    <span className="text-sm">{template.label}</span>
+                    {selectedTemplate === template.id && (
+                      <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#00e054] rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                    <p className={`font-semibold text-sm ${selectedTemplate === template.id ? 'text-white' : 'text-zinc-400'}`}>
+                      {template.label}
+                    </p>
+                    <p className="text-xs text-zinc-600 mt-1">{template.desc}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Story Preview (scaled down for display) */}
+            {/* Story Preview */}
             <div className="flex justify-center">
-              <div className="transform scale-[0.25] origin-top" style={{ height: '480px' }}>
-                <div>
-                  {renderTemplate()}
+              <div className="relative">
+                {/* Phone frame mockup */}
+                <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl shadow-black/50">
+                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
+                    {/* Notch */}
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-6 bg-black rounded-full z-10" />
+                    {/* Preview content */}
+                    <div className="transform scale-[0.25] origin-top-left">
+                      {renderTemplate()}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,32 +243,40 @@ export default function Home() {
             </div>
 
             {/* Download Button */}
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-4">
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="bg-white text-black font-semibold px-12 py-4 rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative bg-[#00e054] text-black font-bold px-10 py-4 rounded-xl hover:bg-[#00c948] transition-all duration-300 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/25 hover:shadow-[#00e054]/40 hover:scale-105"
               >
                 {downloading ? (
                   <>
                     <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Generating...
+                    <span>Generating...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <svg className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Download
+                    <span>Download Story</span>
                   </>
                 )}
               </button>
+              <p className="text-zinc-600 text-sm">Ready for Instagram Stories</p>
             </div>
           </div>
         )}
+
+        {/* Footer */}
+        <div className="mt-16 pt-8 border-t border-zinc-900 text-center">
+          <p className="text-zinc-600 text-sm">
+            Made with <span className="text-orange-500">♥</span> for movie lovers
+          </p>
+        </div>
       </div>
     </div>
   );
