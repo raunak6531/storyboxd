@@ -2,9 +2,24 @@
 
 import { ReviewData } from '@/app/api/scrape/route';
 
+// Font type - 3 very distinct font families
+export type FontType = 'sans' | 'serif' | 'mono';
+
+// Color theme
+export type ColorTheme = 'neutral' | 'warm' | 'neon';
+
+// Text style options
+export interface TextStyle {
+  fontType: FontType;
+  colorTheme: ColorTheme;
+  isBold: boolean;
+  isItalic: boolean;
+}
+
 interface TemplateProps {
   data: ReviewData;
   fontSizeMultiplier?: number;
+  textStyle?: TextStyle;
 }
 
 // Helper to proxy image URLs to avoid CORS issues
@@ -13,8 +28,53 @@ function proxyUrl(url: string): string {
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
-// Common font family for all templates
-const fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+// Font families using CSS variables from layout.tsx Google Fonts
+const FONTS: Record<FontType, string> = {
+  sans: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+  serif: 'var(--font-playfair), "Playfair Display", Georgia, serif',
+  mono: 'var(--font-mono), "Space Mono", "Courier New", monospace',
+};
+
+// Color configurations
+interface ColorConfig {
+  primary: string;
+  accent: string;
+  star: string;
+  textShadow: string;
+  titleShadow: string;
+}
+
+const COLORS: Record<ColorTheme, ColorConfig> = {
+  neutral: {
+    primary: '#ffffff',
+    accent: '#a0a0a0',
+    star: '#00e054',
+    textShadow: '0 2px 20px rgba(0,0,0,0.5)',
+    titleShadow: '0 2px 10px rgba(0,0,0,0.5)',
+  },
+  warm: {
+    primary: '#fff8e7',
+    accent: '#d4a574',
+    star: '#d4a574',
+    textShadow: '0 2px 30px rgba(0,0,0,0.7)',
+    titleShadow: '0 4px 20px rgba(0,0,0,0.6), 0 0 40px rgba(212,165,116,0.2)',
+  },
+  neon: {
+    primary: '#ffffff',
+    accent: '#00e054',
+    star: '#00e054',
+    textShadow: '0 0 20px rgba(0,224,84,0.4), 0 0 40px rgba(0,224,84,0.2), 0 2px 10px rgba(0,0,0,0.8)',
+    titleShadow: '0 0 30px rgba(0,224,84,0.6), 0 0 60px rgba(0,224,84,0.3)',
+  },
+};
+
+// Default text style
+const DEFAULT_STYLE: TextStyle = {
+  fontType: 'sans',
+  colorTheme: 'neutral',
+  isBold: false,
+  isItalic: false,
+};
 
 // Auto-scale font size based on text length
 function getAutoScale(textLength: number): number {
@@ -27,17 +87,18 @@ function getAutoScale(textLength: number): number {
 }
 
 // Helper to render star rating with inline styles
-function StarRating({ rating, size = 48 }: { rating: number; size?: number }) {
+function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: number; size?: number; colorTheme?: ColorTheme }) {
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 !== 0;
+  const colors = COLORS[colorTheme];
 
   return (
     <span style={{
-      color: '#00e054',
+      color: colors.star,
       fontSize: `${size}px`,
       fontWeight: 'bold',
-      letterSpacing: '2px',
-      fontFamily,
+      letterSpacing: '4px',
+      textShadow: colorTheme === 'neon' ? '0 0 20px rgba(0,224,84,0.8), 0 0 40px rgba(0,224,84,0.4)' : 'none',
     }}>
       {'★'.repeat(fullStars)}
       {hasHalf && '½'}
@@ -46,10 +107,15 @@ function StarRating({ rating, size = 48 }: { rating: number; size?: number }) {
 }
 
 // Template 1: Info at bottom (like screenshot 1)
-export function TemplateBottom({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(52 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const colors = COLORS[textStyle.colorTheme];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
   return (
     <div style={{
@@ -62,7 +128,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1 }: TemplateProps) 
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      fontFamily,
+      fontFamily: font,
     }}>
 
       {/* Gradient overlay */}
@@ -86,39 +152,47 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1 }: TemplateProps) 
       }}>
         {/* Review text */}
         <p style={{
-          color: '#ffffff',
+          color: colors.primary,
           fontSize: `${reviewFontSize}px`,
-          fontWeight: 400,
+          fontWeight: fontWeight,
+          fontStyle: fontStyleCss,
           marginBottom: '48px',
           lineHeight: 1.5,
           maxWidth: '950px',
           marginLeft: 'auto',
           marginRight: 'auto',
-          textShadow: '0 2px 20px rgba(0,0,0,0.5)',
+          textShadow: colors.textShadow,
         }}>
           "{data.reviewText}"
         </p>
 
         {/* Rating */}
         <div style={{ marginBottom: '24px' }}>
-          <StarRating rating={data.ratingNumber} size={56} />
+          <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
         </div>
 
         {/* Movie title and year */}
         <h2 style={{
-          color: '#ffffff',
+          color: colors.primary,
           fontSize: '56px',
-          fontWeight: 700,
+          fontWeight: textStyle.isBold ? 800 : 700,
           marginBottom: '8px',
-          textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+          textShadow: colors.titleShadow,
         }}>
           {data.movieTitle}
         </h2>
-        <p style={{ color: '#a0a0a0', fontSize: '40px', marginBottom: '40px', fontWeight: 300 }}>{data.year}</p>
+        <p style={{ color: colors.accent, fontSize: '40px', marginBottom: '16px', fontWeight: 300 }}>{data.year}</p>
+
+        {/* Director */}
+        {data.director && (
+          <p style={{ color: '#888888', fontSize: '32px', marginBottom: '40px', fontWeight: 300 }}>
+            Directed by {data.director}
+          </p>
+        )}
 
         {/* Username */}
         <p style={{ color: '#666666', fontSize: '32px', fontWeight: 400 }}>
-          Review by <span style={{ color: '#999999' }}>{data.username}</span>
+          Review by <span style={{ color: colors.accent }}>{data.username}</span>
         </p>
       </div>
     </div>
@@ -126,10 +200,15 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1 }: TemplateProps) 
 }
 
 // Template 2: Info card at top-left (like screenshot 2)
-export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(48 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const colors = COLORS[textStyle.colorTheme];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
   return (
     <div style={{
@@ -142,7 +221,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps)
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      fontFamily,
+      fontFamily: font,
     }}>
       {/* Gradient overlay */}
       <div style={{
@@ -182,26 +261,33 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps)
         <div style={{ textAlign: 'left', paddingTop: '8px' }}>
           {/* Title and year */}
           <h2 style={{
-            color: '#ffffff',
+            color: colors.primary,
             fontSize: '52px',
-            fontWeight: 700,
-            textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+            fontWeight: textStyle.isBold ? 800 : 700,
+            textShadow: colors.titleShadow,
             marginBottom: '8px',
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: '#a0a0a0', fontSize: '36px', fontWeight: 300, marginBottom: '16px' }}>
+          <p style={{ color: colors.accent, fontSize: '36px', fontWeight: 300, marginBottom: '12px' }}>
             {data.year}
           </p>
 
+          {/* Director */}
+          {data.director && (
+            <p style={{ color: '#888888', fontSize: '28px', fontWeight: 300, marginBottom: '16px' }}>
+              Directed by {data.director}
+            </p>
+          )}
+
           {/* Rating */}
           <div style={{ marginBottom: '16px' }}>
-            <StarRating rating={data.ratingNumber} size={48} />
+            <StarRating rating={data.ratingNumber} size={48} colorTheme={textStyle.colorTheme} />
           </div>
 
           {/* Username */}
           <p style={{ color: '#888888', fontSize: '28px' }}>
-            Review by <span style={{ color: '#cccccc' }}>{data.username}</span>
+            Review by <span style={{ color: colors.accent }}>{data.username}</span>
           </p>
         </div>
       </div>
@@ -214,11 +300,12 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps)
         right: '64px',
       }}>
         <p style={{
-          color: '#ffffff',
+          color: colors.primary,
           fontSize: `${reviewFontSize}px`,
-          fontWeight: 400,
+          fontWeight: fontWeight,
+          fontStyle: fontStyleCss,
           lineHeight: 1.5,
-          textShadow: '0 2px 20px rgba(0,0,0,0.5)',
+          textShadow: colors.textShadow,
         }}>
           "{data.reviewText}"
         </p>
@@ -228,10 +315,28 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1 }: TemplateProps)
 }
 
 // Template 3: Centered floating card (like screenshot 3)
-export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps) {
+export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(44 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const colors = COLORS[textStyle.colorTheme];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  // Card background varies by color theme
+  const cardBg = textStyle.colorTheme === 'neon'
+    ? 'rgba(0,20,10,0.9)'
+    : textStyle.colorTheme === 'warm'
+      ? 'rgba(30,25,20,0.9)'
+      : 'rgba(20,20,20,0.85)';
+
+  const cardBorder = textStyle.colorTheme === 'neon'
+    ? '1px solid rgba(0,224,84,0.3)'
+    : textStyle.colorTheme === 'warm'
+      ? '1px solid rgba(212,165,116,0.2)'
+      : '1px solid rgba(255,255,255,0.1)';
 
   return (
     <div style={{
@@ -244,7 +349,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-      fontFamily,
+      fontFamily: font,
     }}>
       {/* Overlay with blur effect simulation */}
       <div style={{
@@ -268,14 +373,16 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps
         justifyContent: 'center',
       }}>
         <div style={{
-          backgroundColor: 'rgba(20,20,20,0.85)',
+          backgroundColor: cardBg,
           borderRadius: '32px',
           padding: '64px',
           margin: '0 64px',
           textAlign: 'center',
           maxWidth: '920px',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: textStyle.colorTheme === 'neon'
+            ? '0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,224,84,0.15)'
+            : '0 40px 80px rgba(0,0,0,0.5)',
+          border: cardBorder,
         }}>
           {/* Poster thumbnail */}
           {data.posterUrl && (
@@ -288,7 +395,9 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps
                 height: '300px',
                 objectFit: 'cover',
                 borderRadius: '16px',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                boxShadow: textStyle.colorTheme === 'neon'
+                  ? '0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0,224,84,0.2)'
+                  : '0 20px 40px rgba(0,0,0,0.4)',
                 margin: '0 auto 40px auto',
                 display: 'block',
               }}
@@ -297,36 +406,46 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1 }: TemplateProps
 
           {/* Title and year */}
           <h2 style={{
-            color: '#ffffff',
+            color: colors.primary,
             fontSize: '52px',
-            fontWeight: 700,
+            fontWeight: textStyle.isBold ? 800 : 700,
             marginBottom: '8px',
+            textShadow: colors.titleShadow,
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: '#888888', fontSize: '36px', fontWeight: 300, marginBottom: '24px' }}>
+          <p style={{ color: colors.accent, fontSize: '36px', fontWeight: 300, marginBottom: '16px' }}>
             {data.year}
           </p>
 
+          {/* Director */}
+          {data.director && (
+            <p style={{ color: '#888888', fontSize: '30px', fontWeight: 300, marginBottom: '24px' }}>
+              Directed by {data.director}
+            </p>
+          )}
+
           {/* Rating */}
           <div style={{ marginBottom: '40px' }}>
-            <StarRating rating={data.ratingNumber} size={52} />
+            <StarRating rating={data.ratingNumber} size={52} colorTheme={textStyle.colorTheme} />
           </div>
 
           {/* Review text */}
           <p style={{
-            color: '#ffffff',
+            color: colors.primary,
             fontSize: `${reviewFontSize}px`,
-            fontWeight: 400,
+            fontWeight: fontWeight,
+            fontStyle: fontStyleCss,
             lineHeight: 1.5,
             marginBottom: '48px',
+            textShadow: textStyle.colorTheme === 'neon' ? '0 0 10px rgba(255,255,255,0.3)' : 'none',
           }}>
             "{data.reviewText}"
           </p>
 
           {/* Username */}
           <p style={{ color: '#666666', fontSize: '32px' }}>
-            Review by <span style={{ color: '#aaaaaa' }}>{data.username}</span>
+            Review by <span style={{ color: colors.accent }}>{data.username}</span>
           </p>
         </div>
       </div>

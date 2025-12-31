@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { ReviewData } from '@/app/api/scrape/route';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 
 type TemplateType = 'bottom' | 'topLeft' | 'centered';
 
@@ -16,8 +16,15 @@ export default function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
   const [mounted, setMounted] = useState(false);
 
-  // Text size customization
+  // Text customization
   const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1); // 0.6 to 1.4 range
+  const [fontType, setFontType] = useState<FontType>('sans');
+  const [colorTheme, setColorTheme] = useState<ColorTheme>('neutral');
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+
+  // Combined text style object
+  const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
 
   const storyRef = useRef<HTMLDivElement>(null);
 
@@ -98,13 +105,19 @@ export default function Home() {
   const renderTemplate = () => {
     if (!reviewData) return null;
 
+    const templateProps = {
+      data: reviewData,
+      fontSizeMultiplier,
+      textStyle
+    };
+
     switch (selectedTemplate) {
       case 'bottom':
-        return <TemplateBottom data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
+        return <TemplateBottom {...templateProps} />;
       case 'topLeft':
-        return <TemplateTopLeft data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
+        return <TemplateTopLeft {...templateProps} />;
       case 'centered':
-        return <TemplateCentered data={reviewData} fontSizeMultiplier={fontSizeMultiplier} />;
+        return <TemplateCentered {...templateProps} />;
     }
   };
 
@@ -256,6 +269,139 @@ export default function Home() {
                   >
                     Reset to Auto
                   </button>
+                </div>
+
+                {/* Font Type Selector - 3 very distinct fonts */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <label className="text-sm text-zinc-400 mb-3 block">Font</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Sans */}
+                    <button
+                      onClick={() => setFontType('sans')}
+                      className={`p-3 rounded-lg border transition-all duration-200 ${
+                        fontType === 'sans'
+                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <span className="text-xl block mb-1 text-white" style={{ fontFamily: 'var(--font-inter), Inter, sans-serif' }}>
+                        Aa
+                      </span>
+                      <span className={`text-xs ${fontType === 'sans' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Sans
+                      </span>
+                    </button>
+
+                    {/* Serif */}
+                    <button
+                      onClick={() => setFontType('serif')}
+                      className={`p-3 rounded-lg border transition-all duration-200 ${
+                        fontType === 'serif'
+                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <span className="text-xl block mb-1 text-white" style={{ fontFamily: 'var(--font-playfair), "Playfair Display", serif' }}>
+                        Aa
+                      </span>
+                      <span className={`text-xs ${fontType === 'serif' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Serif
+                      </span>
+                    </button>
+
+                    {/* Mono */}
+                    <button
+                      onClick={() => setFontType('mono')}
+                      className={`p-3 rounded-lg border transition-all duration-200 ${
+                        fontType === 'mono'
+                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <span className="text-xl block mb-1 text-white" style={{ fontFamily: 'var(--font-mono), "Space Mono", monospace' }}>
+                        Aa
+                      </span>
+                      <span className={`text-xs ${fontType === 'mono' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Mono
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Color Theme Selector */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <label className="text-sm text-zinc-400 mb-3 block">Color</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => setColorTheme('neutral')}
+                      className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${
+                        colorTheme === 'neutral'
+                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-white" />
+                      <span className={`text-xs ${colorTheme === 'neutral' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Neutral
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => setColorTheme('warm')}
+                      className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${
+                        colorTheme === 'warm'
+                          ? 'border-[#d4a574] bg-[#d4a574]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-[#d4a574]" />
+                      <span className={`text-xs ${colorTheme === 'warm' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Warm
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => setColorTheme('neon')}
+                      className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${
+                        colorTheme === 'neon'
+                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          : 'border-zinc-700 hover:border-zinc-600'
+                      }`}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-[#00e054] shadow-[0_0_8px_rgba(0,224,84,0.8)]" />
+                      <span className={`text-xs ${colorTheme === 'neon' ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                        Neon
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bold & Italic Toggles */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <label className="text-sm text-zinc-400 mb-3 block">Text Style</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsBold(!isBold)}
+                      className={`flex-1 p-2 rounded-lg border transition-all duration-200 ${
+                        isBold
+                          ? 'border-[#00e054] bg-[#00e054]/10 text-white'
+                          : 'border-zinc-700 hover:border-zinc-600 text-zinc-500'
+                      }`}
+                    >
+                      <span className="font-bold text-lg">B</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsItalic(!isItalic)}
+                      className={`flex-1 p-2 rounded-lg border transition-all duration-200 ${
+                        isItalic
+                          ? 'border-[#00e054] bg-[#00e054]/10 text-white'
+                          : 'border-zinc-700 hover:border-zinc-600 text-zinc-500'
+                      }`}
+                    >
+                      <span className="italic text-lg">I</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Download Button - Desktop */}
