@@ -34,23 +34,11 @@ export function TemplateBottom({ data }: TemplateProps) {
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
+      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
     }}>
-      {/* Background Image */}
-      {data.backdropUrl && (
-        <img
-          src={proxyUrl(data.backdropUrl)}
-          alt=""
-          crossOrigin="anonymous"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-      )}
 
       {/* Gradient overlay */}
       <div style={{
@@ -114,24 +102,11 @@ export function TemplateTopLeft({ data }: TemplateProps) {
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
+      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
     }}>
-      {/* Background Image */}
-      {data.backdropUrl && (
-        <img
-          src={proxyUrl(data.backdropUrl)}
-          alt=""
-          crossOrigin="anonymous"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-      )}
-
       {/* Subtle overlay */}
       <div style={{
         position: 'absolute',
@@ -214,24 +189,11 @@ export function TemplateCentered({ data }: TemplateProps) {
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
+      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
     }}>
-      {/* Background Image */}
-      {data.backdropUrl && (
-        <img
-          src={proxyUrl(data.backdropUrl)}
-          alt=""
-          crossOrigin="anonymous"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-      )}
-
       {/* Overlay */}
       <div style={{
         position: 'absolute',
