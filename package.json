@@ -1,5 +1,5 @@
 {
-  "name": "letterboxdtostories",
+  "name": "storyboxd",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "cheerio": "^1.1.2",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
