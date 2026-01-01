@@ -371,13 +371,13 @@ export default function Home() {
                       onClick={() => setColorTheme('neon')}
                       className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${
                         colorTheme === 'neon'
-                          ? 'border-[#00e054] bg-[#00e054]/10'
+                          ? 'border-[#4FD1C5] bg-[#4FD1C5]/10'
                           : 'border-zinc-700 hover:border-zinc-600'
                       }`}
                     >
-                      <div className="w-4 h-4 rounded-full bg-[#00e054] shadow-[0_0_8px_rgba(0,224,84,0.8)]" />
+                      <div className="w-4 h-4 rounded-full bg-[#4FD1C5] shadow-[0_0_8px_rgba(79,209,197,0.8)]" />
                       <span className={`text-xs ${colorTheme === 'neon' ? 'text-zinc-300' : 'text-zinc-500'}`}>
-                        Neon
+                        Teal
                       </span>
                     </button>
                   </div>

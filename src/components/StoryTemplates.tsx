@@ -67,10 +67,10 @@ const COLORS: Record<ColorTheme, ColorConfig> = {
   },
   neon: {
     primary: '#ffffff',
-    accent: '#00e054',
-    star: '#00e054',
-    textShadow: '0 0 20px rgba(0,224,84,0.4), 0 0 40px rgba(0,224,84,0.2), 0 2px 10px rgba(0,0,0,0.8)',
-    titleShadow: '0 0 30px rgba(0,224,84,0.6), 0 0 60px rgba(0,224,84,0.3)',
+    accent: '#4FD1C5',
+    star: '#4FD1C5',
+    textShadow: '0 2px 20px rgba(0,0,0,0.75)',
+    titleShadow: '0 0 24px rgba(79,209,197,0.18), 0 2px 10px rgba(0,0,0,0.7)',
   },
 };
 
@@ -104,7 +104,7 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
       fontSize: `${size}px`,
       fontWeight: 'bold',
       letterSpacing: '4px',
-      textShadow: colorTheme === 'neon' ? '0 0 20px rgba(0,224,84,0.8), 0 0 40px rgba(0,224,84,0.4)' : 'none',
+      textShadow: colorTheme === 'neon' ? '0 0 20px rgba(79,209,197,0.7), 0 0 40px rgba(79,209,197,0.35)' : 'none',
     }}>
       {'★'.repeat(fullStars)}
       {hasHalf && '½'}
@@ -376,13 +376,13 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
 
   // Card background varies by color theme
   const cardBg = textStyle.colorTheme === 'neon'
-    ? 'rgba(0,20,10,0.9)'
+    ? 'rgba(18,24,27,0.9)'
     : textStyle.colorTheme === 'warm'
       ? 'rgba(30,25,20,0.9)'
       : 'rgba(20,20,20,0.85)';
 
   const cardBorder = textStyle.colorTheme === 'neon'
-    ? '1px solid rgba(0,224,84,0.3)'
+    ? '1px solid rgba(79,209,197,0.25)'
     : textStyle.colorTheme === 'warm'
       ? '1px solid rgba(212,165,116,0.2)'
       : '1px solid rgba(255,255,255,0.1)';
@@ -440,7 +440,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
           textAlign: 'center',
           maxWidth: '920px',
           boxShadow: textStyle.colorTheme === 'neon'
-            ? '0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,224,84,0.15)'
+            ? '0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(79,209,197,0.12)'
             : '0 40px 80px rgba(0,0,0,0.5)',
           border: cardBorder,
         }}>
@@ -456,7 +456,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
                 objectFit: 'cover',
                 borderRadius: '16px',
                 boxShadow: textStyle.colorTheme === 'neon'
-                  ? '0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0,224,84,0.2)'
+                  ? '0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(79,209,197,0.18)'
                   : '0 20px 40px rgba(0,0,0,0.4)',
                 margin: '0 auto 40px auto',
                 display: 'block',
@@ -494,7 +494,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
             lineHeight: 1.6,
             margin: '0 auto 24px auto',
             maxWidth: '720px',
-            textShadow: textStyle.colorTheme === 'neon' ? '0 0 10px rgba(255,255,255,0.3)' : 'none',
+            textShadow: textStyle.colorTheme === 'neon' ? '0 0 10px rgba(79,209,197,0.18)' : 'none',
           }}>
             "{data.reviewText}"
           </p>
