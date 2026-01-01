@@ -409,6 +409,16 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
         bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.55)',
       }} />
+      {/* Vignette edges for focus */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'radial-gradient(70% 60% at 50% 45%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%)',
+        pointerEvents: 'none'
+      }} />
 
       {/* Centered card */}
       <div style={{
@@ -423,8 +433,9 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
       }}>
         <div style={{
           backgroundColor: cardBg,
-          borderRadius: '32px',
-          padding: '64px',
+          backdropFilter: 'blur(14px)',
+          borderRadius: '24px',
+          padding: '72px',
           margin: '0 64px',
           textAlign: 'center',
           maxWidth: '920px',
@@ -464,20 +475,15 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
             {data.movieTitle}
           </h2>
           <p style={{ color: colors.accent, fontSize: '36px', fontWeight: 300, marginBottom: '16px' }}>
-            {data.year}
-          </p>
+             {data.year}
+           </p>
 
-          {/* Director */}
           {data.director && (
-            <p style={{ color: '#888888', fontSize: '30px', fontWeight: 300, marginBottom: '24px' }}>
-              Directed by {data.director}
-            </p>
-          )}
+             <p style={{ color: '#888888', fontSize: '30px', fontWeight: 300, marginBottom: '24px' }}>
+               Directed by {data.director}
+             </p>
+           )}
 
-          {/* Rating */}
-          <div style={{ marginBottom: '40px' }}>
-            <StarRating rating={data.ratingNumber} size={52} colorTheme={textStyle.colorTheme} />
-          </div>
 
           {/* Review text */}
           <p style={{
@@ -485,12 +491,18 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
             fontSize: `${reviewFontSize}px`,
             fontWeight: fontWeight,
             fontStyle: fontStyleCss,
-            lineHeight: 1.5,
-            marginBottom: '48px',
+            lineHeight: 1.6,
+            margin: '0 auto 24px auto',
+            maxWidth: '720px',
             textShadow: textStyle.colorTheme === 'neon' ? '0 0 10px rgba(255,255,255,0.3)' : 'none',
           }}>
             "{data.reviewText}"
           </p>
+
+          {/* Rating under quote */}
+          <div style={{ marginBottom: '32px' }}>
+            <StarRating rating={data.ratingNumber} size={44} colorTheme={textStyle.colorTheme} />
+          </div>
 
           {/* Username */}
           <p style={{ color: '#666666', fontSize: '32px' }}>
