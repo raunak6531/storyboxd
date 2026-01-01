@@ -210,7 +210,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
             }}>
               {data.movieTitle}
             </h2>
-            <p style={{ color: colors.accent, fontSize: '40px', fontWeight: 300, textAlign: 'center' }}>
+            <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, textAlign: 'center' }}>
               {data.year}
             </p>
           </div>
@@ -218,13 +218,13 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
 
         {/* Director */}
         {data.director && (
-          <p style={{ color: '#888888', fontSize: '32px', marginBottom: '40px', fontWeight: 300 }}>
+          <p style={{ color: '#888888', fontSize: '34px', marginBottom: '40px', fontWeight: 300 }}>
             Directed by {data.director}
           </p>
         )}
 
         {/* Username */}
-        <p style={{ color: '#666666', fontSize: '32px', fontWeight: 400 }}>
+        <p style={{ color: '#666666', fontSize: '34px', fontWeight: 400 }}>
           Review by <span style={{ color: colors.accent }}>{data.username}</span>
         </p>
       </div>
@@ -312,13 +312,13 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: colors.accent, fontSize: '36px', fontWeight: 300, marginBottom: '12px' }}>
+          <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
             {data.year}
           </p>
 
           {/* Director */}
           {data.director && (
-            <p style={{ color: '#888888', fontSize: '28px', fontWeight: 300, marginBottom: '16px' }}>
+            <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '16px' }}>
               Directed by {data.director}
             </p>
           )}
@@ -327,7 +327,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
           <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
 
           {/* Username */}
-          <p style={{ color: '#888888', fontSize: '28px' }}>
+          <p style={{ color: '#888888', fontSize: '34px' }}>
             Review by <span style={{ color: colors.accent }}>{data.username}</span>
           </p>
         </div>
@@ -474,12 +474,12 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: colors.accent, fontSize: '36px', fontWeight: 300, marginBottom: '16px' }}>
+          <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
              {data.year}
            </p>
 
           {data.director && (
-             <p style={{ color: '#888888', fontSize: '30px', fontWeight: 300, marginBottom: '24px' }}>
+             <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '24px' }}>
                Directed by {data.director}
              </p>
            )}
@@ -505,7 +505,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
           </div>
 
           {/* Username */}
-          <p style={{ color: '#666666', fontSize: '32px' }}>
+          <p style={{ color: '#666666', fontSize: '34px' }}>
             Review by <span style={{ color: colors.accent }}>{data.username}</span>
           </p>
         </div>
