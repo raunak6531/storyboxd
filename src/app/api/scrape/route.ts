@@ -22,6 +22,13 @@ function parseRating(ratingText: string): { rating: string; ratingNumber: number
   return { rating: ratingText.trim(), ratingNumber };
 }
 
+// Helper to normalize image URLs (handle protocol-relative URLs, etc.)
+function normalizeImageUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('//')) return `https:${url}`;
+  return url;
+}
+
 async function scrapeReview(url: string): Promise<ReviewData> {
   // Normalize URL
   let reviewUrl = url.trim();
@@ -134,7 +141,7 @@ async function scrapeReview(url: string): Promise<ReviewData> {
 
   // Try to extract year from HTML
   const yearFromHtml = html.match(/(\d{4})\s*<\/a>\s*<\/small>/)?.[1] ||
-                       html.match(/"releaseYear":\s*"?(\d{4})"?/)?.[1] || '';
+                       html.match(/"releaseYear":\s*"?(\d{4})"?/ )?.[1] || '';
   if (!year && yearFromHtml) {
     year = yearFromHtml;
   }
@@ -187,15 +194,15 @@ async function scrapeReview(url: string): Promise<ReviewData> {
       // Get poster - prioritize actual poster images over og:image (which is often a backdrop)
       // Letterboxd poster URLs typically have paths like /film-poster/ or dimensions like 0-230-0-345 (portrait)
 
-      // First look for film-poster URLs in HTML
-      const filmPosterMatch = movieHtml.match(/https:\/\/a\.ltrbxd\.com\/resized\/film-poster\/[^"'\s<>]+\.jpg[^"'\s<>]*/);
+      // First look for film-poster URLs in HTML (support jpg, jpeg, png, webp)
+      const filmPosterMatch = movieHtml.match(/https:\/\/a\.ltrbxd\.com\/resized\/film-poster\/[^"'\s<>]+\.(?:jpg|jpeg|png|webp)[^"'\s<>]*/i);
       if (filmPosterMatch) {
         posterUrl = filmPosterMatch[0];
       }
 
       // Try to find TMDB poster (portrait format, has /p/ in path)
       if (!posterUrl) {
-        const tmdbPosterMatch = movieHtml.match(/https:\/\/image\.tmdb\.org\/t\/p\/w\d+\/[^"'\s<>]+\.jpg/);
+        const tmdbPosterMatch = movieHtml.match(/https:\/\/image\.tmdb\.org\/t\/p\/(?:w\d+|original)\/[^"'\s<>]+\.(?:jpg|jpeg|png|webp)/i);
         if (tmdbPosterMatch) {
           posterUrl = tmdbPosterMatch[0];
         }
@@ -215,7 +222,7 @@ async function scrapeReview(url: string): Promise<ReviewData> {
 
       // Try to find poster with portrait dimensions in URL (0-230-0-345 or similar)
       if (!posterUrl) {
-        const portraitMatch = movieHtml.match(/https:\/\/a\.ltrbxd\.com\/resized\/[^"'\s<>]*?-0-\d{2,3}-0-\d{3}[^"'\s<>]*\.jpg[^"'\s<>]*/);
+        const portraitMatch = movieHtml.match(/https:\/\/a\.ltrbxd\.com\/resized\/[^"'\s<>]*?-0-\d{2,3}-0-\d{3}[^"'\s<>]*\.(?:jpg|jpeg|png|webp)[^"'\s<>]*/i);
         if (portraitMatch && !portraitMatch[0].includes('backdrop')) {
           posterUrl = portraitMatch[0];
         }
@@ -225,6 +232,9 @@ async function scrapeReview(url: string): Promise<ReviewData> {
       if (!posterUrl) {
         posterUrl = $movie('meta[property="og:image"]').attr('content') || '';
       }
+
+      // Normalize poster URL
+      posterUrl = normalizeImageUrl(posterUrl);
 
       console.log('Poster URL found:', posterUrl);
 
@@ -258,6 +268,9 @@ async function scrapeReview(url: string): Promise<ReviewData> {
       if (!backdropUrl) {
         backdropUrl = posterUrl;
       }
+
+      // Normalize backdrop URL
+      backdropUrl = normalizeImageUrl(backdropUrl);
 
       // Get year from movie page if not found
       if (!year) {

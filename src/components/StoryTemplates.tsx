@@ -356,7 +356,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
           "{data.reviewText}"
         </p>
         <div>
-          <StarRating rating={data.ratingNumber} size={40} colorTheme={textStyle.colorTheme} />
+          <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
         </div>
       </div>
     </div>
@@ -501,7 +501,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
 
           {/* Rating under quote */}
           <div style={{ marginBottom: '32px' }}>
-            <StarRating rating={data.ratingNumber} size={44} colorTheme={textStyle.colorTheme} />
+            <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
           </div>
 
           {/* Username */}
