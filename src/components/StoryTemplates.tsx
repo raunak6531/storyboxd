@@ -25,6 +25,7 @@ export type ColorTheme = 'neutral' | 'warm' | 'neon';
    fontSizeMultiplier?: number;
    textStyle?: TextStyle;
    backdropPositionPercent?: number; // 0–100
+  showPoster?: boolean;
  }
 
 // Helper to proxy image URLs to avoid CORS issues
@@ -112,7 +113,7 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
 }
 
 // Template 1: Info at bottom (like screenshot 1)
-export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
+export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(52 * scale);
@@ -146,7 +147,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
         background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 70%, transparent 100%)',
       }} />
 
-      {/* Content at bottom */}
+
       <div style={{
         position: 'absolute',
         bottom: 0,
@@ -176,17 +177,44 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
           <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
         </div>
 
-        {/* Movie title and year */}
-        <h2 style={{
-          color: colors.primary,
-          fontSize: '56px',
-          fontWeight: textStyle.isBold ? 800 : 700,
-          marginBottom: '8px',
-          textShadow: colors.titleShadow,
+        {/* Title row with optional poster */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '28px',
+          marginTop: '8px',
+          marginBottom: '16px',
         }}>
-          {data.movieTitle}
-        </h2>
-        <p style={{ color: colors.accent, fontSize: '40px', marginBottom: '16px', fontWeight: 300 }}>{data.year}</p>
+          {showPoster && data.posterUrl && (
+            <img
+              src={proxyUrl(data.posterUrl)}
+              alt=""
+              style={{
+                width: '200px',
+                height: '300px',
+                objectFit: 'cover',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 12px 36px rgba(0,0,0,0.6)'
+              }}
+            />
+          )}
+          <div style={{ textAlign: 'left' }}>
+            <h2 style={{
+              color: colors.primary,
+              fontSize: '56px',
+              fontWeight: textStyle.isBold ? 800 : 700,
+              marginBottom: '8px',
+              textShadow: colors.titleShadow,
+            }}>
+              {data.movieTitle}
+            </h2>
+            <p style={{ color: colors.accent, fontSize: '40px', fontWeight: 300, textAlign: 'center' }}>
+              {data.year}
+            </p>
+          </div>
+        </div>
 
         {/* Director */}
         {data.director && (
@@ -205,7 +233,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
 }
 
 // Template 2: Info card at top-left (like screenshot 2)
-export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
+export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(48 * scale);
@@ -248,7 +276,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
         gap: '32px',
       }}>
         {/* Poster thumbnail */}
-        {data.posterUrl && (
+        {showPoster && data.posterUrl && (
           <img
             src={proxyUrl(data.posterUrl)}
             alt=""
@@ -320,7 +348,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
 }
 
 // Template 3: Centered floating card (like screenshot 3)
-export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
+export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(44 * scale);
@@ -390,7 +418,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
           border: cardBorder,
         }}>
           {/* Poster thumbnail */}
-          {data.posterUrl && (
+          {showPoster && data.posterUrl && (
             <img
               src={proxyUrl(data.posterUrl)}
               alt=""

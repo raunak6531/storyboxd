@@ -22,6 +22,7 @@ export default function Home() {
   const [colorTheme, setColorTheme] = useState<ColorTheme>('neutral');
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
+  const [showPoster, setShowPoster] = useState(false);
 
   // Add backdrop horizontal position state
   const [backdropPositionPercent, setBackdropPositionPercent] = useState(50); // 0–100 (50=center)
@@ -114,6 +115,7 @@ export default function Home() {
       textStyle,
       // pass backdrop x-position percent to templates
       backdropPositionPercent,
+      showPoster,
     };
 
     switch (selectedTemplate) {
@@ -406,6 +408,22 @@ export default function Home() {
                   >
                     Reset to Center
                   </button>
+                </div>
+
+                {/* Show Poster Toggle */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-zinc-400">Show Poster</label>
+                    <button
+                      onClick={() => setShowPoster(!showPoster)}
+                      className={`relative inline-flex items-center h-6 w-11 rounded-full border transition-colors ${showPoster ? 'bg-[#00e054] border-[#00e054]' : 'bg-zinc-800 border-zinc-700'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showPoster ? 'translate-x-5' : 'translate-x-1'}`}></span>
+                    </button>
+                  </div>
+                  {!reviewData?.posterUrl && (
+                    <p className="mt-2 text-xs text-zinc-500">Poster not available for this review</p>
+                  )}
                 </div>
 
                 {/* Bold & Italic Toggles */}
