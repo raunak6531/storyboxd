@@ -265,6 +265,16 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
         bottom: 0,
         background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.7) 100%)',
       }} />
+      {/* Top-left legibility mask */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '560px',
+        height: '420px',
+        background: 'linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0) 70%)',
+        pointerEvents: 'none'
+      }} />
 
       {/* Top-left card */}
       <div style={{
@@ -313,10 +323,8 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
             </p>
           )}
 
-          {/* Rating */}
-          <div style={{ marginBottom: '16px' }}>
-            <StarRating rating={data.ratingNumber} size={48} colorTheme={textStyle.colorTheme} />
-          </div>
+          {/* Divider */}
+          <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
 
           {/* Username */}
           <p style={{ color: '#888888', fontSize: '28px' }}>
@@ -328,7 +336,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
       {/* Review text below the card */}
       <div style={{
         position: 'absolute',
-        top: '480px',
+        top: '500px',
         left: '64px',
         right: '64px',
       }}>
@@ -337,11 +345,19 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
           fontSize: `${reviewFontSize}px`,
           fontWeight: fontWeight,
           fontStyle: fontStyleCss,
-          lineHeight: 1.5,
+          lineHeight: 1.6,
           textShadow: colors.textShadow,
+          maxWidth: '640px',
+          textAlign: 'left',
+          borderLeft: `3px solid ${colors.accent}`,
+          paddingLeft: '16px',
+          marginBottom: '24px'
         }}>
           "{data.reviewText}"
         </p>
+        <div>
+          <StarRating rating={data.ratingNumber} size={40} colorTheme={textStyle.colorTheme} />
+        </div>
       </div>
     </div>
   );
