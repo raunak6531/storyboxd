@@ -23,6 +23,9 @@ export default function Home() {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
 
+  // Add backdrop horizontal position state
+  const [backdropPositionPercent, setBackdropPositionPercent] = useState(50); // 0–100 (50=center)
+
   // Combined text style object
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
 
@@ -108,7 +111,9 @@ export default function Home() {
     const templateProps = {
       data: reviewData,
       fontSizeMultiplier,
-      textStyle
+      textStyle,
+      // pass backdrop x-position percent to templates
+      backdropPositionPercent,
     };
 
     switch (selectedTemplate) {
@@ -130,7 +135,7 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className={`relative z-10 max-w-2xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 max-w-6xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
 
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -150,7 +155,7 @@ export default function Home() {
         </div>
 
         {/* URL Input Form */}
-        <form onSubmit={handleSubmit} className="mb-10">
+        <form onSubmit={handleSubmit} className="mb-10 max-w-3xl mx-auto">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
             <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-2">
@@ -160,12 +165,12 @@ export default function Home() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="Paste your Letterboxd review URL..."
-                  className="flex-1 bg-transparent px-5 py-4 text-white placeholder-zinc-500 focus:outline-none text-base"
+                  className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
                 />
                 <button
                   type="submit"
                   disabled={loading || !url}
-                  className="bg-[#00e054] text-black font-semibold px-8 py-4 rounded-xl hover:bg-[#00c948] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                  className="bg-[#00e054] text-black font-semibold px-6 py-3 rounded-xl hover:bg-[#00c948] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group/btn"
                 >
                   {loading ? (
                     <>
@@ -207,10 +212,10 @@ export default function Home() {
             <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
 
               {/* Left: Controls */}
-              <div className="w-full lg:w-80 space-y-6">
+              <div className="w-full lg:w-[560px] xl:w-[600px] flex-none grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* Template Selection */}
-                <div>
+                <div className="md:col-span-2">
                   <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Style</h3>
                   <div className="grid grid-cols-3 gap-2">
                     {([
@@ -376,6 +381,33 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* Backdrop Position Slider */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-sm text-zinc-400">Backdrop Position</label>
+                    <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded">{backdropPositionPercent}%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-zinc-500">Left</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={backdropPositionPercent}
+                      onChange={(e) => setBackdropPositionPercent(parseInt(e.target.value))}
+                      className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
+                    />
+                    <span className="text-xs text-zinc-500">Right</span>
+                  </div>
+                  <button
+                    onClick={() => setBackdropPositionPercent(50)}
+                    className="text-xs text-zinc-500 hover:text-[#00e054] mt-2 transition-colors"
+                  >
+                    Reset to Center
+                  </button>
+                </div>
+
                 {/* Bold & Italic Toggles */}
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
                   <label className="text-sm text-zinc-400 mb-3 block">Text Style</label>
@@ -408,7 +440,7 @@ export default function Home() {
                 <button
                   onClick={handleDownload}
                   disabled={downloading}
-                  className="hidden lg:flex w-full bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 items-center justify-center gap-2"
+                  className="hidden lg:flex w-full bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 items-center justify-center gap-2 md:col-span-2"
                 >
                   {downloading ? (
                     <>

@@ -8,19 +8,24 @@ export type FontType = 'sans' | 'serif' | 'mono';
 // Color theme
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 
-// Text style options
-export interface TextStyle {
-  fontType: FontType;
-  colorTheme: ColorTheme;
-  isBold: boolean;
-  isItalic: boolean;
-}
+// Backdrop horizontal position
+// Use percentage (0–100) for horizontal backdrop position
+// 0 = left, 50 = center, 100 = right
 
-interface TemplateProps {
-  data: ReviewData;
-  fontSizeMultiplier?: number;
-  textStyle?: TextStyle;
-}
+// Text style options
+ export interface TextStyle {
+   fontType: FontType;
+   colorTheme: ColorTheme;
+   isBold: boolean;
+   isItalic: boolean;
+ }
+ 
+ interface TemplateProps {
+   data: ReviewData;
+   fontSizeMultiplier?: number;
+   textStyle?: TextStyle;
+   backdropPositionPercent?: number; // 0–100
+ }
 
 // Helper to proxy image URLs to avoid CORS issues
 function proxyUrl(url: string): string {
@@ -107,7 +112,7 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
 }
 
 // Template 1: Info at bottom (like screenshot 1)
-export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
+export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(52 * scale);
@@ -126,7 +131,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
       overflow: 'hidden',
       backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
       backgroundSize: 'cover',
-      backgroundPosition: 'center',
+      backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
@@ -200,7 +205,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
 }
 
 // Template 2: Info card at top-left (like screenshot 2)
-export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
+export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(48 * scale);
@@ -219,7 +224,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
       overflow: 'hidden',
       backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
       backgroundSize: 'cover',
-      backgroundPosition: 'center',
+      backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
@@ -315,7 +320,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
 }
 
 // Template 3: Centered floating card (like screenshot 3)
-export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE }: TemplateProps) {
+export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(44 * scale);
@@ -347,7 +352,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
       overflow: 'hidden',
       backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
       backgroundSize: 'cover',
-      backgroundPosition: 'center',
+      backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
