@@ -1,20 +1,40 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { ReviewData } from '@/app/api/scrape/route';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 
 type TemplateType = 'bottom' | 'topLeft' | 'centered';
 
+interface RecentReview {
+  url: string;
+  movieTitle: string;
+  username: string;
+  posterUrl: string;
+  timestamp: number;
+}
+
+// Example Letterboxd review URLs for demo
+const EXAMPLE_URLS = [
+  { url: 'https://letterboxd.com/film/the-shape-of-water/', label: 'The Shape of Water' },
+  { url: 'https://letterboxd.com/film/parasite-2019/', label: 'Parasite' },
+  { url: 'https://letterboxd.com/film/dune-2021/', label: 'Dune' },
+];
+
+const STORAGE_KEY = 'storyboxd_recent_downloads';
+const MAX_RECENT_DOWNLOADS = 12;
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [error, setError] = useState('');
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
   const [mounted, setMounted] = useState(false);
+  const [recentDownloads, setRecentDownloads] = useState<RecentReview[]>([]);
 
   // Text customization
   const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1); // 0.6 to 1.4 range
@@ -31,20 +51,57 @@ export default function Home() {
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
 
   const storyRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Load recent downloads from localStorage
+    loadRecentDownloads();
   }, []);
 
-  // Reset font size when new review loads
-  useEffect(() => {
-    if (reviewData) {
-      setFontSizeMultiplier(1);
+  // Load recent downloads from localStorage
+  const loadRecentDownloads = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const downloads = JSON.parse(stored) as RecentReview[];
+        // Filter out old entries without posterUrl or add empty posterUrl for backward compatibility
+        const updatedDownloads = downloads.map(d => ({
+          ...d,
+          posterUrl: d.posterUrl || ''
+        }));
+        setRecentDownloads(updatedDownloads);
+      }
+    } catch (err) {
+      console.error('Failed to load recent downloads:', err);
     }
-  }, [reviewData]);
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Save download to recent downloads
+  const saveToRecentDownloads = useCallback((data: ReviewData, reviewUrl: string) => {
+    try {
+      const recent: RecentReview = {
+        url: reviewUrl,
+        movieTitle: data.movieTitle,
+        username: data.username,
+        posterUrl: data.posterUrl || '',
+        timestamp: Date.now(),
+      };
+      
+      setRecentDownloads(prev => {
+        const existing = prev.filter(r => r.url !== reviewUrl);
+        const updated = [recent, ...existing].slice(0, MAX_RECENT_DOWNLOADS);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    } catch (err) {
+      console.error('Failed to save recent download:', err);
+    }
+  }, []);
+
+  // Load review from URL
+  const loadReviewFromUrl = async (reviewUrl: string) => {
+    setUrl(reviewUrl);
     setLoading(true);
     setError('');
     setReviewData(null);
@@ -53,7 +110,7 @@ export default function Home() {
       const response = await fetch('/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: reviewUrl }),
       });
 
       const data = await response.json();
@@ -70,39 +127,114 @@ export default function Home() {
     }
   };
 
-  const handleDownload = async () => {
-    if (!storyRef.current) return;
+  // Reset font size when new review loads
+  useEffect(() => {
+    if (reviewData) {
+      setFontSizeMultiplier(1);
+    }
+  }, [reviewData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url.trim()) return;
+    await loadReviewFromUrl(url.trim());
+  };
+
+  const generateImage = async (): Promise<string> => {
+    if (!storyRef.current) throw new Error('Story ref not available');
+
+    // Wait a bit for images to fully load
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const canvas = await html2canvas(storyRef.current, {
+      width: 1080,
+      height: 1920,
+      scale: 1,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#000000',
+      logging: false,
+    });
+
+    return canvas.toDataURL('image/png');
+  };
+
+  const handleDownload = useCallback(async () => {
+    if (!storyRef.current || !reviewData) return;
 
     setDownloading(true);
     setError('');
 
     try {
-      // Wait a bit for images to fully load
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const canvas = await html2canvas(storyRef.current, {
-        width: 1080,
-        height: 1920,
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#000000',
-        logging: false,
-      });
-
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = await generateImage();
 
       const link = document.createElement('a');
-      link.download = `${reviewData?.movieTitle || 'story'}-letterboxd.png`;
+      link.download = `${reviewData.movieTitle || 'story'}-letterboxd.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Save to recent downloads after successful download
+      if (url) {
+        saveToRecentDownloads(reviewData, url);
+      }
     } catch (err) {
       console.error('Failed to generate image:', err);
       setError('Failed to generate image. Please try again.');
     } finally {
       setDownloading(false);
+    }
+  }, [reviewData, url, saveToRecentDownloads]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+D or Cmd+D to download
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd' && reviewData && !downloading) {
+        e.preventDefault();
+        handleDownload();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [reviewData, downloading, handleDownload]);
+
+  const handleCopyToClipboard = async () => {
+    if (!storyRef.current || !reviewData) return;
+
+    setCopying(true);
+    setError('');
+
+    try {
+      const dataUrl = await generateImage();
+      
+      // Convert data URL to blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      
+      // Copy to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+
+      // Show success feedback
+      const originalText = document.querySelector('[data-copy-button]')?.textContent;
+      const copyButton = document.querySelector('[data-copy-button]') as HTMLElement;
+      if (copyButton) {
+        copyButton.textContent = 'Copied!';
+        setTimeout(() => {
+          if (copyButton && originalText) {
+            copyButton.textContent = originalText;
+          }
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      setError('Failed to copy image. Please try downloading instead.');
+    } finally {
+      setCopying(false);
     }
   };
 
@@ -154,6 +286,9 @@ export default function Home() {
           <p className="text-lg md:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
             Transform your Letterboxd reviews into stunning Instagram stories
           </p>
+          <p className="text-sm text-zinc-600 mt-2">
+            Press <kbd className="px-2 py-1 bg-zinc-800 rounded text-zinc-400">Enter</kbd> to submit • <kbd className="px-2 py-1 bg-zinc-800 rounded text-zinc-400">Ctrl+D</kbd> to download
+          </p>
         </div>
 
         {/* URL Input Form */}
@@ -163,11 +298,17 @@ export default function Home() {
             <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-2">
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
+                  ref={inputRef}
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="Paste your Letterboxd review URL..."
                   className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !loading && url.trim()) {
+                      handleSubmit(e);
+                    }
+                  }}
                 />
                 <button
                   type="submit"
@@ -194,15 +335,61 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <p className="text-zinc-600 text-sm mt-4 text-center">
-            Paste any Letterboxd review URL to get started
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+            <p className="text-zinc-600 text-sm">
+              Paste any Letterboxd review URL to get started
+            </p>
+            <span className="text-zinc-700 hidden sm:inline">•</span>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-600 text-sm">Try examples:</span>
+              <div className="flex gap-2 flex-wrap justify-center">
+                {EXAMPLE_URLS.map((example, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => loadReviewFromUrl(example.url)}
+                    disabled={loading}
+                    className="text-xs px-3 py-1 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors disabled:opacity-40"
+                  >
+                    {example.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </form>
 
         {/* Error message */}
         {error && (
           <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
             <p className="text-red-400 text-center">{error}</p>
+          </div>
+        )}
+
+        {/* Loading Skeleton */}
+        {loading && !reviewData && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+              {/* Left: Controls Skeleton */}
+              <div className="w-full lg:w-[560px] xl:w-[600px] flex-none grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2 h-20 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="h-24 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="h-24 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="h-24 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="h-24 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="h-24 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+                <div className="md:col-span-2 h-12 bg-zinc-900/50 border border-zinc-800 rounded-xl animate-pulse" />
+              </div>
+              {/* Right: Phone Preview Skeleton */}
+              <div className="flex-shrink-0">
+                <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl shadow-black/50">
+                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-6 bg-zinc-900 rounded-full z-10" />
+                    <div className="w-full h-full bg-zinc-900/30 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -454,29 +641,55 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Download Button - Desktop */}
-                <button
-                  onClick={handleDownload}
-                  disabled={downloading}
-                  className="hidden lg:flex w-full bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 items-center justify-center gap-2 md:col-span-2"
-                >
-                  {downloading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download Story
-                    </>
-                  )}
-                </button>
+                {/* Download & Copy Buttons - Desktop */}
+                <div className="hidden lg:flex gap-3 md:col-span-2">
+                  <button
+                    onClick={handleCopyToClipboard}
+                    disabled={copying || !reviewData}
+                    className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 hover:border-zinc-600"
+                    data-copy-button
+                  >
+                    {copying ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span>Copying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading || !reviewData}
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#00e054] hover:bg-[#00c049] active:bg-[#00b040] text-black font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/20 hover:shadow-[#00e054]/30"
+                    title="Download (Ctrl+D or Cmd+D)"
+                  >
+                    {downloading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Download</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Right: Phone Preview */}
@@ -497,12 +710,35 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Download Button - Mobile (below preview) */}
-            <div className="lg:hidden mt-6 flex justify-center">
+            {/* Download & Copy Buttons - Mobile (below preview) */}
+            <div className="lg:hidden mt-6 flex flex-col sm:flex-row gap-3 justify-center px-4">
+              <button
+                onClick={handleCopyToClipboard}
+                disabled={copying || !reviewData}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 hover:border-zinc-600"
+                data-copy-button
+              >
+                {copying ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Copying...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
               <button
                 onClick={handleDownload}
-                disabled={downloading}
-                className="bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-8 rounded-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+                disabled={downloading || !reviewData}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00e054] hover:bg-[#00c049] active:bg-[#00b040] text-black font-semibold py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/20 hover:shadow-[#00e054]/30"
               >
                 {downloading ? (
                   <>
@@ -510,14 +746,14 @@ export default function Home() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Generating...
+                    <span>Generating...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Download Story
+                    <span>Download</span>
                   </>
                 )}
               </button>
@@ -533,6 +769,79 @@ export default function Home() {
               }}
             >
               {renderTemplate()}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Downloads Section */}
+        {recentDownloads.length > 0 && (
+          <div className="mt-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-white mb-2">Recent Downloads</h2>
+              <p className="text-zinc-500 text-sm">Click any movie to create another story</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {recentDownloads.map((download, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => loadReviewFromUrl(download.url)}
+                  disabled={loading}
+                  className="group relative bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 hover:border-[#00e054]/50 hover:bg-zinc-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                >
+                  <div className="aspect-[2/3] bg-zinc-800 rounded-lg mb-3 overflow-hidden relative">
+                    {download.posterUrl && download.posterUrl.trim() !== '' ? (
+                      <img
+                        src={`/api/proxy-image?url=${encodeURIComponent(download.posterUrl)}`}
+                        alt={download.movieTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 relative z-10"
+                        onError={(e) => {
+                          // Show fallback on error
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const fallback = parent.querySelector('.poster-fallback') as HTMLElement;
+                            if (fallback) {
+                              fallback.style.display = 'flex';
+                            }
+                          }
+                        }}
+                        onLoad={(e) => {
+                          // Hide fallback when image loads successfully
+                          const target = e.target as HTMLImageElement;
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const fallback = parent.querySelector('.poster-fallback') as HTMLElement;
+                            if (fallback) {
+                              fallback.style.display = 'none';
+                            }
+                          }
+                        }}
+                      />
+                    ) : null}
+                    {/* Fallback placeholder - shown when no poster or image fails */}
+                    <div 
+                      className="poster-fallback absolute inset-0 w-full h-full flex items-center justify-center bg-zinc-800 z-0"
+                      style={{ display: (!download.posterUrl || download.posterUrl.trim() === '') ? 'flex' : 'none' }}
+                    >
+                      <svg className="w-8 h-8 text-zinc-600 group-hover:text-[#00e054] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="font-medium text-white text-sm mb-1 line-clamp-2 group-hover:text-[#00e054] transition-colors">
+                    {download.movieTitle}
+                  </div>
+                  <div className="text-xs text-zinc-500 line-clamp-1">
+                    by {download.username}
+                  </div>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-4 h-4 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         )}
