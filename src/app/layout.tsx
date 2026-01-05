@@ -1,41 +1,45 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Playfair_Display, Space_Mono } from "next/font/google";
+import { Inter, Playfair_Display, Space_Mono, Courier_Prime, Permanent_Marker, Anton } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// Story template fonts - 3 very distinct styles
 const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
 });
 
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  variable: "--font-playfair",
 });
 
 const spaceMono = Space_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
   weight: ["400", "700"],
-  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
+// NEW FONTS
+const courierPrime = Courier_Prime({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-courier",
+});
+
+const permanentMarker = Permanent_Marker({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-marker",
+});
+
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anton",
 });
 
 export const metadata: Metadata = {
-  title: "StoryBoxd - Create Instagram Stories from Letterboxd Reviews",
-  description: "Turn your Letterboxd reviews into beautiful, shareable Instagram stories. Free and easy to use.",
+  title: "StoryBoxd",
+  description: "Share your Letterboxd reviews as Instagram Stories",
 };
 
 export default function RootLayout({
@@ -46,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${playfairDisplay.variable} ${spaceMono.variable} antialiased`}
+        className={`${inter.variable} ${playfair.variable} ${spaceMono.variable} ${courierPrime.variable} ${permanentMarker.variable} ${anton.variable} antialiased`}
       >
         {children}
       </body>

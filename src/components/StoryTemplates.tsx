@@ -3,7 +3,10 @@
 import { ReviewData } from '@/app/api/scrape/route';
 
 export type TemplateType = 'bottom' | 'topLeft' | 'centered';
-export type FontType = 'sans' | 'serif' | 'mono';
+
+// Updated Font Types
+export type FontType = 'sans' | 'serif' | 'mono' | 'courier' | 'marker' | 'anton';
+
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 
 export interface TextStyle {
@@ -23,13 +26,19 @@ interface TemplateProps {
   backdropBlur?: number;
   backdropBrightness?: number;
   backdropSaturation?: number;
-  // New Prop
   accentColor?: string;
 }
 
 function proxyUrl(url: string): string {
   if (!url) return '';
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+}
+
+function hexToRgba(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
@@ -40,18 +49,14 @@ function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
   return data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none';
 }
 
-// Helper to convert hex to rgba for glows
-function hexToRgba(hex: string, alpha: number) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
+// UPDATE FONTS MAPPING
 const FONTS: Record<FontType, string> = {
   sans: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, sans-serif',
   serif: 'var(--font-playfair), "Playfair Display", Georgia, serif',
   mono: 'var(--font-mono), "Space Mono", "Courier New", monospace',
+  courier: 'var(--font-courier), "Courier Prime", Courier, monospace',
+  marker: 'var(--font-marker), "Permanent Marker", cursive',
+  anton: 'var(--font-anton), "Anton", sans-serif',
 };
 
 interface ColorConfig {
@@ -60,7 +65,6 @@ interface ColorConfig {
   titleShadow: string;
 }
 
-// Removed 'accent' and 'star' from here as they are now dynamic
 const COLORS: Record<ColorTheme, ColorConfig> = {
   neutral: {
     primary: '#ffffff',
@@ -74,8 +78,7 @@ const COLORS: Record<ColorTheme, ColorConfig> = {
   },
   neon: {
     primary: '#ffffff',
-    // We will calculate these dynamically now
-    textShadow: '', 
+    textShadow: '',
     titleShadow: '',
   },
 };
@@ -106,15 +109,13 @@ function StarRating({ rating, size = 48, color, shadow }: { rating: number; size
       fontSize: `${size}px`,
       fontWeight: 'bold',
       letterSpacing: '4px',
-      textShadow: shadow || '0 2px 10px rgba(0,0,0,0.3)', // Use prop or default
+      textShadow: shadow || '0 2px 10px rgba(0,0,0,0.3)',
     }}>
       {'★'.repeat(fullStars)}
       {hasHalf && '½'}
     </span>
   );
 }
-
-// --- TEMPLATES ---
 
 export function TemplateBottom({ 
   data, 
@@ -133,23 +134,21 @@ export function TemplateBottom({
   const reviewFontSize = Math.round(52 * scale);
 
   const font = FONTS[textStyle.fontType];
-  // 1. Get base colors
+  
   // 1. Get base colors
   let colors = { ...COLORS[textStyle.colorTheme] };
-  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
   // 2. If NEON, generate dynamic glow
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
     
-    // Glow for Title & Text
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    
-    // Glow for Stars, Year, Username
     accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
   }
+
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -206,7 +205,7 @@ export function TemplateBottom({
         </p>
 
         <div style={{ marginBottom: '24px' }}>
-          <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow}/>
+          <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow} />
         </div>
 
         <div style={{
@@ -241,7 +240,7 @@ export function TemplateBottom({
             }}>
               {data.movieTitle}
             </h2>
-            <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, textAlign: 'center' }}>
+            <p style={{ color: accentColor, textShadow: accentShadow, fontSize: '44px', fontWeight: 300, textAlign: 'center' }}>
               {data.year}
             </p>
           </div>
@@ -254,7 +253,7 @@ export function TemplateBottom({
         )}
 
         <p style={{ color: '#666666', fontSize: '34px', fontWeight: 400 }}>
-          Review by <span style={{ color: accentColor ,textShadow: accentShadow}}>{data.username}</span>
+          Review by <span style={{ color: accentColor, textShadow: accentShadow }}>{data.username}</span>
         </p>
       </div>
     </div>
@@ -278,23 +277,19 @@ export function TemplateTopLeft({
   const reviewFontSize = Math.round(48 * scale);
 
   const font = FONTS[textStyle.fontType];
-  // 1. Get base colors
-  // 1. Get base colors
+  
   let colors = { ...COLORS[textStyle.colorTheme] };
-  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
-  // 2. If NEON, generate dynamic glow
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
     
-    // Glow for Title & Text
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    
-    // Glow for Stars, Year, Username
     accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
   }
+
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -372,7 +367,7 @@ export function TemplateTopLeft({
             }}>
               {data.movieTitle}
             </h2>
-            <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
+            <p style={{ color: accentColor, textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
               {data.year}
             </p>
             {data.director && (
@@ -382,7 +377,7 @@ export function TemplateTopLeft({
             )}
             <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
             <p style={{ color: '#888888', fontSize: '34px' }}>
-              Review by <span style={{ color: accentColor,textShadow: accentShadow }}>{data.username}</span>
+              Review by <span style={{ color: accentColor, textShadow: accentShadow }}>{data.username}</span>
             </p>
           </div>
         </div>
@@ -434,23 +429,19 @@ export function TemplateCentered({
   const reviewFontSize = Math.round(44 * scale);
 
   const font = FONTS[textStyle.fontType];
-  // 1. Get base colors
-  // 1. Get base colors
+  
   let colors = { ...COLORS[textStyle.colorTheme] };
-  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
-  // 2. If NEON, generate dynamic glow
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
     
-    // Glow for Title & Text
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    
-    // Glow for Stars, Year, Username
     accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
   }
+
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -460,8 +451,7 @@ export function TemplateCentered({
       ? 'rgba(30,25,20,0.9)'
       : 'rgba(20,20,20,0.85)';
 
-  // Border uses the accent color but with low opacity
-  const cardBorder = `1px solid ${accentColor}40`; // 40 is hex for ~25% opacity
+  const cardBorder = `1px solid ${accentColor}40`;
 
   return (
     <div style={{
@@ -547,7 +537,7 @@ export function TemplateCentered({
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
+          <p style={{ color: accentColor, textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
              {data.year}
            </p>
 
@@ -575,7 +565,7 @@ export function TemplateCentered({
           </div>
 
           <p style={{ color: '#666666', fontSize: '34px' }}>
-            Review by <span style={{ color: accentColor,textShadow: accentShadow }}>{data.username}</span>
+            Review by <span style={{ color: accentColor, textShadow: accentShadow }}>{data.username}</span>
           </p>
         </div>
       </div>

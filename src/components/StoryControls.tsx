@@ -43,14 +43,13 @@ interface StoryControlsProps {
   
   // Actions
   onDownload: () => void;
-  onShare: () => void; // Renamed from onCopy
+  onShare: () => void; // Renamed to Share
   downloading: boolean;
-  sharing: boolean;    // Renamed from copying
+  sharing: boolean;    
   hasReviewData: boolean;
   posterUrl?: string;
 }
 
-// Helper component for Accordion Sections
 const ControlSection = ({ 
   title, 
   isOpen, 
@@ -159,23 +158,36 @@ export default function StoryControls(props: StoryControlsProps) {
             </div>
           </div>
 
+          {/* FONTS - UPDATED TO 6 FONTS */}
           <div>
             <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Font Family</label>
             <div className="grid grid-cols-3 gap-2">
-              {['sans', 'serif', 'mono'].map((f) => (
+              {[
+                { id: 'sans', label: 'Sans' },
+                { id: 'serif', label: 'Serif' },
+                { id: 'mono', label: 'Mono' },
+                { id: 'courier', label: 'Script' },
+                { id: 'marker', label: 'Marker' },
+                { id: 'anton', label: 'Poster' }
+              ].map((f) => (
                 <button
-                  key={f}
-                  onClick={() => props.setFontType(f as FontType)}
+                  key={f.id}
+                  onClick={() => props.setFontType(f.id as FontType)}
                   className={`p-2 rounded-lg border transition-all duration-200 ${
-                    props.fontType === f
+                    props.fontType === f.id
                       ? 'border-[#00e054] bg-[#00e054]/10'
                       : 'border-zinc-700 hover:border-zinc-600'
                   }`}
                 >
-                  <span className="text-lg block mb-0.5 text-white capitalize" style={{ 
-                    fontFamily: f === 'sans' ? 'var(--font-inter)' : f === 'serif' ? 'var(--font-playfair)' : 'var(--font-mono)' 
+                  <span className="text-lg block mb-0.5 text-white capitalize truncate" style={{ 
+                    fontFamily: 
+                      f.id === 'sans' ? 'var(--font-inter)' : 
+                      f.id === 'serif' ? 'var(--font-playfair)' : 
+                      f.id === 'mono' ? 'var(--font-mono)' :
+                      f.id === 'courier' ? 'var(--font-courier)' :
+                      f.id === 'marker' ? 'var(--font-marker)' : 'var(--font-anton)'
                   }}>Aa</span>
-                  <span className="text-[10px] text-zinc-500 capitalize">{f}</span>
+                  <span className="text-[10px] text-zinc-500 capitalize">{f.label}</span>
                 </button>
               ))}
             </div>
@@ -206,11 +218,7 @@ export default function StoryControls(props: StoryControlsProps) {
       </ControlSection>
 
       {/* SECTION 2: COLORS */}
-      <ControlSection 
-        title="Colors & Theme" 
-        isOpen={openSection === 'colors'} 
-        onClick={() => toggleSection('colors')}
-      >
+      <ControlSection title="Colors & Theme" isOpen={openSection === 'colors'} onClick={() => toggleSection('colors')}>
         {/* Accent Color Picker (No Scrollbar) */}
         <div>
            <div className="flex justify-between items-center mb-3">
@@ -293,11 +301,8 @@ export default function StoryControls(props: StoryControlsProps) {
       </ControlSection>
 
       {/* SECTION 3: BACKGROUND */}
-      <ControlSection 
-        title="Background Image" 
-        isOpen={openSection === 'background'} 
-        onClick={() => toggleSection('background')}
-      >
+      <ControlSection title="Background Image" isOpen={openSection === 'background'} onClick={() => toggleSection('background')}>
+        {/* ... paste previous content ... */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Custom Image</label>
@@ -369,11 +374,8 @@ export default function StoryControls(props: StoryControlsProps) {
       </ControlSection>
 
       {/* SECTION 4: FILTERS */}
-      <ControlSection 
-        title="Image Filters" 
-        isOpen={openSection === 'filters'} 
-        onClick={() => toggleSection('filters')}
-      >
+      <ControlSection title="Image Filters" isOpen={openSection === 'filters'} onClick={() => toggleSection('filters')}>
+        {/* ... paste previous content ... */}
         {[{
             label: 'Blur', value: props.backdropBlur, max: 20, unit: 'px', 
             onChange: props.setBackdropBlur
@@ -402,7 +404,7 @@ export default function StoryControls(props: StoryControlsProps) {
         ))}
       </ControlSection>
 
-      {/* DESKTOP BUTTONS (Matching Mobile functionality) */}
+      {/* DESKTOP BUTTONS (RENAMED TO SHARE) */}
       <div className="hidden lg:flex gap-3 mt-4">
         <button
           onClick={props.onShare}
