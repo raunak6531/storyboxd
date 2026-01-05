@@ -25,13 +25,20 @@ export type ColorTheme = 'neutral' | 'warm' | 'neon';
    fontSizeMultiplier?: number;
    textStyle?: TextStyle;
    backdropPositionPercent?: number; // 0–100
-  showPoster?: boolean;
+   showPoster?: boolean;
+   customBackdropUrl?: string | null; // Added custom background prop
  }
 
 // Helper to proxy image URLs to avoid CORS issues
 function proxyUrl(url: string): string {
   if (!url) return '';
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+}
+
+// Helper to determine background image
+function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
+  if (customUrl) return `url(${customUrl})`;
+  return data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none';
 }
 
 // Font families using CSS variables from layout.tsx Google Fonts
@@ -113,7 +120,14 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
 }
 
 // Template 1: Info at bottom (like screenshot 1)
-export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
+export function TemplateBottom({ 
+  data, 
+  fontSizeMultiplier = 1, 
+  textStyle = DEFAULT_STYLE, 
+  backdropPositionPercent = 50, 
+  showPoster = false,
+  customBackdropUrl 
+}: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(52 * scale);
@@ -130,7 +144,7 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundImage: getBackgroundImage(data, customBackdropUrl),
       backgroundSize: 'cover',
       backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
@@ -233,7 +247,14 @@ export function TemplateBottom({ data, fontSizeMultiplier = 1, textStyle = DEFAU
 }
 
 // Template 2: Info card at top-left (like screenshot 2)
-export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
+export function TemplateTopLeft({ 
+  data, 
+  fontSizeMultiplier = 1, 
+  textStyle = DEFAULT_STYLE, 
+  backdropPositionPercent = 50, 
+  showPoster = false,
+  customBackdropUrl
+}: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(48 * scale);
@@ -250,7 +271,7 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundImage: getBackgroundImage(data, customBackdropUrl),
       backgroundSize: 'cover',
       backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
@@ -364,7 +385,14 @@ export function TemplateTopLeft({ data, fontSizeMultiplier = 1, textStyle = DEFA
 }
 
 // Template 3: Centered floating card (like screenshot 3)
-export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEFAULT_STYLE, backdropPositionPercent = 50, showPoster = false }: TemplateProps) {
+export function TemplateCentered({ 
+  data, 
+  fontSizeMultiplier = 1, 
+  textStyle = DEFAULT_STYLE, 
+  backdropPositionPercent = 50, 
+  showPoster = false,
+  customBackdropUrl
+}: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(44 * scale);
@@ -394,7 +422,7 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none',
+      backgroundImage: getBackgroundImage(data, customBackdropUrl),
       backgroundSize: 'cover',
       backgroundPosition: `${backdropPositionPercent}% center`,
       backgroundRepeat: 'no-repeat',
@@ -513,4 +541,3 @@ export function TemplateCentered({ data, fontSizeMultiplier = 1, textStyle = DEF
     </div>
   );
 }
-

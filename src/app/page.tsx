@@ -47,6 +47,9 @@ export default function Home() {
   // Add backdrop horizontal position state
   const [backdropPositionPercent, setBackdropPositionPercent] = useState(50); // 0–100 (50=center)
 
+  // Add custom backdrop state
+  const [customBackdrop, setCustomBackdrop] = useState<string | null>(null);
+
   // Combined text style object
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
 
@@ -58,6 +61,13 @@ export default function Home() {
     // Load recent downloads from localStorage
     loadRecentDownloads();
   }, []);
+
+  // Clean up object URL when component unmounts or changes
+  useEffect(() => {
+    return () => {
+      if (customBackdrop) URL.revokeObjectURL(customBackdrop);
+    };
+  }, [customBackdrop]);
 
   // Load recent downloads from localStorage
   const loadRecentDownloads = () => {
@@ -99,12 +109,23 @@ export default function Home() {
     }
   }, []);
 
+  // Handle file upload for custom background
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Create a local URL for the uploaded file
+      const url = URL.createObjectURL(file);
+      setCustomBackdrop(url);
+    }
+  };
+
   // Load review from URL
   const loadReviewFromUrl = async (reviewUrl: string) => {
     setUrl(reviewUrl);
     setLoading(true);
     setError('');
     setReviewData(null);
+    setCustomBackdrop(null); // Reset custom backdrop on new review load
 
     try {
       const response = await fetch('/api/scrape', {
@@ -248,6 +269,7 @@ export default function Home() {
       // pass backdrop x-position percent to templates
       backdropPositionPercent,
       showPoster,
+      customBackdropUrl: customBackdrop, // Pass the custom backdrop state
     };
 
     switch (selectedTemplate) {
@@ -567,6 +589,42 @@ export default function Home() {
                         Teal
                       </span>
                     </button>
+                  </div>
+                </div>
+
+                {/* Custom Background Upload */}
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-sm text-zinc-400">Custom Background</label>
+                    {customBackdrop && (
+                      <button
+                        onClick={() => setCustomBackdrop(null)}
+                        className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundUpload}
+                      className="hidden"
+                      id="backdrop-upload"
+                    />
+                    <label
+                      htmlFor="backdrop-upload"
+                      className="flex items-center justify-center gap-2 w-full p-3 rounded-lg border border-dashed border-zinc-700 hover:border-[#00e054] hover:bg-zinc-800/50 cursor-pointer transition-all duration-200 group"
+                    >
+                      <svg className="w-5 h-5 text-zinc-500 group-hover:text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm text-zinc-400 group-hover:text-white">
+                        {customBackdrop ? 'Change Image' : 'Upload Image'}
+                      </span>
+                    </label>
                   </div>
                 </div>
 
