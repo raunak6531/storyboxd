@@ -43,9 +43,9 @@ interface StoryControlsProps {
   
   // Actions
   onDownload: () => void;
-  onCopy: () => void;
+  onShare: () => void; // Renamed from onCopy
   downloading: boolean;
-  copying: boolean;
+  sharing: boolean;    // Renamed from copying
   hasReviewData: boolean;
   posterUrl?: string;
 }
@@ -87,7 +87,6 @@ const ControlSection = ({
 );
 
 export default function StoryControls(props: StoryControlsProps) {
-  // State to track which section is open (default to 'style')
   const [openSection, setOpenSection] = useState<string | null>('style');
 
   const toggleSection = (section: string) => {
@@ -212,15 +211,15 @@ export default function StoryControls(props: StoryControlsProps) {
         isOpen={openSection === 'colors'} 
         onClick={() => toggleSection('colors')}
       >
-        {/* Accent Color Picker */}
+        {/* Accent Color Picker (No Scrollbar) */}
         <div>
            <div className="flex justify-between items-center mb-3">
             <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Accent Color</label>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             <div className="flex gap-3">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 shadow-sm flex-shrink-0">
+              <div className="relative w-12 h-10 rounded-lg overflow-hidden border border-zinc-700 shadow-sm flex-shrink-0">
                 <input 
                   type="color" 
                   value={props.accentColor}
@@ -244,7 +243,7 @@ export default function StoryControls(props: StoryControlsProps) {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {[
                 { color: '#00e054', label: 'Green' }, 
                 { color: '#d4a574', label: 'Gold' },  
@@ -258,7 +257,7 @@ export default function StoryControls(props: StoryControlsProps) {
                 <button
                   key={preset.color}
                   onClick={() => props.setAccentColor(preset.color)}
-                  className={`w-7 h-7 rounded-full border border-zinc-700 hover:scale-110 transition-transform focus:outline-none ${
+                  className={`w-8 h-8 rounded-full border border-zinc-700 hover:scale-110 transition-transform focus:outline-none ${
                     props.accentColor.toLowerCase() === preset.color.toLowerCase() ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''
                   }`}
                   style={{ backgroundColor: preset.color }}
@@ -403,21 +402,31 @@ export default function StoryControls(props: StoryControlsProps) {
         ))}
       </ControlSection>
 
-      {/* DESKTOP BUTTONS (Hidden on mobile) */}
+      {/* DESKTOP BUTTONS (Matching Mobile functionality) */}
       <div className="hidden lg:flex gap-3 mt-4">
         <button
-          onClick={props.onCopy}
-          disabled={props.copying || !props.hasReviewData}
+          onClick={props.onShare}
+          disabled={props.sharing || !props.hasReviewData}
           className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700"
         >
-          {props.copying ? 'Copying...' : 'Copy'}
+          {props.sharing ? (
+             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          ) : (
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+          )}
+          {props.sharing ? 'Sharing...' : 'Share'}
         </button>
         <button
           onClick={props.onDownload}
           disabled={props.downloading || !props.hasReviewData}
           className="flex-1 flex items-center justify-center gap-2 bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/20"
         >
-          {props.downloading ? 'Generating...' : 'Download'}
+          {props.downloading ? (
+             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          ) : (
+             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          )}
+          {props.downloading ? 'Saving...' : 'Download'}
         </button>
       </div>
 

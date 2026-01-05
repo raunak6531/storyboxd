@@ -14,12 +14,6 @@ interface RecentReview {
   timestamp: number;
 }
 
-const EXAMPLE_URLS = [
-  { url: 'https://letterboxd.com/film/the-shape-of-water/', label: 'The Shape of Water' },
-  { url: 'https://letterboxd.com/film/parasite-2019/', label: 'Parasite' },
-  { url: 'https://letterboxd.com/film/dune-2021/', label: 'Dune' },
-];
-
 const STORAGE_KEY = 'storyboxd_recent_downloads';
 const MAX_RECENT_DOWNLOADS = 12;
 
@@ -27,7 +21,7 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [copying, setCopying] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [error, setError] = useState('');
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
@@ -157,13 +151,17 @@ export default function Home() {
 
   const generateImage = async (): Promise<string> => {
     if (!storyRef.current) throw new Error('Story ref not available');
+    
+    // Ensure fonts are loaded
+    await document.fonts.ready;
     await new Promise(resolve => setTimeout(resolve, 500));
+    
     const canvas = await html2canvas(storyRef.current, {
       width: 1080,
       height: 1920,
       scale: 1,
       useCORS: true,
-      allowTaint: true,
+      // allowTaint: true, <--- REMOVED: This was causing the crash!
       backgroundColor: '#000000',
       logging: false,
     });
@@ -190,26 +188,9 @@ export default function Home() {
     }
   }, [reviewData, url, saveToRecentDownloads]);
 
-  const handleCopyToClipboard = async () => {
-    if (!storyRef.current || !reviewData) return;
-    setCopying(true);
-    try {
-      const dataUrl = await generateImage();
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to copy. Try downloading.');
-    } finally {
-      setCopying(false);
-    }
-  };
-
-  // NEW: Share Handler
   const handleShare = async () => {
     if (!storyRef.current || !reviewData) return;
-    setCopying(true); // Re-using state for loading spinner
+    setSharing(true);
     try {
       const dataUrl = await generateImage();
       const blob = await (await fetch(dataUrl)).blob();
@@ -223,14 +204,17 @@ export default function Home() {
           text: 'Check out my review on Letterboxd!'
         });
       } else {
-        // Fallback to clipboard if share not supported
+        // Fallback to clipboard
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        // Simple toast feedback logic could go here, for now we just rely on button state
         alert('Image copied to clipboard!');
       }
     } catch (err) {
       console.error('Share failed:', err);
+      // Fallback if sharing/copying completely fails
+      setError('Share failed. Try downloading instead.');
     } finally {
-      setCopying(false);
+      setSharing(false);
     }
   };
 
@@ -355,9 +339,9 @@ export default function Home() {
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
                 onDownload={handleDownload}
-                onCopy={handleCopyToClipboard}
+                onShare={handleShare}
                 downloading={downloading}
-                copying={copying}
+                sharing={sharing}
                 hasReviewData={!!reviewData}
                 posterUrl={reviewData.posterUrl}
               />
@@ -389,12 +373,14 @@ export default function Home() {
           <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-lg border-t border-zinc-800 p-4 lg:hidden z-50 flex gap-3 pb-safe">
             <button
               onClick={handleShare}
-              disabled={copying}
+              disabled={sharing}
               className="flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
+              {sharing ? (
+                 <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              ) : (
+                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              )}
               Share
             </button>
             <button
@@ -411,6 +397,11 @@ export default function Home() {
             </button>
           </div>
         )}
+        
+        {/* Hidden Render Target */}
+        <div ref={storyRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+           {renderTemplate()}
+        </div>
 
       </div>
     </div>
