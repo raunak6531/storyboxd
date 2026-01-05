@@ -2,49 +2,50 @@
 
 import { ReviewData } from '@/app/api/scrape/route';
 
-// Export this type so we can use it in controls
 export type TemplateType = 'bottom' | 'topLeft' | 'centered';
-
-// Font type - 3 very distinct font families
 export type FontType = 'sans' | 'serif' | 'mono';
-
-// Color theme
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 
-// Text style options
- export interface TextStyle {
-   fontType: FontType;
-   colorTheme: ColorTheme;
-   isBold: boolean;
-   isItalic: boolean;
- }
- 
- interface TemplateProps {
-   data: ReviewData;
-   fontSizeMultiplier?: number;
-   textStyle?: TextStyle;
-   backdropPositionPercent?: number; // 0–100
-   showPoster?: boolean;
-   customBackdropUrl?: string | null;
-   // New Filter Props
-   backdropBlur?: number;       // px (0-20)
-   backdropBrightness?: number; // % (0-200)
-   backdropSaturation?: number; // % (0-200)
- }
+export interface TextStyle {
+  fontType: FontType;
+  colorTheme: ColorTheme;
+  isBold: boolean;
+  isItalic: boolean;
+}
 
-// Helper to proxy image URLs to avoid CORS issues
+interface TemplateProps {
+  data: ReviewData;
+  fontSizeMultiplier?: number;
+  textStyle?: TextStyle;
+  backdropPositionPercent?: number;
+  showPoster?: boolean;
+  customBackdropUrl?: string | null;
+  backdropBlur?: number;
+  backdropBrightness?: number;
+  backdropSaturation?: number;
+  // New Prop
+  accentColor?: string;
+}
+
 function proxyUrl(url: string): string {
   if (!url) return '';
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
-// Helper to determine background image
 function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
   if (customUrl) {
     if (customUrl.includes('gradient')) return customUrl;
     return `url(${customUrl})`;
   }
   return data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none';
+}
+
+// Helper to convert hex to rgba for glows
+function hexToRgba(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 const FONTS: Record<FontType, string> = {
@@ -55,33 +56,27 @@ const FONTS: Record<FontType, string> = {
 
 interface ColorConfig {
   primary: string;
-  accent: string;
-  star: string;
   textShadow: string;
   titleShadow: string;
 }
 
+// Removed 'accent' and 'star' from here as they are now dynamic
 const COLORS: Record<ColorTheme, ColorConfig> = {
   neutral: {
     primary: '#ffffff',
-    accent: '#a0a0a0',
-    star: '#00e054',
     textShadow: '0 2px 20px rgba(0,0,0,0.5)',
     titleShadow: '0 2px 10px rgba(0,0,0,0.5)',
   },
   warm: {
     primary: '#fff8e7',
-    accent: '#d4a574',
-    star: '#d4a574',
     textShadow: '0 2px 30px rgba(0,0,0,0.7)',
     titleShadow: '0 4px 20px rgba(0,0,0,0.6), 0 0 40px rgba(212,165,116,0.2)',
   },
   neon: {
     primary: '#ffffff',
-    accent: '#4FD1C5',
-    star: '#4FD1C5',
-    textShadow: '0 2px 20px rgba(0,0,0,0.75)',
-    titleShadow: '0 0 24px rgba(79,209,197,0.18), 0 2px 10px rgba(0,0,0,0.7)',
+    // We will calculate these dynamically now
+    textShadow: '', 
+    titleShadow: '',
   },
 };
 
@@ -101,18 +96,17 @@ function getAutoScale(textLength: number): number {
   return 0.45;
 }
 
-function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: number; size?: number; colorTheme?: ColorTheme }) {
+function StarRating({ rating, size = 48, color, shadow }: { rating: number; size?: number; color: string; shadow?: string }) {
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 !== 0;
-  const colors = COLORS[colorTheme];
 
   return (
     <span style={{
-      color: colors.star,
+      color: color,
       fontSize: `${size}px`,
       fontWeight: 'bold',
       letterSpacing: '4px',
-      textShadow: colorTheme === 'neon' ? '0 0 20px rgba(79,209,197,0.7), 0 0 40px rgba(79,209,197,0.35)' : 'none',
+      textShadow: shadow || '0 2px 10px rgba(0,0,0,0.3)', // Use prop or default
     }}>
       {'★'.repeat(fullStars)}
       {hasHalf && '½'}
@@ -122,7 +116,6 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
 
 // --- TEMPLATES ---
 
-// Template 1: Info at bottom
 export function TemplateBottom({ 
   data, 
   fontSizeMultiplier = 1, 
@@ -132,14 +125,31 @@ export function TemplateBottom({
   customBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
-  backdropSaturation = 100
+  backdropSaturation = 100,
+  accentColor = '#00e054'
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(52 * scale);
 
   const font = FONTS[textStyle.fontType];
-  const colors = COLORS[textStyle.colorTheme];
+  // 1. Get base colors
+  // 1. Get base colors
+  let colors = { ...COLORS[textStyle.colorTheme] };
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+
+  // 2. If NEON, generate dynamic glow
+  if (textStyle.colorTheme === 'neon') {
+    const glowColor = hexToRgba(accentColor, 0.6);
+    const ambientGlow = hexToRgba(accentColor, 0.2);
+    
+    // Glow for Title & Text
+    colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
+    colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
+    
+    // Glow for Stars, Year, Username
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+  }
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -152,7 +162,6 @@ export function TemplateBottom({
       overflow: 'hidden',
       fontFamily: font,
     }}>
-      {/* 1. Background Layer with Filters */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -162,10 +171,9 @@ export function TemplateBottom({
         backgroundRepeat: 'no-repeat',
         filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
         zIndex: 0,
-        transform: 'scale(1.05)', // Slight scale to prevent blur edges from showing white
+        transform: 'scale(1.05)',
       }} />
 
-      {/* 2. Gradient Overlay (on top of bg, unaffected by filters) */}
       {!customBackdropUrl?.includes('gradient') && (
         <div style={{
           position: 'absolute',
@@ -175,7 +183,6 @@ export function TemplateBottom({
         }} />
       )}
 
-      {/* 3. Content Layer */}
       <div style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
@@ -199,7 +206,7 @@ export function TemplateBottom({
         </p>
 
         <div style={{ marginBottom: '24px' }}>
-          <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
+          <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow}/>
         </div>
 
         <div style={{
@@ -234,7 +241,7 @@ export function TemplateBottom({
             }}>
               {data.movieTitle}
             </h2>
-            <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, textAlign: 'center' }}>
+            <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, textAlign: 'center' }}>
               {data.year}
             </p>
           </div>
@@ -247,14 +254,13 @@ export function TemplateBottom({
         )}
 
         <p style={{ color: '#666666', fontSize: '34px', fontWeight: 400 }}>
-          Review by <span style={{ color: colors.accent }}>{data.username}</span>
+          Review by <span style={{ color: accentColor ,textShadow: accentShadow}}>{data.username}</span>
         </p>
       </div>
     </div>
   );
 }
 
-// Template 2: Info card at top-left
 export function TemplateTopLeft({ 
   data, 
   fontSizeMultiplier = 1, 
@@ -264,14 +270,31 @@ export function TemplateTopLeft({
   customBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
-  backdropSaturation = 100
+  backdropSaturation = 100,
+  accentColor = '#00e054'
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(48 * scale);
 
   const font = FONTS[textStyle.fontType];
-  const colors = COLORS[textStyle.colorTheme];
+  // 1. Get base colors
+  // 1. Get base colors
+  let colors = { ...COLORS[textStyle.colorTheme] };
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+
+  // 2. If NEON, generate dynamic glow
+  if (textStyle.colorTheme === 'neon') {
+    const glowColor = hexToRgba(accentColor, 0.6);
+    const ambientGlow = hexToRgba(accentColor, 0.2);
+    
+    // Glow for Title & Text
+    colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
+    colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
+    
+    // Glow for Stars, Year, Username
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+  }
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -284,7 +307,6 @@ export function TemplateTopLeft({
       overflow: 'hidden',
       fontFamily: font,
     }}>
-      {/* 1. Background Layer */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -297,7 +319,6 @@ export function TemplateTopLeft({
         transform: 'scale(1.05)',
       }} />
 
-      {/* 2. Gradient Overlay */}
       {!customBackdropUrl?.includes('gradient') && (
         <div style={{
           position: 'absolute',
@@ -307,7 +328,6 @@ export function TemplateTopLeft({
         }} />
       )}
       
-      {/* 3. Legibility Mask */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0,
@@ -318,7 +338,6 @@ export function TemplateTopLeft({
         zIndex: 1,
       }} />
 
-      {/* 4. Content Layer */}
       <div style={{ position: 'relative', zIndex: 2 }}>
         <div style={{
           position: 'absolute',
@@ -353,7 +372,7 @@ export function TemplateTopLeft({
             }}>
               {data.movieTitle}
             </h2>
-            <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
+            <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
               {data.year}
             </p>
             {data.director && (
@@ -363,7 +382,7 @@ export function TemplateTopLeft({
             )}
             <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
             <p style={{ color: '#888888', fontSize: '34px' }}>
-              Review by <span style={{ color: colors.accent }}>{data.username}</span>
+              Review by <span style={{ color: accentColor,textShadow: accentShadow }}>{data.username}</span>
             </p>
           </div>
         </div>
@@ -383,14 +402,14 @@ export function TemplateTopLeft({
             textShadow: colors.textShadow,
             maxWidth: '640px',
             textAlign: 'left',
-            borderLeft: `3px solid ${colors.accent}`,
+            borderLeft: `3px solid ${accentColor}`,
             paddingLeft: '16px',
             marginBottom: '24px'
           }}>
             "{data.reviewText}"
           </p>
           <div>
-            <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
+            <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow} />
           </div>
         </div>
       </div>
@@ -398,7 +417,6 @@ export function TemplateTopLeft({
   );
 }
 
-// Template 3: Centered floating card
 export function TemplateCentered({ 
   data, 
   fontSizeMultiplier = 1, 
@@ -408,14 +426,31 @@ export function TemplateCentered({
   customBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
-  backdropSaturation = 100
+  backdropSaturation = 100,
+  accentColor = '#00e054'
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
   const reviewFontSize = Math.round(44 * scale);
 
   const font = FONTS[textStyle.fontType];
-  const colors = COLORS[textStyle.colorTheme];
+  // 1. Get base colors
+  // 1. Get base colors
+  let colors = { ...COLORS[textStyle.colorTheme] };
+  let accentShadow = '0 2px 10px rgba(0,0,0,0.3)'; // Default shadow for accent elements
+
+  // 2. If NEON, generate dynamic glow
+  if (textStyle.colorTheme === 'neon') {
+    const glowColor = hexToRgba(accentColor, 0.6);
+    const ambientGlow = hexToRgba(accentColor, 0.2);
+    
+    // Glow for Title & Text
+    colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
+    colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
+    
+    // Glow for Stars, Year, Username
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+  }
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
@@ -425,11 +460,8 @@ export function TemplateCentered({
       ? 'rgba(30,25,20,0.9)'
       : 'rgba(20,20,20,0.85)';
 
-  const cardBorder = textStyle.colorTheme === 'neon'
-    ? '1px solid rgba(79,209,197,0.25)'
-    : textStyle.colorTheme === 'warm'
-      ? '1px solid rgba(212,165,116,0.2)'
-      : '1px solid rgba(255,255,255,0.1)';
+  // Border uses the accent color but with low opacity
+  const cardBorder = `1px solid ${accentColor}40`; // 40 is hex for ~25% opacity
 
   return (
     <div style={{
@@ -440,7 +472,6 @@ export function TemplateCentered({
       overflow: 'hidden',
       fontFamily: font,
     }}>
-      {/* 1. Background Layer */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -453,7 +484,6 @@ export function TemplateCentered({
         transform: 'scale(1.05)',
       }} />
 
-      {/* 2. Overlays */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -468,7 +498,6 @@ export function TemplateCentered({
         zIndex: 1,
       }} />
 
-      {/* 3. Centered Content */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -518,7 +547,7 @@ export function TemplateCentered({
           }}>
             {data.movieTitle}
           </h2>
-          <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
+          <p style={{ color: accentColor,textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
              {data.year}
            </p>
 
@@ -542,11 +571,11 @@ export function TemplateCentered({
           </p>
 
           <div style={{ marginBottom: '32px' }}>
-            <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
+            <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow} />
           </div>
 
           <p style={{ color: '#666666', fontSize: '34px' }}>
-            Review by <span style={{ color: colors.accent }}>{data.username}</span>
+            Review by <span style={{ color: accentColor,textShadow: accentShadow }}>{data.username}</span>
           </p>
         </div>
       </div>
