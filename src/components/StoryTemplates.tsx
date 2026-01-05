@@ -8,10 +8,6 @@ export type FontType = 'sans' | 'serif' | 'mono';
 // Color theme
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 
-// Backdrop horizontal position
-// Use percentage (0–100) for horizontal backdrop position
-// 0 = left, 50 = center, 100 = right
-
 // Text style options
  export interface TextStyle {
    fontType: FontType;
@@ -26,7 +22,11 @@ export type ColorTheme = 'neutral' | 'warm' | 'neon';
    textStyle?: TextStyle;
    backdropPositionPercent?: number; // 0–100
    showPoster?: boolean;
-   customBackdropUrl?: string | null; // Added custom background prop
+   customBackdropUrl?: string | null;
+   // New Filter Props
+   backdropBlur?: number;       // px (0-20)
+   backdropBrightness?: number; // % (0-200)
+   backdropSaturation?: number; // % (0-200)
  }
 
 // Helper to proxy image URLs to avoid CORS issues
@@ -37,18 +37,19 @@ function proxyUrl(url: string): string {
 
 // Helper to determine background image
 function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
-  if (customUrl) return `url(${customUrl})`;
+  if (customUrl) {
+    if (customUrl.includes('gradient')) return customUrl;
+    return `url(${customUrl})`;
+  }
   return data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none';
 }
 
-// Font families using CSS variables from layout.tsx Google Fonts
 const FONTS: Record<FontType, string> = {
   sans: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, sans-serif',
   serif: 'var(--font-playfair), "Playfair Display", Georgia, serif',
   mono: 'var(--font-mono), "Space Mono", "Courier New", monospace',
 };
 
-// Color configurations
 interface ColorConfig {
   primary: string;
   accent: string;
@@ -81,7 +82,6 @@ const COLORS: Record<ColorTheme, ColorConfig> = {
   },
 };
 
-// Default text style
 const DEFAULT_STYLE: TextStyle = {
   fontType: 'sans',
   colorTheme: 'neutral',
@@ -89,17 +89,15 @@ const DEFAULT_STYLE: TextStyle = {
   isItalic: false,
 };
 
-// Auto-scale font size based on text length
 function getAutoScale(textLength: number): number {
-  if (textLength <= 80) return 1.1;      // Short text - slightly bigger
-  if (textLength <= 150) return 1.0;     // Normal
-  if (textLength <= 250) return 0.85;    // Medium - slightly smaller
-  if (textLength <= 400) return 0.7;     // Long - smaller
-  if (textLength <= 600) return 0.55;    // Very long - much smaller
-  return 0.45;                           // Extremely long - minimum
+  if (textLength <= 80) return 1.1;
+  if (textLength <= 150) return 1.0;
+  if (textLength <= 250) return 0.85;
+  if (textLength <= 400) return 0.7;
+  if (textLength <= 600) return 0.55;
+  return 0.45;
 }
 
-// Helper to render star rating with inline styles
 function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: number; size?: number; colorTheme?: ColorTheme }) {
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 !== 0;
@@ -119,14 +117,19 @@ function StarRating({ rating, size = 48, colorTheme = 'neutral' }: { rating: num
   );
 }
 
-// Template 1: Info at bottom (like screenshot 1)
+// --- TEMPLATES ---
+
+// Template 1: Info at bottom
 export function TemplateBottom({ 
   data, 
   fontSizeMultiplier = 1, 
   textStyle = DEFAULT_STYLE, 
   backdropPositionPercent = 50, 
   showPoster = false,
-  customBackdropUrl 
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
@@ -144,33 +147,39 @@ export function TemplateBottom({
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: getBackgroundImage(data, customBackdropUrl),
-      backgroundSize: 'cover',
-      backgroundPosition: `${backdropPositionPercent}% center`,
-      backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
-
-      {/* Gradient overlay */}
+      {/* 1. Background Layer with Filters */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 70%, transparent 100%)',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        backgroundRepeat: 'no-repeat',
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        zIndex: 0,
+        transform: 'scale(1.05)', // Slight scale to prevent blur edges from showing white
       }} />
 
+      {/* 2. Gradient Overlay (on top of bg, unaffected by filters) */}
+      {!customBackdropUrl?.includes('gradient') && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 70%, transparent 100%)',
+          zIndex: 1,
+        }} />
+      )}
 
+      {/* 3. Content Layer */}
       <div style={{
         position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: 0, left: 0, right: 0,
         padding: '80px 64px',
         textAlign: 'center',
+        zIndex: 2,
       }}>
-        {/* Review text */}
         <p style={{
           color: colors.primary,
           fontSize: `${reviewFontSize}px`,
@@ -186,12 +195,10 @@ export function TemplateBottom({
           "{data.reviewText}"
         </p>
 
-        {/* Rating */}
         <div style={{ marginBottom: '24px' }}>
           <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
         </div>
 
-        {/* Title row with optional poster */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -230,14 +237,12 @@ export function TemplateBottom({
           </div>
         </div>
 
-        {/* Director */}
         {data.director && (
           <p style={{ color: '#888888', fontSize: '34px', marginBottom: '40px', fontWeight: 300 }}>
             Directed by {data.director}
           </p>
         )}
 
-        {/* Username */}
         <p style={{ color: '#666666', fontSize: '34px', fontWeight: 400 }}>
           Review by <span style={{ color: colors.accent }}>{data.username}</span>
         </p>
@@ -246,14 +251,17 @@ export function TemplateBottom({
   );
 }
 
-// Template 2: Info card at top-left (like screenshot 2)
+// Template 2: Info card at top-left
 export function TemplateTopLeft({ 
   data, 
   fontSizeMultiplier = 1, 
   textStyle = DEFAULT_STYLE, 
   backdropPositionPercent = 50, 
   showPoster = false,
-  customBackdropUrl
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
@@ -271,127 +279,133 @@ export function TemplateTopLeft({
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: getBackgroundImage(data, customBackdropUrl),
-      backgroundSize: 'cover',
-      backgroundPosition: `${backdropPositionPercent}% center`,
-      backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
-      {/* Gradient overlay */}
+      {/* 1. Background Layer */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.7) 100%)',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        backgroundRepeat: 'no-repeat',
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        zIndex: 0,
+        transform: 'scale(1.05)',
       }} />
-      {/* Top-left legibility mask */}
+
+      {/* 2. Gradient Overlay */}
+      {!customBackdropUrl?.includes('gradient') && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.7) 100%)',
+          zIndex: 1,
+        }} />
+      )}
+      
+      {/* 3. Legibility Mask */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
+        top: 0, left: 0,
         width: '560px',
         height: '420px',
         background: 'linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0) 70%)',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        zIndex: 1,
       }} />
 
-      {/* Top-left card */}
-      <div style={{
-        position: 'absolute',
-        top: '100px',
-        left: '64px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '32px',
-      }}>
-        {/* Poster thumbnail */}
-        {showPoster && data.posterUrl && (
-          <img
-            src={proxyUrl(data.posterUrl)}
-            alt=""
-            crossOrigin="anonymous"
-            style={{
-              width: '180px',
-              height: '270px',
-              objectFit: 'cover',
-              borderRadius: '12px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-            }}
-          />
-        )}
-
-        <div style={{ textAlign: 'left', paddingTop: '8px' }}>
-          {/* Title and year */}
-          <h2 style={{
-            color: colors.primary,
-            fontSize: '52px',
-            fontWeight: textStyle.isBold ? 800 : 700,
-            textShadow: colors.titleShadow,
-            marginBottom: '8px',
-          }}>
-            {data.movieTitle}
-          </h2>
-          <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
-            {data.year}
-          </p>
-
-          {/* Director */}
-          {data.director && (
-            <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '16px' }}>
-              Directed by {data.director}
-            </p>
+      {/* 4. Content Layer */}
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        <div style={{
+          position: 'absolute',
+          top: '100px',
+          left: '64px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '32px',
+        }}>
+          {showPoster && data.posterUrl && (
+            <img
+              src={proxyUrl(data.posterUrl)}
+              alt=""
+              crossOrigin="anonymous"
+              style={{
+                width: '180px',
+                height: '270px',
+                objectFit: 'cover',
+                borderRadius: '12px',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              }}
+            />
           )}
 
-          {/* Divider */}
-          <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
-
-          {/* Username */}
-          <p style={{ color: '#888888', fontSize: '34px' }}>
-            Review by <span style={{ color: colors.accent }}>{data.username}</span>
-          </p>
+          <div style={{ textAlign: 'left', paddingTop: '8px' }}>
+            <h2 style={{
+              color: colors.primary,
+              fontSize: '52px',
+              fontWeight: textStyle.isBold ? 800 : 700,
+              textShadow: colors.titleShadow,
+              marginBottom: '8px',
+            }}>
+              {data.movieTitle}
+            </h2>
+            <p style={{ color: colors.accent, fontSize: '44px', fontWeight: 300, marginBottom: '12px' }}>
+              {data.year}
+            </p>
+            {data.director && (
+              <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '16px' }}>
+                Directed by {data.director}
+              </p>
+            )}
+            <div style={{ height: '1px', width: '100%', background: 'rgba(255,255,255,0.12)', margin: '8px 0 12px 0' }} />
+            <p style={{ color: '#888888', fontSize: '34px' }}>
+              Review by <span style={{ color: colors.accent }}>{data.username}</span>
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Review text below the card */}
-      <div style={{
-        position: 'absolute',
-        top: '500px',
-        left: '64px',
-        right: '64px',
-      }}>
-        <p style={{
-          color: colors.primary,
-          fontSize: `${reviewFontSize}px`,
-          fontWeight: fontWeight,
-          fontStyle: fontStyleCss,
-          lineHeight: 1.6,
-          textShadow: colors.textShadow,
-          maxWidth: '640px',
-          textAlign: 'left',
-          borderLeft: `3px solid ${colors.accent}`,
-          paddingLeft: '16px',
-          marginBottom: '24px'
+        <div style={{
+          position: 'absolute',
+          top: '500px',
+          left: '64px',
+          right: '64px',
         }}>
-          "{data.reviewText}"
-        </p>
-        <div>
-          <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
+          <p style={{
+            color: colors.primary,
+            fontSize: `${reviewFontSize}px`,
+            fontWeight: fontWeight,
+            fontStyle: fontStyleCss,
+            lineHeight: 1.6,
+            textShadow: colors.textShadow,
+            maxWidth: '640px',
+            textAlign: 'left',
+            borderLeft: `3px solid ${colors.accent}`,
+            paddingLeft: '16px',
+            marginBottom: '24px'
+          }}>
+            "{data.reviewText}"
+          </p>
+          <div>
+            <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// Template 3: Centered floating card (like screenshot 3)
+// Template 3: Centered floating card
 export function TemplateCentered({ 
   data, 
   fontSizeMultiplier = 1, 
   textStyle = DEFAULT_STYLE, 
   backdropPositionPercent = 50, 
   showPoster = false,
-  customBackdropUrl
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
@@ -402,7 +416,6 @@ export function TemplateCentered({
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
-  // Card background varies by color theme
   const cardBg = textStyle.colorTheme === 'neon'
     ? 'rgba(18,24,27,0.9)'
     : textStyle.colorTheme === 'warm'
@@ -422,42 +435,44 @@ export function TemplateCentered({
       height: '1920px',
       backgroundColor: '#000000',
       overflow: 'hidden',
-      backgroundImage: getBackgroundImage(data, customBackdropUrl),
-      backgroundSize: 'cover',
-      backgroundPosition: `${backdropPositionPercent}% center`,
-      backgroundRepeat: 'no-repeat',
       fontFamily: font,
     }}>
-      {/* Overlay with blur effect simulation */}
+      {/* 1. Background Layer */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.55)',
-      }} />
-      {/* Vignette edges for focus */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'radial-gradient(70% 60% at 50% 45%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%)',
-        pointerEvents: 'none'
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        backgroundRepeat: 'no-repeat',
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        zIndex: 0,
+        transform: 'scale(1.05)',
       }} />
 
-      {/* Centered card */}
+      {/* 2. Overlays */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        zIndex: 1,
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(70% 60% at 50% 45%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%)',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }} />
+
+      {/* 3. Centered Content */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        zIndex: 2,
       }}>
         <div style={{
           backgroundColor: cardBg,
@@ -472,7 +487,6 @@ export function TemplateCentered({
             : '0 40px 80px rgba(0,0,0,0.5)',
           border: cardBorder,
         }}>
-          {/* Poster thumbnail */}
           {showPoster && data.posterUrl && (
             <img
               src={proxyUrl(data.posterUrl)}
@@ -492,7 +506,6 @@ export function TemplateCentered({
             />
           )}
 
-          {/* Title and year */}
           <h2 style={{
             color: colors.primary,
             fontSize: '52px',
@@ -512,8 +525,6 @@ export function TemplateCentered({
              </p>
            )}
 
-
-          {/* Review text */}
           <p style={{
             color: colors.primary,
             fontSize: `${reviewFontSize}px`,
@@ -527,12 +538,10 @@ export function TemplateCentered({
             "{data.reviewText}"
           </p>
 
-          {/* Rating under quote */}
           <div style={{ marginBottom: '32px' }}>
             <StarRating rating={data.ratingNumber} size={56} colorTheme={textStyle.colorTheme} />
           </div>
 
-          {/* Username */}
           <p style={{ color: '#666666', fontSize: '34px' }}>
             Review by <span style={{ color: colors.accent }}>{data.username}</span>
           </p>
