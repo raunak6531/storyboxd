@@ -2,6 +2,9 @@
 
 import { ReviewData } from '@/app/api/scrape/route';
 
+// Export this type so we can use it in controls
+export type TemplateType = 'bottom' | 'topLeft' | 'centered';
+
 // Font type - 3 very distinct font families
 export type FontType = 'sans' | 'serif' | 'mono';
 
