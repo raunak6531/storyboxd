@@ -51,7 +51,7 @@ export default function Home() {
   const [backdropBrightness, setBackdropBrightness] = useState(100);
   const [backdropSaturation, setBackdropSaturation] = useState(100);
 
-  // Accent Color State
+  // Accent Color
   const [accentColor, setAccentColor] = useState('#00e054');
 
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
@@ -206,6 +206,34 @@ export default function Home() {
     }
   };
 
+  // NEW: Share Handler
+  const handleShare = async () => {
+    if (!storyRef.current || !reviewData) return;
+    setCopying(true); // Re-using state for loading spinner
+    try {
+      const dataUrl = await generateImage();
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `${reviewData.movieTitle}.png`, { type: 'image/png' });
+
+      // Check for native sharing support
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `My review of ${reviewData.movieTitle}`,
+          text: 'Check out my review on Letterboxd!'
+        });
+      } else {
+        // Fallback to clipboard if share not supported
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        alert('Image copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    } finally {
+      setCopying(false);
+    }
+  };
+
   const renderTemplate = () => {
     if (!reviewData) return null;
     const props = {
@@ -229,9 +257,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden pb-24 lg:pb-0">
       
-      {/* Animated background gradient - RESTORED */}
+      {/* Animated background gradient */}
       <div className="fixed inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -350,11 +378,40 @@ export default function Home() {
         )}
         
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-zinc-900 text-center">
+        <div className="mt-16 pt-8 border-t border-zinc-900 text-center lg:block hidden">
           <p className="text-zinc-600 text-sm">
             Made with <span className="text-orange-500">♥</span> for movie lovers
           </p>
         </div>
+
+        {/* Mobile Sticky Action Bar */}
+        {reviewData && (
+          <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-lg border-t border-zinc-800 p-4 lg:hidden z-50 flex gap-3 pb-safe">
+            <button
+              onClick={handleShare}
+              disabled={copying}
+              className="flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="flex-1 bg-[#00e054] text-black font-bold py-3 rounded-xl active:scale-95 transition-transform shadow-lg shadow-[#00e054]/20 flex items-center justify-center gap-2"
+            >
+              {downloading ? (
+                 <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              ) : (
+                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              )}
+              Save
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
