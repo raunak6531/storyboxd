@@ -1,6 +1,6 @@
 'use client';
 
-import { ReviewData } from '@/app/api/scrape/route';
+import { ReviewData } from '@/lib/clientScraper';
 
 export type TemplateType = 'bottom' | 'topLeft' | 'centered';
 

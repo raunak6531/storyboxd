@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
-import { ReviewData } from '@/app/api/scrape/route';
+// IMPORT THE NEW CLIENT SCRAPER
+import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
@@ -110,6 +111,7 @@ export default function Home() {
     }
   };
 
+  // --- NEW LOADING FUNCTION ---
   const loadReviewFromUrl = async (reviewUrl: string) => {
     setUrl(reviewUrl);
     setLoading(true);
@@ -122,18 +124,17 @@ export default function Home() {
     setAccentColor('#00e054'); 
 
     try {
-      const response = await fetch('/api/scrape', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: reviewUrl }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch review');
+      // Direct Client Call - No server API needed!
+      const data = await scrapeLetterboxd(reviewUrl);
+      
+      if (!data || !data.movieTitle) {
+        throw new Error('Could not find review data. Make sure the link is correct.');
+      }
+      
       setReviewData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      console.error('Load Error:', err);
+      setError('Failed to load review. The proxy might be busy, please try again.');
     } finally {
       setLoading(false);
     }
@@ -160,7 +161,6 @@ export default function Home() {
       height: 1920,
       scale: 1,
       useCORS: true,
-      // allowTaint: true, // REMOVED to prevent crashes
       backgroundColor: '#000000',
       logging: false,
     });
@@ -187,7 +187,6 @@ export default function Home() {
     }
   }, [reviewData, url, saveToRecentDownloads]);
 
-  // Handle Share (Native -> Clipboard fallback)
   const handleShare = async () => {
     if (!storyRef.current || !reviewData) return;
     setSharing(true);
@@ -196,7 +195,6 @@ export default function Home() {
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `${reviewData.movieTitle}.png`, { type: 'image/png' });
 
-      // Check for native sharing support
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
@@ -204,14 +202,11 @@ export default function Home() {
           text: 'Check out my review on Letterboxd!'
         });
       } else {
-        // Fallback to clipboard
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        // Simple toast feedback logic could go here, for now we just rely on button state
         alert('Image copied to clipboard!');
       }
     } catch (err) {
       console.error('Share failed:', err);
-      // Fallback if sharing/copying completely fails
       setError('Share failed. Try downloading instead.');
     } finally {
       setSharing(false);
@@ -243,7 +238,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden pb-24 lg:pb-0">
       
-      {/* Animated background gradient */}
       <div className="fixed inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -251,7 +245,6 @@ export default function Home() {
 
       <div className={`relative z-10 max-w-6xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
         
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-4 py-2 mb-6">
             <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
@@ -266,7 +259,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Input Form */}
         <form onSubmit={handleSubmit} className="mb-10 max-w-3xl mx-auto">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
@@ -296,7 +288,6 @@ export default function Home() {
           <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 text-center text-red-400">{error}</div>
         )}
 
-        {/* Loading Skeleton */}
         {loading && !reviewData && (
           <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-pulse">
              <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
@@ -304,12 +295,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* Main Interface */}
         {reviewData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
               
-              {/* Controls */}
               <StoryControls
                 selectedTemplate={selectedTemplate}
                 setSelectedTemplate={setSelectedTemplate}
@@ -346,7 +335,6 @@ export default function Home() {
                 posterUrl={reviewData.posterUrl}
               />
 
-              {/* Preview */}
               <div className="flex-shrink-0">
                 <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl">
                   <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
@@ -361,14 +349,12 @@ export default function Home() {
           </div>
         )}
         
-        {/* Footer */}
         <div className="mt-16 pt-8 border-t border-zinc-900 text-center lg:block hidden">
           <p className="text-zinc-600 text-sm">
             Made with <span className="text-orange-500">♥</span> for movie lovers
           </p>
         </div>
 
-        {/* Mobile Sticky Action Bar */}
         {reviewData && (
           <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-lg border-t border-zinc-800 p-4 lg:hidden z-50 flex gap-3 pb-safe">
             <button
@@ -396,7 +382,6 @@ export default function Home() {
           </div>
         )}
         
-        {/* Hidden Render Target */}
         <div ref={storyRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
            {renderTemplate()}
         </div>
