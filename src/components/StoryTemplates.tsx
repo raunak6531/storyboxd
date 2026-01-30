@@ -2,7 +2,7 @@
 
 import { ReviewData } from '@/lib/clientScraper';
 
-export type TemplateType = 'bottom' | 'topLeft' | 'centered';
+export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'polaroid' | 'magazine';
 
 // Updated Font Types
 export type FontType = 'sans' | 'serif' | 'mono' | 'courier' | 'marker' | 'anton';
@@ -353,10 +353,10 @@ export function TemplateTopLeft({
               alt=""
               crossOrigin="anonymous"
               style={{
-                width: '180px',
-                height: '270px',
+                width: '200px',
+                height: '300px',
                 objectFit: 'cover',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
               }}
             />
@@ -573,6 +573,434 @@ export function TemplateCentered({
 
           <p style={{ color: '#666666', fontSize: '34px' }}>
             Review by <span style={{ color: accentColor, textShadow: accentShadow }}>{data.username}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// TEMPLATE 4: MINIMAL - Clean, text-focused with subtle backdrop
+export function TemplateMinimal({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  showPoster = false,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(44 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: '1080px',
+      height: '1920px',
+      backgroundColor: '#0a0a0a',
+      overflow: 'hidden',
+      fontFamily: font,
+    }}>
+      {/* Backdrop - user controls blur/brightness */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        transform: 'scale(1.05)',
+      }} />
+
+      {/* Dark overlay for text readability */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+      }} />
+
+      {/* Content */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '80px',
+        textAlign: 'center',
+      }}>
+        {/* Accent line */}
+        <div style={{
+          width: '60px',
+          height: '4px',
+          backgroundColor: accentColor,
+          marginBottom: '40px',
+          borderRadius: '2px',
+        }} />
+
+        {/* Poster (optional) */}
+        {showPoster && data.posterUrl && (
+          <img
+            src={proxyUrl(data.posterUrl)}
+            alt=""
+            style={{
+              width: '200px',
+              height: '300px',
+              objectFit: 'cover',
+              borderRadius: '16px',
+              marginBottom: '32px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          />
+        )}
+
+        {/* Movie title */}
+        <h2 style={{
+          color: '#ffffff',
+          fontSize: '48px',
+          fontWeight: 600,
+          marginBottom: '8px',
+          letterSpacing: '1px',
+        }}>
+          {data.movieTitle}
+        </h2>
+
+        {/* Director & Year */}
+        <p style={{ color: '#888888', fontSize: '30px', marginBottom: '24px' }}>
+          {data.director ? `${data.director} • ` : ''}{data.year}
+        </p>
+
+        {/* Rating */}
+        <div style={{ marginBottom: '32px' }}>
+          <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
+        </div>
+
+        {/* Review text */}
+        <p style={{
+          color: '#ffffff',
+          fontSize: `${reviewFontSize}px`,
+          fontWeight: fontWeight,
+          fontStyle: fontStyleCss,
+          letterSpacing: `${textStyle.letterSpacing}px`,
+          lineHeight: textStyle.lineHeight,
+          maxWidth: '900px',
+          marginBottom: '40px',
+        }}>
+          "{data.reviewText}"
+        </p>
+
+        {/* Username */}
+        <p style={{ color: '#666666', fontSize: '28px' }}>
+          Review by <span style={{ color: accentColor }}>@{data.username}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// TEMPLATE 5: POLAROID - Poster prominently displayed like a polaroid
+export function TemplatePolaroid({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(38 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: '1080px',
+      height: '1920px',
+      backgroundColor: '#111111',
+      overflow: 'hidden',
+      fontFamily: font,
+    }}>
+      {/* Backdrop - user controls */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        transform: 'scale(1.05)',
+      }} />
+
+      {/* Dark overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+      }} />
+
+      {/* Content */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '60px 64px',
+      }}>
+        {/* Polaroid frame */}
+        <div style={{
+          backgroundColor: '#fafafa',
+          padding: '20px 20px 60px 20px',
+          borderRadius: '4px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3)',
+          transform: 'rotate(-2deg)',
+          marginBottom: '32px',
+        }}>
+          <img
+            src={proxyUrl(data.posterUrl || data.backdropUrl)}
+            alt=""
+            style={{
+              width: '420px',
+              height: '630px',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+          {/* Handwritten-style title on polaroid */}
+          <p style={{
+            color: '#333333',
+            fontSize: '32px',
+            fontFamily: 'var(--font-marker), cursive',
+            textAlign: 'center',
+            marginTop: '16px',
+          }}>
+            {data.movieTitle} ({data.year})
+          </p>
+        </div>
+
+        {/* Director */}
+        {data.director && (
+          <p style={{ color: '#888888', fontSize: '28px', marginBottom: '16px' }}>
+            Directed by {data.director}
+          </p>
+        )}
+
+        {/* Rating */}
+        <div style={{ marginBottom: '20px' }}>
+          <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
+        </div>
+
+        {/* Review text */}
+        <p style={{
+          color: '#e0e0e0',
+          fontSize: `${reviewFontSize}px`,
+          fontWeight: fontWeight,
+          fontStyle: fontStyleCss,
+          letterSpacing: `${textStyle.letterSpacing}px`,
+          lineHeight: textStyle.lineHeight,
+          textAlign: 'center',
+          maxWidth: '900px',
+          marginBottom: '24px',
+        }}>
+          "{data.reviewText}"
+        </p>
+
+        {/* Username */}
+        <p style={{ color: '#666666', fontSize: '28px' }}>
+          Review by <span style={{ color: accentColor }}>@{data.username}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// TEMPLATE 6: MAGAZINE - Bold editorial magazine style
+export function TemplateMagazine({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  showPoster = false,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(42 * scale);
+
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: '1080px',
+      height: '1920px',
+      backgroundColor: '#000000',
+      overflow: 'hidden',
+      fontFamily: font,
+    }}>
+      {/* Full bleed backdrop - full height */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `center ${backdropPositionPercent}%`,
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+      }} />
+
+      {/* Gradient overlay for text readability */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,0.9) 75%, rgba(0,0,0,0.95) 100%)',
+      }} />
+
+      {/* Magazine header bar */}
+      <div style={{
+        position: 'absolute',
+        top: '48px',
+        left: '48px',
+        right: '48px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10,
+      }}>
+        <div style={{
+          backgroundColor: accentColor,
+          color: '#000000',
+          padding: '12px 24px',
+          fontSize: '24px',
+          fontWeight: 800,
+          letterSpacing: '3px',
+          textTransform: 'uppercase',
+        }}>
+          REVIEW
+        </div>
+        <div style={{
+          color: '#ffffff',
+          fontSize: '24px',
+          fontWeight: 600,
+          letterSpacing: '2px',
+        }}>
+          {data.year}
+        </div>
+      </div>
+
+      {/* Content - bottom section */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        padding: '64px',
+        paddingTop: '0',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: showPoster ? '40px' : '0',
+        alignItems: 'flex-end',
+      }}>
+        <div style={{ flex: 1 }}>
+          {/* Title row with poster on right */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '32px',
+            alignItems: 'flex-start',
+            marginBottom: '24px',
+          }}>
+            {/* Title and director */}
+            <div style={{ flex: 1 }}>
+              <h1 style={{
+                color: '#ffffff',
+                fontSize: showPoster ? '72px' : '96px',
+                fontWeight: 900,
+                lineHeight: 1.0,
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+                letterSpacing: '-2px',
+              }}>
+                {data.movieTitle}
+              </h1>
+
+              {data.director && (
+                <p style={{
+                  color: accentColor,
+                  fontSize: '30px',
+                  fontWeight: 600,
+                  marginBottom: '0',
+                  letterSpacing: '1px',
+                }}>
+                  Directed by {data.director}
+                </p>
+              )}
+            </div>
+
+            {/* Poster (optional) - on the right of title */}
+            {showPoster && data.posterUrl && (
+              <img
+                src={proxyUrl(data.posterUrl)}
+                alt=""
+                style={{
+                  width: '180px',
+                  height: '270px',
+                  objectFit: 'cover',
+                  borderRadius: '12px',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  flexShrink: 0,
+                }}
+              />
+            )}
+          </div>
+
+          {/* Rating bar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            marginBottom: '24px',
+            paddingBottom: '24px',
+            borderBottom: '2px solid #333333',
+          }}>
+            <StarRating rating={data.ratingNumber} size={44} color={accentColor} />
+            <span style={{ color: '#666666', fontSize: '26px' }}>|</span>
+            <span style={{ color: '#888888', fontSize: '26px' }}>@{data.username}</span>
+          </div>
+
+          {/* Review text */}
+          <p style={{
+            color: '#cccccc',
+            fontSize: `${reviewFontSize}px`,
+            fontWeight: fontWeight,
+            fontStyle: fontStyleCss,
+            letterSpacing: `${textStyle.letterSpacing}px`,
+            lineHeight: textStyle.lineHeight,
+            maxWidth: '100%',
+          }}>
+            "{data.reviewText}"
           </p>
         </div>
       </div>

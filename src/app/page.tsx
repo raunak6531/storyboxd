@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 // IMPORT THE NEW CLIENT SCRAPER
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
 interface RecentReview {
@@ -310,6 +310,9 @@ export default function Home() {
       case 'bottom': return <TemplateBottom {...props} />;
       case 'topLeft': return <TemplateTopLeft {...props} />;
       case 'centered': return <TemplateCentered {...props} />;
+      case 'minimal': return <TemplateMinimal {...props} />;
+      case 'polaroid': return <TemplatePolaroid {...props} />;
+      case 'magazine': return <TemplateMagazine {...props} />;
     }
   };
 

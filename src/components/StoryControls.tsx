@@ -113,6 +113,9 @@ export default function StoryControls(props: StoryControlsProps) {
               { id: 'bottom', label: 'Classic' },
               { id: 'topLeft', label: 'Editorial' },
               { id: 'centered', label: 'Focused' },
+              { id: 'minimal', label: 'Minimal' },
+              { id: 'polaroid', label: 'Polaroid' },
+              { id: 'magazine', label: 'Magazine' },
             ] as { id: TemplateType; label: string }[]).map((template) => (
               <button
                 key={template.id}
