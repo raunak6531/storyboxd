@@ -2,7 +2,7 @@
 
 import { ReviewData } from '@/lib/clientScraper';
 
-export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'polaroid' | 'magazine';
+export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'polaroid' | 'magazine' | 'cinematic' | 'gradient' | 'duotone';
 
 // Updated Font Types
 export type FontType = 'sans' | 'serif' | 'mono' | 'courier' | 'marker' | 'anton';
@@ -121,11 +121,11 @@ function StarRating({ rating, size = 48, color, shadow }: { rating: number; size
   );
 }
 
-export function TemplateBottom({ 
-  data, 
-  fontSizeMultiplier = 1, 
-  textStyle = DEFAULT_STYLE, 
-  backdropPositionPercent = 50, 
+export function TemplateBottom({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
   backdropBlur = 0,
@@ -138,7 +138,7 @@ export function TemplateBottom({
   const reviewFontSize = Math.round(52 * scale);
 
   const font = FONTS[textStyle.fontType];
-  
+
   // 1. Get base colors
   let colors = { ...COLORS[textStyle.colorTheme] };
   let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
@@ -147,10 +147,10 @@ export function TemplateBottom({
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
-    
+
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`;
   }
 
   const fontWeight = textStyle.isBold ? 700 : 400;
@@ -265,11 +265,11 @@ export function TemplateBottom({
   );
 }
 
-export function TemplateTopLeft({ 
-  data, 
-  fontSizeMultiplier = 1, 
-  textStyle = DEFAULT_STYLE, 
-  backdropPositionPercent = 50, 
+export function TemplateTopLeft({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
   backdropBlur = 0,
@@ -282,17 +282,17 @@ export function TemplateTopLeft({
   const reviewFontSize = Math.round(48 * scale);
 
   const font = FONTS[textStyle.fontType];
-  
+
   let colors = { ...COLORS[textStyle.colorTheme] };
   let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
-    
+
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`;
   }
 
   const fontWeight = textStyle.isBold ? 700 : 400;
@@ -327,7 +327,7 @@ export function TemplateTopLeft({
           zIndex: 1,
         }} />
       )}
-      
+
       <div style={{
         position: 'absolute',
         top: 0, left: 0,
@@ -418,11 +418,11 @@ export function TemplateTopLeft({
   );
 }
 
-export function TemplateCentered({ 
-  data, 
-  fontSizeMultiplier = 1, 
-  textStyle = DEFAULT_STYLE, 
-  backdropPositionPercent = 50, 
+export function TemplateCentered({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
   backdropBlur = 0,
@@ -435,17 +435,17 @@ export function TemplateCentered({
   const reviewFontSize = Math.round(44 * scale);
 
   const font = FONTS[textStyle.fontType];
-  
+
   let colors = { ...COLORS[textStyle.colorTheme] };
   let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
   if (textStyle.colorTheme === 'neon') {
     const glowColor = hexToRgba(accentColor, 0.6);
     const ambientGlow = hexToRgba(accentColor, 0.2);
-    
+
     colors.titleShadow = `0 0 30px ${glowColor}, 0 0 60px ${ambientGlow}, 0 2px 10px rgba(0,0,0,0.8)`;
     colors.textShadow = `0 0 15px ${ambientGlow}, 0 2px 20px rgba(0,0,0,0.8)`;
-    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`; 
+    accentShadow = `0 0 20px ${glowColor}, 0 0 10px ${ambientGlow}`;
   }
 
   const fontWeight = textStyle.isBold ? 700 : 400;
@@ -544,14 +544,14 @@ export function TemplateCentered({
             {data.movieTitle}
           </h2>
           <p style={{ color: accentColor, textShadow: accentShadow, fontSize: '44px', fontWeight: 300, marginBottom: '16px' }}>
-             {data.year}
-           </p>
+            {data.year}
+          </p>
 
           {data.director && (
-             <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '24px' }}>
-               Directed by {data.director}
-             </p>
-           )}
+            <p style={{ color: '#888888', fontSize: '34px', fontWeight: 300, marginBottom: '24px' }}>
+              Directed by {data.director}
+            </p>
+          )}
 
           <p style={{
             color: colors.primary,
@@ -1002,6 +1002,523 @@ export function TemplateMagazine({
           }}>
             "{data.reviewText}"
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// TEMPLATE: CINEMATIC
+// Full backdrop with dramatic movie poster style
+// ============================================
+export function TemplateCinematic({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  showPoster = false,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(42 * scale);
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  return (
+    <div style={{
+      width: '1080px',
+      height: '1920px',
+      position: 'relative',
+      background: '#000000',
+      fontFamily: font,
+      overflow: 'hidden',
+    }}>
+      {/* Full backdrop */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+      }} />
+
+      {/* Dramatic cinematic gradient - dark at top and bottom */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: `linear-gradient(to bottom,
+          rgba(0,0,0,0.85) 0%,
+          rgba(0,0,0,0.3) 20%,
+          rgba(0,0,0,0.1) 40%,
+          rgba(0,0,0,0.1) 55%,
+          rgba(0,0,0,0.5) 70%,
+          rgba(0,0,0,0.9) 85%,
+          rgba(0,0,0,0.95) 100%)`,
+        zIndex: 1,
+      }} />
+
+      {/* Vignette effect */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)',
+        zIndex: 1,
+      }} />
+
+      {/* Top content - Title & Director */}
+      <div style={{
+        position: 'absolute',
+        top: '64px', left: '64px', right: '64px',
+        zIndex: 2,
+      }}>
+        <h1 style={{
+          color: '#ffffff',
+          fontSize: '80px',
+          fontWeight: 900,
+          lineHeight: 0.95,
+          textTransform: 'uppercase',
+          letterSpacing: '-1px',
+          textShadow: '0 4px 30px rgba(0,0,0,0.8)',
+          marginBottom: '16px',
+        }}>
+          {data.movieTitle}
+        </h1>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+        }}>
+          <span style={{
+            color: accentColor,
+            fontSize: '32px',
+            fontWeight: 700,
+            textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+          }}>
+            {data.year}
+          </span>
+          {data.director && (
+            <>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '28px' }}>•</span>
+              <span style={{
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '28px',
+                fontWeight: 500,
+                textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+              }}>
+                Directed by {data.director}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Center - Poster (optional) */}
+      {showPoster && data.posterUrl && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 2,
+        }}>
+          <img
+            src={proxyUrl(data.posterUrl)}
+            alt=""
+            style={{
+              width: '320px',
+              height: '480px',
+              objectFit: 'cover',
+              borderRadius: '12px',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
+              border: '3px solid rgba(255,255,255,0.15)',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Bottom content - Rating, Review, Username */}
+      <div style={{
+        position: 'absolute',
+        bottom: '64px', left: '64px', right: '64px',
+        zIndex: 2,
+      }}>
+        {/* Rating */}
+        <div style={{
+          marginBottom: '24px',
+        }}>
+          <StarRating rating={data.ratingNumber} size={52} color={accentColor} />
+        </div>
+
+        {/* Review text */}
+        <p style={{
+          color: 'rgba(255,255,255,0.95)',
+          fontSize: `${reviewFontSize}px`,
+          fontWeight: fontWeight,
+          fontStyle: fontStyleCss,
+          letterSpacing: `${textStyle.letterSpacing}px`,
+          lineHeight: textStyle.lineHeight,
+          textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+          marginBottom: '24px',
+        }}>
+          "{data.reviewText}"
+        </p>
+
+        {/* Username */}
+        <p style={{
+          color: 'rgba(255,255,255,0.5)',
+          fontSize: '26px',
+          fontWeight: 400,
+        }}>
+          — @{data.username}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+// ============================================
+// TEMPLATE: GRADIENT
+// Modern gradient background with glassmorphism
+// ============================================
+export function TemplateGradient({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  showPoster = false,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(48 * scale);
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  // Create gradient from accent color
+  const gradientStart = accentColor;
+  const gradientEnd = '#1a1a2e';
+
+  return (
+    <div style={{
+      width: '1080px',
+      height: '1920px',
+      position: 'relative',
+      fontFamily: font,
+      overflow: 'hidden',
+    }}>
+      {/* Base gradient */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: `linear-gradient(135deg, ${gradientStart} 0%, ${gradientEnd} 50%, #0a0a0f 100%)`,
+      }} />
+
+      {/* Backdrop overlay - fully visible */}
+      {data.backdropUrl && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundImage: getBackgroundImage(data, customBackdropUrl),
+          backgroundSize: 'cover',
+          backgroundPosition: `${backdropPositionPercent}% center`,
+          filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+          opacity: 1.0,
+        }} />
+      )}
+
+      {/* Mesh gradient overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: `
+          radial-gradient(circle at 20% 20%, ${hexToRgba(accentColor, 0.3)} 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, ${hexToRgba(accentColor, 0.2)} 0%, transparent 50%)
+        `,
+      }} />
+
+      {/* Content container */}
+      <div style={{
+        position: 'absolute',
+        top: '80px', left: '64px', right: '64px', bottom: '80px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}>
+        {/* Top section - Title */}
+        <div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '40px',
+          }}>
+            {showPoster && data.posterUrl && (
+              <img
+                src={proxyUrl(data.posterUrl)}
+                alt=""
+                style={{
+                  width: '200px',
+                  height: '300px',
+                  objectFit: 'cover',
+                  borderRadius: '20px',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              />
+            )}
+            <div style={{ flex: 1 }}>
+              <h1 style={{
+                color: '#ffffff',
+                fontSize: showPoster ? '72px' : '96px',
+                fontWeight: 800,
+                lineHeight: 1.0,
+                marginBottom: '16px',
+                textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              }}>
+                {data.movieTitle}
+              </h1>
+              <p style={{
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: '32px',
+                fontWeight: 400,
+              }}>
+                {data.year} {data.director && `• Directed by ${data.director}`}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Middle section - Glassmorphism card with review */}
+        <div style={{
+          background: 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '32px',
+          padding: '56px',
+          border: '1px solid rgba(255,255,255,0.15)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        }}>
+          <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+          <p style={{
+            color: '#ffffff',
+            fontSize: `${reviewFontSize}px`,
+            fontWeight: fontWeight,
+            fontStyle: fontStyleCss,
+            letterSpacing: `${textStyle.letterSpacing}px`,
+            lineHeight: textStyle.lineHeight,
+            marginTop: '32px',
+          }}>
+            "{data.reviewText}"
+          </p>
+        </div>
+
+        {/* Bottom section - Username */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '16px',
+        }}>
+          <div style={{
+            width: '48px',
+            height: '2px',
+            background: 'rgba(255,255,255,0.3)',
+          }} />
+          <p style={{
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: '28px',
+            fontWeight: 500,
+            letterSpacing: '2px',
+          }}>
+            @{data.username}
+          </p>
+          <div style={{
+            width: '48px',
+            height: '2px',
+            background: 'rgba(255,255,255,0.3)',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ============================================
+// TEMPLATE: DUOTONE
+// Bold two-tone color treatment with striking contrast
+// ============================================
+export function TemplateDuotone({
+  data,
+  fontSizeMultiplier = 1,
+  textStyle = DEFAULT_STYLE,
+  backdropPositionPercent = 50,
+  showPoster = false,
+  customBackdropUrl,
+  backdropBlur = 0,
+  backdropBrightness = 100,
+  backdropSaturation = 100,
+  accentColor = '#00e054'
+}: TemplateProps) {
+  const autoScale = getAutoScale(data.reviewText.length);
+  const scale = fontSizeMultiplier * autoScale;
+  const reviewFontSize = Math.round(46 * scale);
+  const font = FONTS[textStyle.fontType];
+  const fontWeight = textStyle.isBold ? 700 : 400;
+  const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  return (
+    <div style={{
+      width: '1080px',
+      height: '1920px',
+      position: 'relative',
+      fontFamily: font,
+      overflow: 'hidden',
+      background: '#0a0a0a',
+    }}>
+      {/* Backdrop with duotone effect */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundSize: 'cover',
+        backgroundPosition: `${backdropPositionPercent}% center`,
+        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(100%)`,
+        opacity: 0.6,
+      }} />
+
+      {/* Duotone color overlay */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: `linear-gradient(180deg, ${hexToRgba(accentColor, 0.4)} 0%, ${hexToRgba(accentColor, 0.1)} 100%)`,
+        mixBlendMode: 'multiply',
+      }} />
+
+      {/* Dark overlay for contrast */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.95) 100%)',
+      }} />
+
+      {/* Content */}
+      <div style={{
+        position: 'absolute',
+        top: '120px', left: '100px', right: '64px', bottom: '120px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}>
+        {/* Top - Rating */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+        }}>
+          <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+          <span style={{
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: '28px',
+            fontWeight: 300,
+          }}>
+            @{data.username}
+          </span>
+        </div>
+
+        {/* Middle - Poster (if enabled) */}
+        {showPoster && data.posterUrl && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+            marginTop: '40px',
+            marginBottom: '40px',
+          }}>
+            <img
+              src={proxyUrl(data.posterUrl)}
+              alt=""
+              style={{
+                width: '280px',
+                height: '420px',
+                objectFit: 'cover',
+                borderRadius: '16px',
+                boxShadow: `0 30px 80px rgba(0,0,0,0.6), 0 0 40px ${hexToRgba(accentColor, 0.2)}`,
+                border: `2px solid ${hexToRgba(accentColor, 0.3)}`,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Bottom - Title, Director, Review */}
+        <div>
+          <h1 style={{
+            color: '#ffffff',
+            fontSize: '80px',
+            fontWeight: 900,
+            lineHeight: 0.95,
+            marginBottom: '16px',
+            textShadow: `0 4px 20px ${hexToRgba(accentColor, 0.3)}`,
+          }}>
+            {data.movieTitle}
+          </h1>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '32px',
+          }}>
+            <span style={{
+              color: accentColor,
+              fontSize: '32px',
+              fontWeight: 600,
+            }}>
+              {data.year}
+            </span>
+            {data.director && (
+              <>
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '24px' }}>•</span>
+                <span style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '28px',
+                  fontWeight: 400,
+                }}>
+                  {data.director}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Review text */}
+          <div style={{
+            borderTop: `1px solid ${hexToRgba(accentColor, 0.3)}`,
+            paddingTop: '32px',
+          }}>
+            <p style={{
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: `${reviewFontSize}px`,
+              fontWeight: fontWeight,
+              fontStyle: fontStyleCss,
+              letterSpacing: `${textStyle.letterSpacing}px`,
+              lineHeight: textStyle.lineHeight,
+            }}>
+              "{data.reviewText}"
+            </p>
+          </div>
         </div>
       </div>
     </div>

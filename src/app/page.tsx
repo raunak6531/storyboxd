@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 // IMPORT THE NEW CLIENT SCRAPER
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
 interface RecentReview {
@@ -313,6 +313,9 @@ export default function Home() {
       case 'minimal': return <TemplateMinimal {...props} />;
       case 'polaroid': return <TemplatePolaroid {...props} />;
       case 'magazine': return <TemplateMagazine {...props} />;
+      case 'cinematic': return <TemplateCinematic {...props} />;
+      case 'gradient': return <TemplateGradient {...props} />;
+      case 'duotone': return <TemplateDuotone {...props} />;
     }
   };
 
