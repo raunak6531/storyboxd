@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 // IMPORT THE NEW CLIENT SCRAPER
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
+import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
@@ -69,6 +70,15 @@ export default function Home() {
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight };
   const storyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Hook for canvas-based backdrop processing
+  const { processedBackdropUrl, isProcessing } = useProcessedBackdrop({
+    originalUrl: reviewData?.backdropUrl,
+    customBackdropUrl: customBackdrop,
+    blur: backdropBlur,
+    brightness: backdropBrightness,
+    saturation: backdropSaturation,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -232,6 +242,7 @@ export default function Home() {
     if (!storyRef.current) throw new Error('Story ref not available');
 
     await document.fonts.ready;
+    // Wait for processed image if needed (though hook handles this reactively)
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const canvas = await html2canvas(storyRef.current, {
@@ -239,6 +250,7 @@ export default function Home() {
       height: 1920,
       scale: 1,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#000000',
       logging: false,
     });
@@ -300,6 +312,7 @@ export default function Home() {
       backdropPositionPercent,
       showPoster,
       customBackdropUrl: customBackdrop,
+      processedBackdropUrl, // Pass the processed image URL
       backdropBlur,
       backdropBrightness,
       backdropSaturation,
@@ -349,8 +362,8 @@ export default function Home() {
             <button
               onClick={() => setInputMode('import')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'import'
-                  ? 'bg-[#00e054] text-black'
-                  : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#00e054] text-black'
+                : 'text-zinc-400 hover:text-white'
                 }`}
             >
               Import from Letterboxd
@@ -358,8 +371,8 @@ export default function Home() {
             <button
               onClick={() => setInputMode('custom')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'custom'
-                  ? 'bg-[#00e054] text-black'
-                  : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#00e054] text-black'
+                : 'text-zinc-400 hover:text-white'
                 }`}
             >
               Create Custom
@@ -544,10 +557,10 @@ export default function Home() {
                           className="text-4xl transition-all transform hover:scale-110 active:scale-95"
                         >
                           <span className={`${customRating >= star
-                              ? 'text-[#00e054] drop-shadow-[0_0_8px_rgba(0,224,84,0.5)]'
-                              : customRating >= star - 0.5
-                                ? 'text-[#00e054]/50'
-                                : 'text-zinc-700 hover:text-zinc-500'
+                            ? 'text-[#00e054] drop-shadow-[0_0_8px_rgba(0,224,84,0.5)]'
+                            : customRating >= star - 0.5
+                              ? 'text-[#00e054]/50'
+                              : 'text-zinc-700 hover:text-zinc-500'
                             } transition-all`}>
                             ★
                           </span>

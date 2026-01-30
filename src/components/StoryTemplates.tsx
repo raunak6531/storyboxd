@@ -25,6 +25,7 @@ interface TemplateProps {
   backdropPositionPercent?: number;
   showPoster?: boolean;
   customBackdropUrl?: string | null;
+  processedBackdropUrl?: string | null; // Pre-processed image with filters baked in
   backdropBlur?: number;
   backdropBrightness?: number;
   backdropSaturation?: number;
@@ -43,7 +44,11 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function getBackgroundImage(data: ReviewData, customUrl?: string | null) {
+function getBackgroundImage(data: ReviewData, customUrl?: string | null, processedUrl?: string | null) {
+  // If we have a pre-processed image (with filters baked in), use it
+  if (processedUrl) {
+    return `url(${processedUrl})`;
+  }
   if (customUrl) {
     if (customUrl.includes('gradient')) return customUrl;
     return `url(${customUrl})`;
@@ -128,6 +133,7 @@ export function TemplateBottom({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -156,6 +162,11 @@ export function TemplateBottom({
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
+  // If we have a processed URL, filters are already applied - don't use CSS filters
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
+
   return (
     <div style={{
       position: 'relative',
@@ -168,11 +179,11 @@ export function TemplateBottom({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
         backgroundRepeat: 'no-repeat',
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
         zIndex: 0,
         transform: 'scale(1.05)',
       }} />
@@ -272,6 +283,7 @@ export function TemplateTopLeft({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -298,6 +310,11 @@ export function TemplateTopLeft({
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 
+  // If we have a processed URL, filters are already applied - don't use CSS filters
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
+
   return (
     <div style={{
       position: 'relative',
@@ -310,11 +327,11 @@ export function TemplateTopLeft({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
         backgroundRepeat: 'no-repeat',
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
         zIndex: 0,
         transform: 'scale(1.05)',
       }} />
@@ -425,6 +442,7 @@ export function TemplateCentered({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -459,6 +477,10 @@ export function TemplateCentered({
 
   const cardBorder = `1px solid ${accentColor}40`;
 
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
+
   return (
     <div style={{
       position: 'relative',
@@ -471,11 +493,11 @@ export function TemplateCentered({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
         backgroundRepeat: 'no-repeat',
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
         zIndex: 0,
         transform: 'scale(1.05)',
       }} />
@@ -588,6 +610,7 @@ export function TemplateMinimal({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -600,6 +623,10 @@ export function TemplateMinimal({
   const font = FONTS[textStyle.fontType];
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
   return (
     <div style={{
@@ -614,10 +641,10 @@ export function TemplateMinimal({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
         transform: 'scale(1.05)',
       }} />
 
@@ -716,6 +743,7 @@ export function TemplatePolaroid({
   textStyle = DEFAULT_STYLE,
   backdropPositionPercent = 50,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -728,6 +756,10 @@ export function TemplatePolaroid({
   const font = FONTS[textStyle.fontType];
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
   return (
     <div style={{
@@ -742,10 +774,10 @@ export function TemplatePolaroid({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
       }} />
 
       {/* Main content */}
@@ -892,6 +924,7 @@ export function TemplateMagazine({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -904,6 +937,10 @@ export function TemplateMagazine({
   const font = FONTS[textStyle.fontType];
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
   return (
     <div style={{
@@ -918,10 +955,10 @@ export function TemplateMagazine({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `center ${backdropPositionPercent}%`,
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
       }} />
 
       {/* Gradient overlay for text readability */}
@@ -1071,6 +1108,7 @@ export function TemplateCinematic({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -1082,6 +1120,10 @@ export function TemplateCinematic({
   const font = FONTS[textStyle.fontType];
   const fontWeight = textStyle.isBold ? 700 : 400;
   const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
+
+  const cssFilter = processedBackdropUrl
+    ? 'none'
+    : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
   return (
     <div style={{
@@ -1096,10 +1138,10 @@ export function TemplateCinematic({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+        filter: cssFilter,
       }} />
 
       {/* Dramatic cinematic gradient - dark at top and bottom */}
@@ -1248,6 +1290,7 @@ export function TemplateGradient({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -1284,10 +1327,10 @@ export function TemplateGradient({
         <div style={{
           position: 'absolute',
           top: 0, left: 0, right: 0, bottom: 0,
-          backgroundImage: getBackgroundImage(data, customBackdropUrl),
+          backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
           backgroundSize: 'cover',
           backgroundPosition: `${backdropPositionPercent}% center`,
-          filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
+          filter: processedBackdropUrl ? 'none' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
           opacity: 1.0,
         }} />
       )}
@@ -1421,6 +1464,7 @@ export function TemplateDuotone({
   backdropPositionPercent = 50,
   showPoster = false,
   customBackdropUrl,
+  processedBackdropUrl,
   backdropBlur = 0,
   backdropBrightness = 100,
   backdropSaturation = 100,
@@ -1446,10 +1490,10 @@ export function TemplateDuotone({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundImage: getBackgroundImage(data, customBackdropUrl),
+        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
-        filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(100%)`,
+        filter: processedBackdropUrl ? 'grayscale(100%)' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(100%)`,
         opacity: 0.6,
       }} />
 
