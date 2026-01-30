@@ -2,7 +2,7 @@
 
 import { ReviewData } from '@/lib/clientScraper';
 
-export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'polaroid' | 'magazine' | 'cinematic' | 'gradient' | 'duotone';
+export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'split' | 'magazine' | 'cinematic' | 'gradient' | 'duotone';
 
 // Updated Font Types
 export type FontType = 'sans' | 'serif' | 'mono' | 'courier' | 'marker' | 'anton';
@@ -709,7 +709,7 @@ export function TemplateMinimal({
   );
 }
 
-// TEMPLATE 5: POLAROID - Poster prominently displayed like a polaroid
+// TEMPLATE 5: PREMIUM SPLIT - Elegant side-by-side layout
 export function TemplatePolaroid({
   data,
   fontSizeMultiplier = 1,
@@ -723,7 +723,7 @@ export function TemplatePolaroid({
 }: TemplateProps) {
   const autoScale = getAutoScale(data.reviewText.length);
   const scale = fontSizeMultiplier * autoScale;
-  const reviewFontSize = Math.round(38 * scale);
+  const reviewFontSize = Math.round(40 * scale);
 
   const font = FONTS[textStyle.fontType];
   const fontWeight = textStyle.isBold ? 700 : 400;
@@ -734,11 +734,11 @@ export function TemplatePolaroid({
       position: 'relative',
       width: '1080px',
       height: '1920px',
-      backgroundColor: '#111111',
+      backgroundColor: '#0d0d0d',
       overflow: 'hidden',
       fontFamily: font,
     }}>
-      {/* Backdrop - user controls */}
+      {/* Backdrop */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
@@ -746,33 +746,23 @@ export function TemplatePolaroid({
         backgroundSize: 'cover',
         backgroundPosition: `${backdropPositionPercent}% center`,
         filter: `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
-        transform: 'scale(1.05)',
       }} />
 
-      {/* Dark overlay */}
+      {/* Main content */}
       <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)',
-      }} />
-
-      {/* Content */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
+        position: 'relative',
+        zIndex: 2,
+        height: '100%',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
-        padding: '60px 64px',
+        padding: '80px 64px',
+        gap: '64px',
       }}>
-        {/* Polaroid frame */}
+        {/* Left side - Poster */}
         <div style={{
-          backgroundColor: '#fafafa',
-          padding: '20px 20px 60px 20px',
-          borderRadius: '4px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3)',
-          transform: 'rotate(-2deg)',
-          marginBottom: '32px',
+          flex: '0 0 auto',
+          position: 'relative',
         }}>
           <img
             src={proxyUrl(data.posterUrl || data.backdropUrl)}
@@ -781,52 +771,114 @@ export function TemplatePolaroid({
               width: '420px',
               height: '630px',
               objectFit: 'cover',
-              display: 'block',
+              borderRadius: '12px',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
+              position: 'relative',
             }}
           />
-          {/* Handwritten-style title on polaroid */}
-          <p style={{
-            color: '#333333',
-            fontSize: '32px',
-            fontFamily: 'var(--font-marker), cursive',
-            textAlign: 'center',
-            marginTop: '16px',
-          }}>
-            {data.movieTitle} ({data.year})
-          </p>
         </div>
 
-        {/* Director */}
-        {data.director && (
-          <p style={{ color: '#888888', fontSize: '28px', marginBottom: '16px' }}>
-            Directed by {data.director}
-          </p>
-        )}
-
-        {/* Rating */}
-        <div style={{ marginBottom: '20px' }}>
-          <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
-        </div>
-
-        {/* Review text */}
-        <p style={{
-          color: '#e0e0e0',
-          fontSize: `${reviewFontSize}px`,
-          fontWeight: fontWeight,
-          fontStyle: fontStyleCss,
-          letterSpacing: `${textStyle.letterSpacing}px`,
-          lineHeight: textStyle.lineHeight,
-          textAlign: 'center',
-          maxWidth: '900px',
-          marginBottom: '24px',
+        {/* Right side - Content */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: '32px',
         }}>
-          "{data.reviewText}"
-        </p>
+          {/* Title section */}
+          <div>
+            {/* Accent line */}
+            <div style={{
+              width: '80px',
+              height: '5px',
+              backgroundColor: accentColor,
+              marginBottom: '24px',
+              borderRadius: '3px',
+            }} />
 
-        {/* Username */}
-        <p style={{ color: '#666666', fontSize: '28px' }}>
-          Review by <span style={{ color: accentColor }}>@{data.username}</span>
-        </p>
+            <h1 style={{
+              color: '#ffffff',
+              fontSize: '72px',
+              fontWeight: 900,
+              lineHeight: 1,
+              marginBottom: '16px',
+              letterSpacing: '-1px',
+              textShadow: '0 4px 20px rgba(0,0,0,0.8)',
+            }}>
+              {data.movieTitle}
+            </h1>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              marginBottom: '8px',
+            }}>
+              <span style={{
+                color: accentColor,
+                fontSize: '32px',
+                fontWeight: 700,
+              }}>
+                {data.year}
+              </span>
+              {data.director && (
+                <>
+                  <span style={{ color: '#444444', fontSize: '32px' }}>•</span>
+                  <span style={{
+                    color: '#999999',
+                    fontSize: '28px',
+                  }}>
+                    {data.director}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Rating */}
+          <div style={{
+            padding: '24px 0',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+          }}>
+            <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+          </div>
+
+          {/* Review */}
+          <p style={{
+            color: '#d0d0d0',
+            fontSize: `${reviewFontSize}px`,
+            fontWeight: fontWeight,
+            fontStyle: fontStyleCss,
+            letterSpacing: `${textStyle.letterSpacing}px`,
+            lineHeight: textStyle.lineHeight,
+            textShadow: '0 2px 12px rgba(0,0,0,0.8)',
+            marginBottom: '8px',
+          }}>
+            "{data.reviewText}"
+          </p>
+
+          {/* Username */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}>
+            <div style={{
+              width: '40px',
+              height: '2px',
+              backgroundColor: accentColor,
+              opacity: 0.5,
+            }} />
+            <span style={{
+              color: '#888888',
+              fontSize: '26px',
+            }}>
+              @{data.username}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -929,7 +981,7 @@ export function TemplateMagazine({
             flexDirection: 'row',
             gap: '32px',
             alignItems: 'flex-start',
-            marginBottom: '24px',
+            marginBottom: '8px',
           }}>
             {/* Title and director */}
             <div style={{ flex: 1 }}>
@@ -938,7 +990,7 @@ export function TemplateMagazine({
                 fontSize: showPoster ? '72px' : '96px',
                 fontWeight: 900,
                 lineHeight: 1.0,
-                marginBottom: '12px',
+                marginBottom: '20px',
                 textTransform: 'uppercase',
                 letterSpacing: '-2px',
               }}>
@@ -1069,7 +1121,7 @@ export function TemplateCinematic({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)',
+        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%)',
         zIndex: 1,
       }} />
 
@@ -1301,16 +1353,18 @@ export function TemplateGradient({
           </div>
         </div>
 
-        {/* Middle section - Glassmorphism card with review */}
+        {/* Middle section - Review text */}
         <div style={{
-          background: 'rgba(255,255,255,0.08)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: '32px',
-          padding: '56px',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          padding: '0 32px',
+          textAlign: 'center',
         }}>
-          <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+          <div style={{
+            marginBottom: '40px',
+            display: 'flex',
+            justifyContent: 'center',
+          }}>
+            <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+          </div>
           <p style={{
             color: '#ffffff',
             fontSize: `${reviewFontSize}px`,
@@ -1318,7 +1372,7 @@ export function TemplateGradient({
             fontStyle: fontStyleCss,
             letterSpacing: `${textStyle.letterSpacing}px`,
             lineHeight: textStyle.lineHeight,
-            marginTop: '32px',
+            textShadow: '0 4px 20px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)',
           }}>
             "{data.reviewText}"
           </p>
@@ -1403,7 +1457,7 @@ export function TemplateDuotone({
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
-        background: `linear-gradient(180deg, ${hexToRgba(accentColor, 0.4)} 0%, ${hexToRgba(accentColor, 0.1)} 100%)`,
+        background: `linear-gradient(180deg, ${hexToRgba(accentColor, 0.15)} 0%, ${hexToRgba(accentColor, 0.05)} 100%)`,
         mixBlendMode: 'multiply',
       }} />
 
@@ -1417,27 +1471,11 @@ export function TemplateDuotone({
       {/* Content */}
       <div style={{
         position: 'absolute',
-        top: '120px', left: '100px', right: '64px', bottom: '120px',
+        top: '120px', left: '64px', right: '64px', bottom: '120px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
       }}>
-        {/* Top - Rating */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px',
-        }}>
-          <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
-          <span style={{
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '28px',
-            fontWeight: 300,
-          }}>
-            @{data.username}
-          </span>
-        </div>
-
         {/* Middle - Poster (if enabled) */}
         {showPoster && data.posterUrl && (
           <div style={{
@@ -1445,7 +1483,6 @@ export function TemplateDuotone({
             justifyContent: 'center',
             alignItems: 'center',
             flex: 1,
-            marginTop: '40px',
             marginBottom: '40px',
           }}>
             <img
@@ -1456,8 +1493,7 @@ export function TemplateDuotone({
                 height: '420px',
                 objectFit: 'cover',
                 borderRadius: '16px',
-                boxShadow: `0 30px 80px rgba(0,0,0,0.6), 0 0 40px ${hexToRgba(accentColor, 0.2)}`,
-                border: `2px solid ${hexToRgba(accentColor, 0.3)}`,
+                boxShadow: `0 30px 80px rgba(0,0,0,0.6)`,
               }}
             />
           </div>
@@ -1505,8 +1541,9 @@ export function TemplateDuotone({
 
           {/* Review text */}
           <div style={{
-            borderTop: `1px solid ${hexToRgba(accentColor, 0.3)}`,
+            borderTop: `3px solid ${hexToRgba(accentColor, 0.3)}`,
             paddingTop: '32px',
+            marginBottom: '32px',
           }}>
             <p style={{
               color: 'rgba(255,255,255,0.9)',
@@ -1515,9 +1552,26 @@ export function TemplateDuotone({
               fontStyle: fontStyleCss,
               letterSpacing: `${textStyle.letterSpacing}px`,
               lineHeight: textStyle.lineHeight,
+              marginBottom: '32px',
             }}>
               "{data.reviewText}"
             </p>
+          </div>
+
+          {/* Rating and Username */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px',
+          }}>
+            <StarRating rating={data.ratingNumber} size={52} color={accentColor} />
+            <span style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '28px',
+              fontWeight: 300,
+            }}>
+              @{data.username}
+            </span>
           </div>
         </div>
       </div>

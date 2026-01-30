@@ -57,7 +57,7 @@ export default function Home() {
   // Visuals State
   const [backdropPositionPercent, setBackdropPositionPercent] = useState(50);
   const [customBackdrop, setCustomBackdrop] = useState<string | null>(null);
-  
+
   // Filter State
   const [backdropBlur, setBackdropBlur] = useState(0);
   const [backdropBrightness, setBackdropBrightness] = useState(100);
@@ -108,7 +108,7 @@ export default function Home() {
         posterUrl: data.posterUrl || '',
         timestamp: Date.now(),
       };
-      
+
       setRecentDownloads(prev => {
         const existing = prev.filter(r => r.url !== reviewUrl);
         const updated = [recent, ...existing].slice(0, MAX_RECENT_DOWNLOADS);
@@ -199,16 +199,16 @@ export default function Home() {
     setBackdropBlur(0);
     setBackdropBrightness(100);
     setBackdropSaturation(100);
-    setAccentColor('#00e054'); 
+    setAccentColor('#00e054');
 
     try {
       // Direct Client Call - No server API needed!
       const data = await scrapeLetterboxd(reviewUrl);
-      
+
       if (!data || !data.movieTitle) {
         throw new Error('Could not find review data. Make sure the link is correct.');
       }
-      
+
       setReviewData(data);
     } catch (err) {
       console.error('Load Error:', err);
@@ -230,10 +230,10 @@ export default function Home() {
 
   const generateImage = async (): Promise<string> => {
     if (!storyRef.current) throw new Error('Story ref not available');
-    
+
     await document.fonts.ready;
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     const canvas = await html2canvas(storyRef.current, {
       width: 1080,
       height: 1920,
@@ -311,7 +311,7 @@ export default function Home() {
       case 'topLeft': return <TemplateTopLeft {...props} />;
       case 'centered': return <TemplateCentered {...props} />;
       case 'minimal': return <TemplateMinimal {...props} />;
-      case 'polaroid': return <TemplatePolaroid {...props} />;
+      case 'split': return <TemplatePolaroid {...props} />;
       case 'magazine': return <TemplateMagazine {...props} />;
       case 'cinematic': return <TemplateCinematic {...props} />;
       case 'gradient': return <TemplateGradient {...props} />;
@@ -321,14 +321,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden pb-24 lg:pb-0">
-      
+
       <div className="fixed inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <div className={`relative z-10 max-w-6xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-        
+
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-4 py-2 mb-6">
             <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
@@ -348,21 +348,19 @@ export default function Home() {
           <div className="inline-flex bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-xl p-1">
             <button
               onClick={() => setInputMode('import')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                inputMode === 'import'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'import'
                   ? 'bg-[#00e054] text-black'
                   : 'text-zinc-400 hover:text-white'
-              }`}
+                }`}
             >
               Import from Letterboxd
             </button>
             <button
               onClick={() => setInputMode('custom')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                inputMode === 'custom'
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'custom'
                   ? 'bg-[#00e054] text-black'
                   : 'text-zinc-400 hover:text-white'
-              }`}
+                }`}
             >
               Create Custom
             </button>
@@ -436,8 +434,8 @@ export default function Home() {
                     >
                       {searchingTmdb ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
                       ) : (
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -545,13 +543,12 @@ export default function Home() {
                           onClick={() => setCustomRating(customRating === star ? star - 0.5 : star)}
                           className="text-4xl transition-all transform hover:scale-110 active:scale-95"
                         >
-                          <span className={`${
-                            customRating >= star
+                          <span className={`${customRating >= star
                               ? 'text-[#00e054] drop-shadow-[0_0_8px_rgba(0,224,84,0.5)]'
                               : customRating >= star - 0.5
                                 ? 'text-[#00e054]/50'
                                 : 'text-zinc-700 hover:text-zinc-500'
-                          } transition-all`}>
+                            } transition-all`}>
                             ★
                           </span>
                         </button>
@@ -610,15 +607,15 @@ export default function Home() {
 
         {loading && !reviewData && (
           <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-pulse">
-             <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
-             <div className="w-[270px] h-[480px] bg-zinc-900/30 rounded-[2.5rem]" />
+            <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
+            <div className="w-[270px] h-[480px] bg-zinc-900/30 rounded-[2.5rem]" />
           </div>
         )}
 
         {reviewData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
-              
+
               <StoryControls
                 selectedTemplate={selectedTemplate}
                 setSelectedTemplate={setSelectedTemplate}
@@ -672,7 +669,7 @@ export default function Home() {
             </div>
           </div>
         )}
-        
+
         <div className="mt-16 pt-8 border-t border-zinc-900 text-center lg:block hidden">
           <p className="text-zinc-600 text-sm">
             Made with <span className="text-orange-500">♥</span> for movie lovers
@@ -697,17 +694,17 @@ export default function Home() {
               className="flex-1 bg-[#00e054] text-black font-bold py-3 rounded-xl active:scale-95 transition-transform shadow-lg shadow-[#00e054]/20 flex items-center justify-center gap-2"
             >
               {downloading ? (
-                 <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               ) : (
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
               )}
               Save
             </button>
           </div>
         )}
-        
+
         <div ref={storyRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-           {renderTemplate()}
+          {renderTemplate()}
         </div>
 
       </div>

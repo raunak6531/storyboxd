@@ -7,7 +7,7 @@ interface StoryControlsProps {
   // Template State
   selectedTemplate: TemplateType;
   setSelectedTemplate: (t: TemplateType) => void;
-  
+
   // Text State
   fontSizeMultiplier: number;
   setFontSizeMultiplier: (n: number) => void;
@@ -23,7 +23,7 @@ interface StoryControlsProps {
   setLetterSpacing: (n: number) => void;
   lineHeight: number;
   setLineHeight: (n: number) => void;
-  
+
   // Visuals State
   showPoster: boolean;
   setShowPoster: (b: boolean) => void;
@@ -32,7 +32,7 @@ interface StoryControlsProps {
   customBackdrop: string | null;
   setCustomBackdrop: (s: string | null) => void;
   handleBackgroundUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  
+
   // Filter State
   backdropBlur: number;
   setBackdropBlur: (n: number) => void;
@@ -44,26 +44,26 @@ interface StoryControlsProps {
   // Accent Color State
   accentColor: string;
   setAccentColor: (c: string) => void;
-  
+
   // Actions
   onDownload: () => void;
   onShare: () => void; // Renamed to Share
   downloading: boolean;
-  sharing: boolean;    
+  sharing: boolean;
   hasReviewData: boolean;
   posterUrl?: string;
 }
 
-const ControlSection = ({ 
-  title, 
-  isOpen, 
-  onClick, 
-  children 
-}: { 
-  title: string; 
-  isOpen: boolean; 
-  onClick: () => void; 
-  children: React.ReactNode 
+const ControlSection = ({
+  title,
+  isOpen,
+  onClick,
+  children
+}: {
+  title: string;
+  isOpen: boolean;
+  onClick: () => void;
+  children: React.ReactNode
 }) => (
   <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
     <button
@@ -78,7 +78,7 @@ const ControlSection = ({
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     </button>
-    
+
     {isOpen && (
       <div className="p-4 pt-0 border-t border-zinc-800/50 animate-in slide-in-from-top-2 duration-200">
         <div className="pt-4 flex flex-col gap-6">
@@ -100,9 +100,9 @@ export default function StoryControls(props: StoryControlsProps) {
     <div className="w-full lg:w-[560px] xl:w-[600px] flex-none flex flex-col gap-4">
 
       {/* SECTION 1: STYLE & TYPOGRAPHY */}
-      <ControlSection 
-        title="Style & Typography" 
-        isOpen={openSection === 'style'} 
+      <ControlSection
+        title="Style & Typography"
+        isOpen={openSection === 'style'}
         onClick={() => toggleSection('style')}
       >
         {/* Template Selection */}
@@ -114,7 +114,7 @@ export default function StoryControls(props: StoryControlsProps) {
               { id: 'topLeft', label: 'Editorial' },
               { id: 'centered', label: 'Focused' },
               { id: 'minimal', label: 'Minimal' },
-              { id: 'polaroid', label: 'Polaroid' },
+              { id: 'split', label: 'Split' },
               { id: 'magazine', label: 'Magazine' },
               { id: 'cinematic', label: 'Cinematic' },
               { id: 'gradient', label: 'Gradient' },
@@ -123,11 +123,10 @@ export default function StoryControls(props: StoryControlsProps) {
               <button
                 key={template.id}
                 onClick={() => props.setSelectedTemplate(template.id)}
-                className={`relative p-3 rounded-xl border-2 transition-all duration-300 ${
-                  props.selectedTemplate === template.id
+                className={`relative p-3 rounded-xl border-2 transition-all duration-300 ${props.selectedTemplate === template.id
                     ? 'border-[#00e054] bg-[#00e054]/10'
                     : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
-                }`}
+                  }`}
               >
                 {props.selectedTemplate === template.id && (
                   <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#00e054] rounded-full flex items-center justify-center">
@@ -183,19 +182,18 @@ export default function StoryControls(props: StoryControlsProps) {
                 <button
                   key={f.id}
                   onClick={() => props.setFontType(f.id as FontType)}
-                  className={`p-2 rounded-lg border transition-all duration-200 ${
-                    props.fontType === f.id
+                  className={`p-2 rounded-lg border transition-all duration-200 ${props.fontType === f.id
                       ? 'border-[#00e054] bg-[#00e054]/10'
                       : 'border-zinc-700 hover:border-zinc-600'
-                  }`}
+                    }`}
                 >
-                  <span className="text-lg block mb-0.5 text-white capitalize truncate" style={{ 
-                    fontFamily: 
-                      f.id === 'sans' ? 'var(--font-inter)' : 
-                      f.id === 'serif' ? 'var(--font-playfair)' : 
-                      f.id === 'mono' ? 'var(--font-mono)' :
-                      f.id === 'courier' ? 'var(--font-courier)' :
-                      f.id === 'marker' ? 'var(--font-marker)' : 'var(--font-anton)'
+                  <span className="text-lg block mb-0.5 text-white capitalize truncate" style={{
+                    fontFamily:
+                      f.id === 'sans' ? 'var(--font-inter)' :
+                        f.id === 'serif' ? 'var(--font-playfair)' :
+                          f.id === 'mono' ? 'var(--font-mono)' :
+                            f.id === 'courier' ? 'var(--font-courier)' :
+                              f.id === 'marker' ? 'var(--font-marker)' : 'var(--font-anton)'
                   }}>Aa</span>
                   <span className="text-[10px] text-zinc-500 capitalize">{f.label}</span>
                 </button>
@@ -203,26 +201,24 @@ export default function StoryControls(props: StoryControlsProps) {
             </div>
           </div>
 
-           <div>
-              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Formatting</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => props.setIsBold(!props.isBold)}
-                  className={`flex-1 h-9 rounded-lg border flex items-center justify-center transition-all ${
-                    props.isBold ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500'
+          <div>
+            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Formatting</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => props.setIsBold(!props.isBold)}
+                className={`flex-1 h-9 rounded-lg border flex items-center justify-center transition-all ${props.isBold ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500'
                   }`}
-                >
-                  <span className="font-bold text-sm">Bold</span>
-                </button>
-                <button
-                  onClick={() => props.setIsItalic(!props.isItalic)}
-                  className={`flex-1 h-9 rounded-lg border flex items-center justify-center transition-all ${
-                    props.isItalic ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500'
+              >
+                <span className="font-bold text-sm">Bold</span>
+              </button>
+              <button
+                onClick={() => props.setIsItalic(!props.isItalic)}
+                className={`flex-1 h-9 rounded-lg border flex items-center justify-center transition-all ${props.isItalic ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500'
                   }`}
-                >
-                  <span className="italic text-sm">Italic</span>
-                </button>
-              </div>
+              >
+                <span className="italic text-sm">Italic</span>
+              </button>
+            </div>
           </div>
 
           {/* Letter Spacing */}
@@ -277,53 +273,52 @@ export default function StoryControls(props: StoryControlsProps) {
       <ControlSection title="Colors & Theme" isOpen={openSection === 'colors'} onClick={() => toggleSection('colors')}>
         {/* Accent Color Picker (No Scrollbar) */}
         <div>
-           <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-3">
             <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Accent Color</label>
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex gap-3">
               <div className="relative w-12 h-10 rounded-lg overflow-hidden border border-zinc-700 shadow-sm flex-shrink-0">
-                <input 
-                  type="color" 
+                <input
+                  type="color"
                   value={props.accentColor}
                   onChange={(e) => props.setAccentColor(e.target.value)}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] p-0 m-0 border-0 cursor-pointer"
                 />
               </div>
               <div className="relative flex-1">
-                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-sm">#</span>
-                 <input 
-                    type="text"
-                    value={props.accentColor.replace('#', '')}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (/^[0-9A-Fa-f]{0,6}$/.test(val)) props.setAccentColor(`#${val}`);
-                    }}
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-mono text-white focus:outline-none focus:border-[#00e054] uppercase placeholder-zinc-600"
-                    placeholder="HEX"
-                    maxLength={6}
-                 />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-sm">#</span>
+                <input
+                  type="text"
+                  value={props.accentColor.replace('#', '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^[0-9A-Fa-f]{0,6}$/.test(val)) props.setAccentColor(`#${val}`);
+                  }}
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-2.5 pl-7 pr-3 text-sm font-mono text-white focus:outline-none focus:border-[#00e054] uppercase placeholder-zinc-600"
+                  placeholder="HEX"
+                  maxLength={6}
+                />
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {[
-                { color: '#00e054', label: 'Green' }, 
-                { color: '#d4a574', label: 'Gold' },  
-                { color: '#40bcf4', label: 'Blue' },  
+                { color: '#00e054', label: 'Green' },
+                { color: '#d4a574', label: 'Gold' },
+                { color: '#40bcf4', label: 'Blue' },
                 { color: '#ff8000', label: 'Orange' },
-                { color: '#eb3f5c', label: 'Red' },   
-                { color: '#e449a3', label: 'Pink' },  
+                { color: '#eb3f5c', label: 'Red' },
+                { color: '#e449a3', label: 'Pink' },
                 { color: '#9d4edd', label: 'Purple' },
                 { color: '#ffffff', label: 'White' },
               ].map((preset) => (
                 <button
                   key={preset.color}
                   onClick={() => props.setAccentColor(preset.color)}
-                  className={`w-8 h-8 rounded-full border border-zinc-700 hover:scale-110 transition-transform focus:outline-none ${
-                    props.accentColor.toLowerCase() === preset.color.toLowerCase() ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''
-                  }`}
+                  className={`w-8 h-8 rounded-full border border-zinc-700 hover:scale-110 transition-transform focus:outline-none ${props.accentColor.toLowerCase() === preset.color.toLowerCase() ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''
+                    }`}
                   style={{ backgroundColor: preset.color }}
                   title={preset.label}
                 />
@@ -344,9 +339,8 @@ export default function StoryControls(props: StoryControlsProps) {
               <button
                 key={theme.id}
                 onClick={() => props.setColorTheme(theme.id as ColorTheme)}
-                className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${
-                  props.colorTheme === theme.id ? 'border-[#00e054] bg-[#00e054]/10' : 'border-zinc-700 hover:border-zinc-600'
-                }`}
+                className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-2 ${props.colorTheme === theme.id ? 'border-[#00e054] bg-[#00e054]/10' : 'border-zinc-700 hover:border-zinc-600'
+                  }`}
               >
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.bg }} />
                 <span className={`text-xs ${props.colorTheme === theme.id ? 'text-zinc-300' : 'text-zinc-500'}`}>{theme.label}</span>
@@ -371,7 +365,7 @@ export default function StoryControls(props: StoryControlsProps) {
               </button>
             )}
           </div>
-          
+
           <div className="relative">
             <input
               type="file"
@@ -433,15 +427,15 @@ export default function StoryControls(props: StoryControlsProps) {
       <ControlSection title="Image Filters" isOpen={openSection === 'filters'} onClick={() => toggleSection('filters')}>
         {/* ... paste previous content ... */}
         {[{
-            label: 'Blur', value: props.backdropBlur, max: 20, unit: 'px', 
-            onChange: props.setBackdropBlur
-          }, {
-            label: 'Brightness', value: props.backdropBrightness, max: 200, unit: '%', 
-            onChange: props.setBackdropBrightness
-          }, {
-            label: 'Saturation', value: props.backdropSaturation, max: 200, unit: '%', 
-            onChange: props.setBackdropSaturation
-          }
+          label: 'Blur', value: props.backdropBlur, max: 20, unit: 'px',
+          onChange: props.setBackdropBlur
+        }, {
+          label: 'Brightness', value: props.backdropBrightness, max: 200, unit: '%',
+          onChange: props.setBackdropBrightness
+        }, {
+          label: 'Saturation', value: props.backdropSaturation, max: 200, unit: '%',
+          onChange: props.setBackdropSaturation
+        }
         ].map((control) => (
           <div key={control.label}>
             <div className="flex justify-between mb-2">
@@ -468,9 +462,9 @@ export default function StoryControls(props: StoryControlsProps) {
           className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700"
         >
           {props.sharing ? (
-             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           ) : (
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
           )}
           {props.sharing ? 'Sharing...' : 'Share'}
         </button>
@@ -480,9 +474,9 @@ export default function StoryControls(props: StoryControlsProps) {
           className="flex-1 flex items-center justify-center gap-2 bg-[#00e054] hover:bg-[#00c049] text-black font-semibold py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#00e054]/20"
         >
           {props.downloading ? (
-             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           ) : (
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
           )}
           {props.downloading ? 'Saving...' : 'Download'}
         </button>
