@@ -19,6 +19,10 @@ interface StoryControlsProps {
   setIsBold: (b: boolean) => void;
   isItalic: boolean;
   setIsItalic: (i: boolean) => void;
+  letterSpacing: number;
+  setLetterSpacing: (n: number) => void;
+  lineHeight: number;
+  setLineHeight: (n: number) => void;
   
   // Visuals State
   showPoster: boolean;
@@ -213,6 +217,52 @@ export default function StoryControls(props: StoryControlsProps) {
                   <span className="italic text-sm">Italic</span>
                 </button>
               </div>
+          </div>
+
+          {/* Letter Spacing */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Letter Spacing</label>
+              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
+                {props.letterSpacing === 0 ? 'Normal' : `${props.letterSpacing > 0 ? '+' : ''}${props.letterSpacing}px`}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-500">Tight</span>
+              <input
+                type="range"
+                min="-2"
+                max="8"
+                step="0.5"
+                value={props.letterSpacing}
+                onChange={(e) => props.setLetterSpacing(parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
+              />
+              <span className="text-xs text-zinc-500">Wide</span>
+            </div>
+          </div>
+
+          {/* Line Height */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Line Height</label>
+              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
+                {props.lineHeight.toFixed(1)}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-500">Tight</span>
+              <input
+                type="range"
+                min="1.0"
+                max="2.2"
+                step="0.1"
+                value={props.lineHeight}
+                onChange={(e) => props.setLineHeight(parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
+              />
+              <span className="text-xs text-zinc-500">Loose</span>
+            </div>
           </div>
         </div>
       </ControlSection>

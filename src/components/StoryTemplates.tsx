@@ -14,6 +14,8 @@ export interface TextStyle {
   colorTheme: ColorTheme;
   isBold: boolean;
   isItalic: boolean;
+  letterSpacing: number;  // in pixels
+  lineHeight: number;     // multiplier (e.g., 1.4)
 }
 
 interface TemplateProps {
@@ -88,6 +90,8 @@ const DEFAULT_STYLE: TextStyle = {
   colorTheme: 'neutral',
   isBold: false,
   isItalic: false,
+  letterSpacing: 0,
+  lineHeight: 1.4,
 };
 
 function getAutoScale(textLength: number): number {
@@ -194,8 +198,9 @@ export function TemplateBottom({
           fontSize: `${reviewFontSize}px`,
           fontWeight: fontWeight,
           fontStyle: fontStyleCss,
+          letterSpacing: `${textStyle.letterSpacing}px`,
+          lineHeight: textStyle.lineHeight,
           marginBottom: '48px',
-          lineHeight: 1.5,
           maxWidth: '950px',
           marginLeft: 'auto',
           marginRight: 'auto',
@@ -393,7 +398,8 @@ export function TemplateTopLeft({
             fontSize: `${reviewFontSize}px`,
             fontWeight: fontWeight,
             fontStyle: fontStyleCss,
-            lineHeight: 1.6,
+            letterSpacing: `${textStyle.letterSpacing}px`,
+            lineHeight: textStyle.lineHeight,
             textShadow: colors.textShadow,
             maxWidth: '640px',
             textAlign: 'left',
@@ -552,7 +558,8 @@ export function TemplateCentered({
             fontSize: `${reviewFontSize}px`,
             fontWeight: fontWeight,
             fontStyle: fontStyleCss,
-            lineHeight: 1.6,
+            letterSpacing: `${textStyle.letterSpacing}px`,
+            lineHeight: textStyle.lineHeight,
             margin: '0 auto 24px auto',
             maxWidth: '720px',
             textShadow: textStyle.colorTheme === 'neon' ? '0 0 10px rgba(79,209,197,0.18)' : 'none',

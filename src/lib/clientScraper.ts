@@ -219,13 +219,22 @@ async function fetchMicrolink(targetUrl: string): Promise<ReviewData> {
     console.log('[Scraper] Got movie details - Director:', director, 'Poster:', posterUrl);
   }
 
+  // Clean the review text - remove Microlink's metadata prefix
+  let reviewText = data.description || '';
+  // Remove patterns like "Username's review published on Letterboxd: actual review"
+  reviewText = reviewText
+    .replace(/^[^']+?'s review published on Letterboxd:\s*/i, '')
+    .replace(/^.*?published on Letterboxd:\s*/i, '')
+    .replace(/^Review by .*?:\s*/i, '')
+    .trim();
+
   const result = {
     movieTitle: cleaned.title || 'Unknown Title',
     year: cleaned.year || '',
     director,
     rating,
     ratingNumber,
-    reviewText: data.description || '',
+    reviewText,
     username,
     displayName: username,
     posterUrl: getHighResImage(posterUrl || data.image?.url || ''),
@@ -240,9 +249,19 @@ async function fetchMicrolink(targetUrl: string): Promise<ReviewData> {
 // --- MAIN FUNCTION ---
 export async function scrapeLetterboxd(url: string): Promise<ReviewData> {
   console.log('[Scraper] Starting scrape for:', url);
+
+  // Try Microlink FIRST - it's the most reliable
+  try {
+    console.log('[Scraper] Trying Microlink first (most reliable)...');
+    return await fetchMicrolink(url);
+  } catch (microlinkError) {
+    console.warn('[Scraper] Microlink failed, trying proxy fallbacks...', microlinkError);
+  }
+
+  // Fallback to proxy-based scraping
   try {
     const html = await fetchHtml(url);
-    console.log('[Scraper] Got HTML, length:', html.length);
+    console.log('[Scraper] Got HTML from proxy, length:', html.length);
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
@@ -369,6 +388,21 @@ export async function scrapeLetterboxd(url: string): Promise<ReviewData> {
       else director = d;
     }
 
+    // If director or poster is still missing, try TMDB API
+    // Extract movie slug from URL or movieUrl
+    const slugMatch = (movieUrl || url).match(/\/film\/([^\/]+)/);
+    if ((!director || !posterUrl || posterUrl === backdropUrl) && slugMatch && slugMatch[1]) {
+      console.log('[Scraper] Director/Poster missing, fetching from TMDB...');
+      const movieDetails = await fetchMovieDetails(slugMatch[1], movieTitle, year, backdropUrl);
+      if (!director && movieDetails.director) {
+        director = movieDetails.director;
+      }
+      if ((!posterUrl || posterUrl === backdropUrl) && movieDetails.posterUrl) {
+        posterUrl = movieDetails.posterUrl;
+      }
+      console.log('[Scraper] After TMDB - Director:', director, 'Poster:', posterUrl);
+    }
+
     return {
       movieTitle: movieTitle || 'Unknown Title',
       year,
@@ -383,8 +417,8 @@ export async function scrapeLetterboxd(url: string): Promise<ReviewData> {
       movieUrl
     };
 
-  } catch (error) {
-    // If scraping fails, use Microlink to guarantee result
-    return await fetchMicrolink(url);
+  } catch (proxyError) {
+    console.error('[Scraper] All methods failed:', proxyError);
+    throw new Error('Failed to scrape review. Please try again later.');
   }
 }

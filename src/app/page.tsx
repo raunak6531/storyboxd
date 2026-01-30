@@ -50,6 +50,8 @@ export default function Home() {
   const [colorTheme, setColorTheme] = useState<ColorTheme>('neutral');
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
+  const [letterSpacing, setLetterSpacing] = useState(0);
+  const [lineHeight, setLineHeight] = useState(1.4);
   const [showPoster, setShowPoster] = useState(false);
 
   // Visuals State
@@ -64,7 +66,7 @@ export default function Home() {
   // Accent Color
   const [accentColor, setAccentColor] = useState('#00e054');
 
-  const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic };
+  const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight };
   const storyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -624,6 +626,10 @@ export default function Home() {
                 setIsBold={setIsBold}
                 isItalic={isItalic}
                 setIsItalic={setIsItalic}
+                letterSpacing={letterSpacing}
+                setLetterSpacing={setLetterSpacing}
+                lineHeight={lineHeight}
+                setLineHeight={setLineHeight}
                 showPoster={showPoster}
                 setShowPoster={setShowPoster}
                 backdropPositionPercent={backdropPositionPercent}
