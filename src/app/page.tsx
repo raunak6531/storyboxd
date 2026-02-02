@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 // IMPORT THE NEW CLIENT SCRAPER
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
+import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
@@ -256,6 +257,30 @@ export default function Home() {
     });
     return canvas.toDataURL('image/png');
   };
+
+  const handleRandomize = useCallback(() => {
+    // 1. Template
+    const templates: TemplateType[] = ['bottom', 'topLeft', 'centered', 'minimal', 'split', 'magazine', 'cinematic', 'gradient', 'duotone'];
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+    setSelectedTemplate(randomTemplate);
+
+    // 2. Font
+    const randomFont = POPULAR_GOOGLE_FONTS[Math.floor(Math.random() * POPULAR_GOOGLE_FONTS.length)].family;
+    setFontType(randomFont);
+
+    // 3. Color - Generate random vibrant hex
+    // Using HSL to Hex manually or just random Hex. For "absolute random", random Hex is fine.
+    const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    setAccentColor(randomHex);
+
+    // 4. Filters - REMOVED per user request
+    // Keep existing filters
+
+    // 5. Formatting
+    setIsBold(Math.random() > 0.5);
+    setIsItalic(Math.random() > 0.85);
+    // setBackdropPositionPercent(Math.floor(Math.random() * 100)); // Also removed
+  }, []);
 
   const handleDownload = useCallback(async () => {
     if (!storyRef.current || !reviewData) return;
@@ -667,6 +692,7 @@ export default function Home() {
                 sharing={sharing}
                 hasReviewData={!!reviewData}
                 posterUrl={reviewData.posterUrl}
+                onRandomize={handleRandomize}
               />
 
               <div className="flex-shrink-0">

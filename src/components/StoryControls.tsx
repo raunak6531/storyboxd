@@ -54,6 +54,7 @@ interface StoryControlsProps {
   sharing: boolean;
   hasReviewData: boolean;
   posterUrl?: string;
+  onRandomize: () => void;
 }
 
 const ControlSection = ({
@@ -101,6 +102,19 @@ export default function StoryControls(props: StoryControlsProps) {
 
   return (
     <div className="w-full lg:w-[560px] xl:w-[600px] flex-none flex flex-col gap-4">
+      {/* SHUFFLE BUTTON */}
+      <button
+        onClick={props.onRandomize}
+        className="w-full h-12 mb-2 relative overflow-hidden bg-zinc-900 border border-zinc-700/50 rounded-xl group transition-all duration-300 hover:border-[#00e054]/50 hover:shadow-[0_0_20px_rgba(0,224,84,0.1)] focus:outline-none"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00e054]/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+        <div className="flex items-center justify-center gap-2 relative z-10 text-zinc-400 group-hover:text-[#00e054] font-medium tracking-wide text-sm uppercase">
+          <svg className="w-4 h-4 transition-transform duration-500 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Shuffle Design
+        </div>
+      </button>
 
       {/* SECTION 1: STYLE & TYPOGRAPHY */}
       <ControlSection
