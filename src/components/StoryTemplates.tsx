@@ -957,7 +957,7 @@ export function TemplateMagazine({
         top: 0, left: 0, right: 0, bottom: 0,
         backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
         backgroundSize: 'cover',
-        backgroundPosition: `center ${backdropPositionPercent}%`,
+        backgroundPosition: `${backdropPositionPercent}% center`,
         filter: cssFilter,
       }} />
 
