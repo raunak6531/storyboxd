@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { FontType, ColorTheme, TemplateType } from './StoryTemplates';
+import FontPicker from './FontPicker';
+import { useWebFont } from '@/hooks/useWebFont';
 
 interface StoryControlsProps {
   // Template State
@@ -90,6 +92,7 @@ const ControlSection = ({
 );
 
 export default function StoryControls(props: StoryControlsProps) {
+  useWebFont(props.fontType);
   const [openSection, setOpenSection] = useState<string | null>('style');
 
   const toggleSection = (section: string) => {
@@ -124,8 +127,8 @@ export default function StoryControls(props: StoryControlsProps) {
                 key={template.id}
                 onClick={() => props.setSelectedTemplate(template.id)}
                 className={`relative p-3 rounded-xl border-2 transition-all duration-300 ${props.selectedTemplate === template.id
-                    ? 'border-[#00e054] bg-[#00e054]/10'
-                    : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                  ? 'border-[#00e054] bg-[#00e054]/10'
+                  : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
                   }`}
               >
                 {props.selectedTemplate === template.id && (
@@ -167,37 +170,11 @@ export default function StoryControls(props: StoryControlsProps) {
             </div>
           </div>
 
-          {/* FONTS - UPDATED TO 6 FONTS */}
+          {/* FONTS - GOOGLE FONTS PICKER */}
           <div>
             <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Font Family</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: 'sans', label: 'Sans' },
-                { id: 'serif', label: 'Serif' },
-                { id: 'mono', label: 'Mono' },
-                { id: 'courier', label: 'Script' },
-                { id: 'marker', label: 'Marker' },
-                { id: 'anton', label: 'Poster' }
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => props.setFontType(f.id as FontType)}
-                  className={`p-2 rounded-lg border transition-all duration-200 ${props.fontType === f.id
-                      ? 'border-[#00e054] bg-[#00e054]/10'
-                      : 'border-zinc-700 hover:border-zinc-600'
-                    }`}
-                >
-                  <span className="text-lg block mb-0.5 text-white capitalize truncate" style={{
-                    fontFamily:
-                      f.id === 'sans' ? 'var(--font-inter)' :
-                        f.id === 'serif' ? 'var(--font-playfair)' :
-                          f.id === 'mono' ? 'var(--font-mono)' :
-                            f.id === 'courier' ? 'var(--font-courier)' :
-                              f.id === 'marker' ? 'var(--font-marker)' : 'var(--font-anton)'
-                  }}>Aa</span>
-                  <span className="text-[10px] text-zinc-500 capitalize">{f.label}</span>
-                </button>
-              ))}
+            <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/50 p-3">
+              <FontPicker currentFont={props.fontType} onFontSelect={props.setFontType} />
             </div>
           </div>
 

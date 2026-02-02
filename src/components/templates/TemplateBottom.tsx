@@ -29,7 +29,7 @@ export function TemplateBottom({
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(52 * scale);
 
-    const font = FONTS[textStyle.fontType];
+    const font = FONTS[textStyle.fontType] || textStyle.fontType;
 
     // 1. Get base colors
     let colors = { ...COLORS[textStyle.colorTheme] };

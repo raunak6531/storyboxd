@@ -28,7 +28,7 @@ export function TemplatePolaroid({
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(40 * scale);
 
-    const font = FONTS[textStyle.fontType];
+    const font = FONTS[textStyle.fontType] || textStyle.fontType;
     const fontWeight = textStyle.isBold ? 700 : 400;
     const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 

@@ -29,7 +29,7 @@ export function TemplateCentered({
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(44 * scale);
 
-    const font = FONTS[textStyle.fontType];
+    const font = FONTS[textStyle.fontType] || textStyle.fontType;
 
     let colors = { ...COLORS[textStyle.colorTheme] };
     let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';

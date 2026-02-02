@@ -5,7 +5,8 @@ import { ReviewData } from '@/lib/clientScraper';
 export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'split' | 'magazine' | 'cinematic' | 'gradient' | 'duotone';
 
 // Updated Font Types
-export type FontType = 'sans' | 'serif' | 'mono' | 'courier' | 'marker' | 'anton';
+// Updated Font Types - can be a preset key or a font family name
+export type FontType = string;
 
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 

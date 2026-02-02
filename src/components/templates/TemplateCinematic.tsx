@@ -28,7 +28,7 @@ export function TemplateCinematic({
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(42 * scale);
-    const font = FONTS[textStyle.fontType];
+    const font = FONTS[textStyle.fontType] || textStyle.fontType;
     const fontWeight = textStyle.isBold ? 700 : 400;
     const fontStyleCss = textStyle.isItalic ? 'italic' : 'normal';
 

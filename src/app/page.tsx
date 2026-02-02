@@ -47,7 +47,7 @@ export default function Home() {
 
   // Text customization
   const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1);
-  const [fontType, setFontType] = useState<FontType>('sans');
+  const [fontType, setFontType] = useState<FontType>('Inter');
   const [colorTheme, setColorTheme] = useState<ColorTheme>('neutral');
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
