@@ -33,6 +33,7 @@ interface StoryControlsProps {
   setBackdropPositionPercent: (n: number) => void;
   customBackdrop: string | null;
   setCustomBackdrop: (s: string | null) => void;
+  availableBackdrops: { url: string; thumbnail: string }[];
   handleBackgroundUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   // Filter State
@@ -546,6 +547,32 @@ export default function StoryControls(props: StoryControlsProps) {
             </label>
           </div>
         </div>
+
+        {/* TMDB Backdrop Gallery */}
+        {props.availableBackdrops.length > 1 && (
+          <div>
+            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Movie Backdrops</label>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-700">
+              {props.availableBackdrops.map((bd, i) => (
+                <button
+                  key={i}
+                  onClick={() => props.setCustomBackdrop(bd.url)}
+                  className={`shrink-0 w-24 h-14 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    props.customBackdrop === bd.url
+                      ? 'border-[#00e054] ring-1 ring-[#00e054]/50'
+                      : 'border-zinc-700/50 hover:border-zinc-500'
+                  }`}
+                >
+                  <img
+                    src={`/api/proxy-image?url=${encodeURIComponent(bd.thumbnail)}`}
+                    alt={`Backdrop ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Position Slider */}
         {(!props.customBackdrop || !props.customBackdrop.includes('gradient')) && (
