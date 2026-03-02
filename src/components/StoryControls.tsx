@@ -248,6 +248,64 @@ export default function StoryControls(props: StoryControlsProps) {
                   <rect x="8" y="36" width="22" height="1" rx="0.5" fill="#666" opacity="0.4"/>
                 </svg>
               )},
+              { id: 'newspaper', label: 'Newspaper', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#f5f0e8"/>
+                  <rect x="10" y="3" width="16" height="1.5" rx="0.75" fill="#111" opacity="0.3"/>
+                  <rect x="5" y="6" width="26" height="3" rx="1" fill="#111" opacity="0.8"/>
+                  <rect x="4" y="11" width="28" height="0.5" fill="#222" opacity="0.3"/>
+                  <rect x="4" y="14" width="22" height="3" rx="1" fill="#111" opacity="0.9"/>
+                  <rect x="4" y="19" width="14" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
+                  <rect x="4" y="24" width="28" height="12" rx="1" fill="#ccc" opacity="0.5"/>
+                  <rect x="4" y="40" width="12" height="1" rx="0.5" fill="#333" opacity="0.4"/>
+                  <rect x="4" y="43" width="28" height="1" rx="0.5" fill="#333" opacity="0.3"/>
+                  <rect x="4" y="46" width="24" height="1" rx="0.5" fill="#333" opacity="0.3"/>
+                  <rect x="4" y="49" width="28" height="1" rx="0.5" fill="#333" opacity="0.3"/>
+                </svg>
+              )},
+              { id: 'neon', label: 'Neon', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#050510"/>
+                  <rect x="4" y="4" width="28" height="56" rx="3" fill="none" stroke="#00e054" strokeWidth="0.5" strokeOpacity="0.6"/>
+                  <rect x="8" y="18" width="20" height="3" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="10" y="23" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="14" y="30" width="8" height="2" rx="1" fill="#00e054" opacity="0.7"/>
+                  <rect x="12" y="35" width="12" height="0.5" fill="#00e054" opacity="0.4"/>
+                  <rect x="8" y="40" width="20" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                  <rect x="9" y="43" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                  <rect x="10" y="46" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                </svg>
+              )},
+              { id: 'vhs', label: 'Retro VHS', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
+                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
+                  <circle cx="7" cy="5" r="1.5" fill="#ff0033" opacity="0.8"/>
+                  <rect x="11" y="3.5" width="8" height="2" rx="1" fill="#fff" opacity="0.7"/>
+                  <rect x="4" y="44" width="18" height="2.5" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="4" y="49" width="12" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
+                  <rect x="4" y="53" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="4" y="57" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="60" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'letterboxd', label: 'Letterboxd', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#14181c"/>
+                  <rect x="0" y="0" width="36" height="6" fill="#1c2228"/>
+                  <circle cx="9" cy="3" r="1.2" fill="#ff8000"/>
+                  <circle cx="12" cy="3" r="1.2" fill="#00e054"/>
+                  <circle cx="15" cy="3" r="1.2" fill="#40bcf4"/>
+                  <rect x="0" y="6" width="36" height="26" fill="#333" opacity="0.4"/>
+                  <rect x="4" y="34" width="8" height="14" rx="1" fill="#555" opacity="0.6"/>
+                  <rect x="15" y="34" width="16" height="2.5" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="15" y="38" width="10" height="1.5" rx="0.75" fill="#9ab" opacity="0.5"/>
+                  <rect x="15" y="42" width="6" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="15" y="46" width="17" height="1" rx="0.5" fill="#678" opacity="0.4"/>
+                  <rect x="15" y="49" width="14" height="1" rx="0.5" fill="#678" opacity="0.4"/>
+                  <rect x="0" y="60" width="36" height="4" fill="#1c2228"/>
+                </svg>
+              )},
             ] as { id: TemplateType; label: string; preview: React.ReactNode }[]).map((template) => (
               <button
                 key={template.id}

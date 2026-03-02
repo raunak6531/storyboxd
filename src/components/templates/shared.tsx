@@ -2,7 +2,7 @@
 
 import { ReviewData } from '@/lib/clientScraper';
 
-export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'split' | 'magazine' | 'cinematic' | 'gradient' | 'duotone';
+export type TemplateType = 'bottom' | 'topLeft' | 'centered' | 'minimal' | 'split' | 'magazine' | 'cinematic' | 'gradient' | 'duotone' | 'newspaper' | 'neon' | 'vhs' | 'letterboxd';
 
 // Updated Font Types
 // Updated Font Types - can be a preset key or a font family name
