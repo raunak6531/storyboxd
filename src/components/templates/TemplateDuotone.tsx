@@ -104,8 +104,8 @@ export function TemplateDuotone({
                         color: '#ffffff',
                         fontSize: '80px',
                         fontWeight: 900,
-                        lineHeight: 0.95,
-                        marginBottom: '16px',
+                        lineHeight: 1.0,
+                        marginBottom: '28px',
                         textShadow: `0 4px 20px ${hexToRgba(accentColor, 0.3)}`,
                     }}>
                         {data.movieTitle}
@@ -115,7 +115,7 @@ export function TemplateDuotone({
                         display: 'flex',
                         alignItems: 'center',
                         gap: '16px',
-                        marginBottom: '32px',
+                        marginBottom: '40px',
                     }}>
                         <span style={{
                             color: accentColor,
@@ -132,46 +132,46 @@ export function TemplateDuotone({
                                     fontSize: '28px',
                                     fontWeight: 400,
                                 }}>
-                                    {data.director}
+                                    Directed by {data.director}
                                 </span>
                             </>
                         )}
                     </div>
-                </div>
 
-                {/* Review text */}
-                <div style={{
-                    borderTop: `3px solid ${hexToRgba(accentColor, 0.3)}`,
-                    paddingTop: '32px',
-                    marginBottom: '32px',
-                }}>
-                    <p style={{
-                        color: 'rgba(255,255,255,0.9)',
-                        fontSize: `${reviewFontSize}px`,
-                        fontWeight: fontWeight,
-                        fontStyle: fontStyleCss,
-                        letterSpacing: `${textStyle.letterSpacing}px`,
-                        lineHeight: textStyle.lineHeight,
+                    {/* Rating and Username - aligned row */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '24px',
                         marginBottom: '32px',
                     }}>
-                        "{data.reviewText}"
-                    </p>
-                </div>
+                        <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
+                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '24px' }}>|</span>
+                        <span style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '28px',
+                            fontWeight: 400,
+                        }}>
+                            @{data.username}
+                        </span>
+                    </div>
 
-                {/* Rating and Username */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '24px',
-                }}>
-                    <StarRating rating={data.ratingNumber} size={52} color={accentColor} />
-                    <span style={{
-                        color: 'rgba(255,255,255,0.5)',
-                        fontSize: '28px',
-                        fontWeight: 300,
+                    {/* Review text */}
+                    <div style={{
+                        borderTop: `3px solid ${hexToRgba(accentColor, 0.3)}`,
+                        paddingTop: '32px',
                     }}>
-                        @{data.username}
-                    </span>
+                        <p style={{
+                            color: 'rgba(255,255,255,0.9)',
+                            fontSize: `${reviewFontSize}px`,
+                            fontWeight: fontWeight,
+                            fontStyle: fontStyleCss,
+                            letterSpacing: `${textStyle.letterSpacing}px`,
+                            lineHeight: textStyle.lineHeight,
+                        }}>
+                            "{data.reviewText}"
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -44,34 +44,36 @@ export function TemplateGradient({
             fontFamily: font,
             overflow: 'hidden',
         }}>
-            {/* Base gradient */}
+            {/* Full backdrop */}
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
-                background: `linear-gradient(135deg, ${gradientStart} 0%, ${gradientEnd} 50%, #0a0a0f 100%)`,
+                backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
+                backgroundSize: 'cover',
+                backgroundPosition: `${backdropPositionPercent}% center`,
+                filter: processedBackdropUrl ? 'none' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
             }} />
 
-            {/* Backdrop overlay - fully visible */}
-            {data.backdropUrl && (
-                <div style={{
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
-                    backgroundSize: 'cover',
-                    backgroundPosition: `${backdropPositionPercent}% center`,
-                    filter: processedBackdropUrl ? 'none' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
-                    opacity: 1.0,
-                }} />
-            )}
+            {/* Gradient overlay for text readability */}
+            <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: `linear-gradient(135deg,
+                    ${hexToRgba(accentColor, 0.5)} 0%,
+                    rgba(0,0,0,0.4) 30%,
+                    rgba(0,0,0,0.3) 50%,
+                    rgba(0,0,0,0.7) 75%,
+                    rgba(0,0,0,0.9) 100%)`,
+            }} />
 
-            {/* Mesh gradient overlay */}
+            {/* Accent color glow effects */}
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0,
                 background: `
-          radial-gradient(circle at 20% 20%, ${hexToRgba(accentColor, 0.3)} 0%, transparent 50%),
-          radial-gradient(circle at 80% 80%, ${hexToRgba(accentColor, 0.2)} 0%, transparent 50%)
-        `,
+                    radial-gradient(circle at 0% 0%, ${hexToRgba(accentColor, 0.25)} 0%, transparent 40%),
+                    radial-gradient(circle at 100% 100%, ${hexToRgba(accentColor, 0.15)} 0%, transparent 40%)
+                `,
             }} />
 
             {/* Content container */}
@@ -109,8 +111,8 @@ export function TemplateGradient({
                                 fontSize: showPoster ? '72px' : '96px',
                                 fontWeight: 800,
                                 lineHeight: 1.0,
-                                marginBottom: '16px',
-                                textShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                                marginBottom: '24px',
+                                textShadow: '0 4px 20px rgba(0,0,0,0.5)',
                             }}>
                                 {data.movieTitle}
                             </h1>
@@ -118,6 +120,7 @@ export function TemplateGradient({
                                 color: 'rgba(255,255,255,0.7)',
                                 fontSize: '32px',
                                 fontWeight: 400,
+                                textShadow: '0 2px 10px rgba(0,0,0,0.5)',
                             }}>
                                 {data.year} {data.director && `• Directed by ${data.director}`}
                             </p>

@@ -88,18 +88,18 @@ export function TemplateCinematic({
                     color: '#ffffff',
                     fontSize: '80px',
                     fontWeight: 900,
-                    lineHeight: 0.95,
+                    lineHeight: 1.0,
                     textTransform: 'uppercase',
                     letterSpacing: '-1px',
                     textShadow: '0 4px 30px rgba(0,0,0,0.8)',
-                    marginBottom: '16px',
+                    marginBottom: '28px',
                 }}>
                     {data.movieTitle}
                 </h1>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '20px',
+                    gap: '16px',
                 }}>
                     <span style={{
                         color: accentColor,

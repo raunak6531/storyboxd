@@ -122,7 +122,7 @@ export function TemplateMagazine({
                                 fontSize: showPoster ? '72px' : '96px',
                                 fontWeight: 900,
                                 lineHeight: 1.0,
-                                marginBottom: '20px',
+                                marginBottom: '28px',
                                 textTransform: 'uppercase',
                                 letterSpacing: '-2px',
                             }}>
