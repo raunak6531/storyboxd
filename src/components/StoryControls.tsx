@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FontType, ColorTheme, TemplateType } from './StoryTemplates';
+import { FontType, ColorTheme, TemplateType, TextAlign, QuoteStyle } from './StoryTemplates';
 import FontPicker from './FontPicker';
 import { useWebFont } from '@/hooks/useWebFont';
 
@@ -46,6 +46,13 @@ interface StoryControlsProps {
   // Accent Color State
   accentColor: string;
   setAccentColor: (c: string) => void;
+
+  // Text Alignment & Quote Style
+  textAlign: TextAlign;
+  setTextAlign: (a: TextAlign) => void;
+  quoteStyle: QuoteStyle;
+  setQuoteStyle: (q: QuoteStyle) => void;
+
 
   // Actions
   onDownload: () => void;
@@ -256,9 +263,55 @@ export default function StoryControls(props: StoryControlsProps) {
               />
               <span className="text-xs text-zinc-500">Loose</span>
             </div>
+          {/* Text Alignment */}
+          <div>
+            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Text Alignment</label>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { id: 'left', label: 'Left', icon: '☰' },
+                { id: 'center', label: 'Center', icon: '☰' },
+                { id: 'right', label: 'Right', icon: '☰' },
+              ] as { id: TextAlign; label: string; icon: string }[]).map((align) => (
+                <button
+                  key={align.id}
+                  onClick={() => props.setTextAlign(align.id)}
+                  className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-1.5 ${props.textAlign === align.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {align.id === 'left' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M3 12h12M3 18h16" /></>}
+                    {align.id === 'center' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M6 12h12M4 18h16" /></>}
+                    {align.id === 'right' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M9 12h12M5 18h16" /></>}
+                  </svg>
+                  <span className="text-xs">{align.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quote Style */}
+          <div>
+            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Quote Style</label>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { id: 'double', label: '\u201C \u201D' },
+                { id: 'angle', label: '\u00AB \u00BB' },
+                { id: 'none', label: 'None' },
+              ] as { id: QuoteStyle; label: string }[]).map((quote) => (
+                <button
+                  key={quote.id}
+                  onClick={() => props.setQuoteStyle(quote.id)}
+                  className={`p-2 rounded-lg border transition-all duration-200 text-center ${props.quoteStyle === quote.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
+                >
+                  <span className="text-sm font-medium">{quote.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           </div>
         </div>
       </ControlSection>
+
+
 
       {/* SECTION 2: COLORS */}
       <ControlSection title="Colors & Theme" isOpen={openSection === 'colors'} onClick={() => toggleSection('colors')}>

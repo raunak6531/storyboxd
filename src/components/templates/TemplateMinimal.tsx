@@ -9,7 +9,8 @@ import {
     getBackgroundImage,
     hexToRgba,
     proxyUrl,
-    StarRating
+    StarRating,
+    getQuoteWrapped
 } from './shared';
 
 export function TemplateMinimal({
@@ -23,7 +24,7 @@ export function TemplateMinimal({
     backdropBlur = 0,
     backdropBrightness = 100,
     backdropSaturation = 100,
-    accentColor = '#00e054'
+    accentColor = '#00e054',
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
@@ -132,8 +133,9 @@ export function TemplateMinimal({
                     lineHeight: textStyle.lineHeight,
                     maxWidth: '900px',
                     marginBottom: '40px',
+                    textAlign: textStyle.textAlign,
                 }}>
-                    "{data.reviewText}"
+                    {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
                 </p>
 
                 {/* Username */}

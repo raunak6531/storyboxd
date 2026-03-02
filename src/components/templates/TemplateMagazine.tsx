@@ -9,7 +9,8 @@ import {
     getBackgroundImage,
     hexToRgba,
     proxyUrl,
-    StarRating
+    StarRating,
+    getQuoteWrapped
 } from './shared';
 
 export function TemplateMagazine({
@@ -23,7 +24,7 @@ export function TemplateMagazine({
     backdropBlur = 0,
     backdropBrightness = 100,
     backdropSaturation = 100,
-    accentColor = '#00e054'
+    accentColor = '#00e054',
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
@@ -183,8 +184,9 @@ export function TemplateMagazine({
                         letterSpacing: `${textStyle.letterSpacing}px`,
                         lineHeight: textStyle.lineHeight,
                         maxWidth: '100%',
+                        textAlign: textStyle.textAlign,
                     }}>
-                        "{data.reviewText}"
+                        {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
                     </p>
                 </div>
             </div>

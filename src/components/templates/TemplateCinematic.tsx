@@ -9,7 +9,8 @@ import {
     getBackgroundImage,
     hexToRgba,
     proxyUrl,
-    StarRating
+    StarRating,
+    getQuoteWrapped
 } from './shared';
 
 export function TemplateCinematic({
@@ -23,7 +24,7 @@ export function TemplateCinematic({
     backdropBlur = 0,
     backdropBrightness = 100,
     backdropSaturation = 100,
-    accentColor = '#00e054'
+    accentColor = '#00e054',
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
@@ -172,8 +173,9 @@ export function TemplateCinematic({
                     lineHeight: textStyle.lineHeight,
                     textShadow: '0 2px 20px rgba(0,0,0,0.8)',
                     marginBottom: '24px',
+                    textAlign: textStyle.textAlign,
                 }}>
-                    "{data.reviewText}"
+                    {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
                 </p>
 
                 {/* Username */}

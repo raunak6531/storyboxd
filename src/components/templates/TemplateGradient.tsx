@@ -9,7 +9,8 @@ import {
     getBackgroundImage,
     hexToRgba,
     proxyUrl,
-    StarRating
+    StarRating,
+    getQuoteWrapped
 } from './shared';
 
 export function TemplateGradient({
@@ -23,7 +24,7 @@ export function TemplateGradient({
     backdropBlur = 0,
     backdropBrightness = 100,
     backdropSaturation = 100,
-    accentColor = '#00e054'
+    accentColor = '#00e054',
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
@@ -148,8 +149,9 @@ export function TemplateGradient({
                         letterSpacing: `${textStyle.letterSpacing}px`,
                         lineHeight: textStyle.lineHeight,
                         textShadow: '0 4px 20px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)',
+                        textAlign: textStyle.textAlign,
                     }}>
-                        "{data.reviewText}"
+                        {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
                     </p>
                 </div>
 

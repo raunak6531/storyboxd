@@ -10,6 +10,9 @@ export type FontType = string;
 
 export type ColorTheme = 'neutral' | 'warm' | 'neon';
 
+export type TextAlign = 'left' | 'center' | 'right';
+export type QuoteStyle = 'double' | 'angle' | 'none';
+
 export interface TextStyle {
     fontType: FontType;
     colorTheme: ColorTheme;
@@ -17,6 +20,8 @@ export interface TextStyle {
     isItalic: boolean;
     letterSpacing: number;  // in pixels
     lineHeight: number;     // multiplier (e.g., 1.4)
+    textAlign: TextAlign;
+    quoteStyle: QuoteStyle;
 }
 
 export interface TemplateProps {
@@ -31,6 +36,14 @@ export interface TemplateProps {
     backdropBrightness?: number;
     backdropSaturation?: number;
     accentColor?: string;
+}
+
+export function getQuoteWrapped(text: string, quoteStyle: QuoteStyle): string {
+    switch (quoteStyle) {
+        case 'double': return `\u201C${text}\u201D`;
+        case 'angle': return `\u00AB ${text} \u00BB`;
+        case 'none': return text;
+    }
 }
 
 export function proxyUrl(url: string): string {
@@ -107,6 +120,8 @@ export const DEFAULT_STYLE: TextStyle = {
     isItalic: false,
     letterSpacing: 0,
     lineHeight: 1.4,
+    textAlign: 'center',
+    quoteStyle: 'double',
 };
 
 export function StarRating({ rating, size = 48, color, shadow }: { rating: number; size?: number; color: string; shadow?: string }) {

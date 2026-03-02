@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateType, FontType, ColorTheme, TextStyle } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
 interface RecentReview {
@@ -68,7 +68,11 @@ export default function Home() {
   // Accent Color
   const [accentColor, setAccentColor] = useState('#00e054');
 
-  const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight };
+  // Text Alignment & Quote Style
+  const [textAlign, setTextAlign] = useState<TextAlign>('center');
+  const [quoteStyle, setQuoteStyle] = useState<QuoteStyle>('double');
+
+  const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight, textAlign, quoteStyle };
   const storyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -337,7 +341,7 @@ export default function Home() {
       backdropPositionPercent,
       showPoster,
       customBackdropUrl: customBackdrop,
-      processedBackdropUrl, // Pass the processed image URL
+      processedBackdropUrl,
       backdropBlur,
       backdropBrightness,
       backdropSaturation,
@@ -686,6 +690,10 @@ export default function Home() {
                 setBackdropSaturation={setBackdropSaturation}
                 accentColor={accentColor}
                 setAccentColor={setAccentColor}
+                textAlign={textAlign}
+                setTextAlign={setTextAlign}
+                quoteStyle={quoteStyle}
+                setQuoteStyle={setQuoteStyle}
                 onDownload={handleDownload}
                 onShare={handleShare}
                 downloading={downloading}
@@ -697,7 +705,10 @@ export default function Home() {
 
               <div className="flex-shrink-0">
                 <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl">
-                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{ width: '270px', height: '480px' }}>
+                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{
+                    width: '270px',
+                    height: '480px',
+                  }}>
                     <div className="transform scale-[0.25] origin-top-left">
                       {renderTemplate()}
                     </div>
@@ -742,7 +753,14 @@ export default function Home() {
           </div>
         )}
 
-        <div ref={storyRef} style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        <div ref={storyRef} style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 0,
+          width: '1080px',
+          height: '1920px',
+          overflow: 'hidden',
+        }}>
           {renderTemplate()}
         </div>
 

@@ -9,7 +9,8 @@ import {
     getBackgroundImage,
     hexToRgba,
     proxyUrl,
-    StarRating
+    StarRating,
+    getQuoteWrapped
 } from './shared';
 
 export function TemplateTopLeft({
@@ -23,7 +24,7 @@ export function TemplateTopLeft({
     backdropBlur = 0,
     backdropBrightness = 100,
     backdropSaturation = 100,
-    accentColor = '#00e054'
+    accentColor = '#00e054',
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length);
     const scale = fontSizeMultiplier * autoScale;
@@ -155,12 +156,12 @@ export function TemplateTopLeft({
                         lineHeight: textStyle.lineHeight,
                         textShadow: colors.textShadow,
                         maxWidth: '640px',
-                        textAlign: 'left',
+                        textAlign: textStyle.textAlign,
                         borderLeft: `3px solid ${accentColor}`,
                         paddingLeft: '16px',
-                        marginBottom: '24px'
+                        marginBottom: '24px',
                     }}>
-                        "{data.reviewText}"
+                        {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
                     </p>
                     <div>
                         <StarRating rating={data.ratingNumber} size={56} color={accentColor} shadow={accentShadow} />
