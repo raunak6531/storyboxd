@@ -129,37 +129,146 @@ export default function StoryControls(props: StoryControlsProps) {
         isOpen={openSection === 'style'}
         onClick={() => toggleSection('style')}
       >
-        {/* Template Selection */}
+        {/* Template Selection with Mini Previews */}
         <div>
           <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-3 block">Template</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              { id: 'bottom', label: 'Classic' },
-              { id: 'topLeft', label: 'Editorial' },
-              { id: 'centered', label: 'Focused' },
-              { id: 'minimal', label: 'Minimal' },
-              { id: 'split', label: 'Split' },
-              { id: 'magazine', label: 'Magazine' },
-              { id: 'cinematic', label: 'Cinematic' },
-              { id: 'gradient', label: 'Gradient' },
-              { id: 'duotone', label: 'Duotone' },
-            ] as { id: TemplateType; label: string }[]).map((template) => (
+              { id: 'bottom', label: 'Classic', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
+                  <rect x="4" y="4" width="28" height="30" rx="1" fill="#333" opacity="0.5"/>
+                  <rect x="4" y="38" width="18" height="2" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="4" y="42" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="4" y="46" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="49" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="52" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="58" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
+                </svg>
+              )},
+              { id: 'topLeft', label: 'Editorial', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
+                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
+                  <rect x="4" y="6" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="4" y="11" width="14" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="4" y="15" width="8" height="8" rx="1" fill="#555" opacity="0.5"/>
+                  <rect x="4" y="40" width="28" height="1" rx="0.5" fill="#888" opacity="0.4"/>
+                  <rect x="4" y="43" width="24" height="1" rx="0.5" fill="#888" opacity="0.4"/>
+                  <rect x="4" y="46" width="20" height="1" rx="0.5" fill="#888" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'centered', label: 'Focused', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
+                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
+                  <rect x="6" y="14" width="24" height="36" rx="2" fill="#222" opacity="0.8" stroke="#444" strokeWidth="0.5"/>
+                  <rect x="13" y="18" width="10" height="2" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="14" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="10" y="28" width="16" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="11" y="31" width="14" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="12" y="34" width="12" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="14" y="42" width="8" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
+                </svg>
+              )},
+              { id: 'minimal', label: 'Minimal', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
+                  <rect x="10" y="16" width="16" height="2" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="12" y="20" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="8" y="28" width="20" height="1" rx="0.5" fill="#666" opacity="0.3"/>
+                  <rect x="9" y="31" width="18" height="1" rx="0.5" fill="#666" opacity="0.3"/>
+                  <rect x="10" y="34" width="16" height="1" rx="0.5" fill="#666" opacity="0.3"/>
+                  <rect x="13" y="42" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'split', label: 'Split', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
+                  <rect x="0" y="0" width="36" height="28" rx="2" fill="#333" opacity="0.5"/>
+                  <rect x="12" y="10" width="12" height="16" rx="1" fill="#555" opacity="0.6"/>
+                  <rect x="4" y="32" width="18" height="2" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="4" y="36" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="4" y="42" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="45" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'magazine', label: 'Magazine', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
+                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.4"/>
+                  <rect x="4" y="4" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.5"/>
+                  <rect x="4" y="44" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="24" y="42" width="8" height="12" rx="1" fill="#555" opacity="0.6"/>
+                  <rect x="4" y="49" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
+                  <rect x="4" y="54" width="18" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="4" y="57" width="15" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'cinematic', label: 'Cinematic', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#000"/>
+                  <rect x="0" y="10" width="36" height="44" fill="#333" opacity="0.4"/>
+                  <rect x="0" y="0" width="36" height="12" fill="#000" opacity="0.7"/>
+                  <rect x="0" y="52" width="36" height="12" fill="#000" opacity="0.7"/>
+                  <rect x="6" y="3" width="24" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="10" y="7" width="16" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
+                  <rect x="12" y="55" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="8" y="58" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                </svg>
+              )},
+              { id: 'gradient', label: 'Gradient', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <defs>
+                    <linearGradient id="grd" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00e054" stopOpacity="0.4"/>
+                      <stop offset="100%" stopColor="#1a1a2e"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="36" height="64" rx="2" fill="url(#grd)"/>
+                  <rect x="6" y="16" width="24" height="32" rx="3" fill="#fff" opacity="0.08" stroke="#fff" strokeWidth="0.3" strokeOpacity="0.2"/>
+                  <rect x="10" y="22" width="16" height="2" rx="1" fill="#fff" opacity="0.8"/>
+                  <rect x="12" y="26" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
+                  <rect x="9" y="32" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                  <rect x="10" y="35" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                  <rect x="11" y="38" width="14" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
+                </svg>
+              )},
+              { id: 'duotone', label: 'Duotone', preview: (
+                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
+                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#00e054" opacity="0.15"/>
+                  <rect x="4" y="4" width="1.5" height="56" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="8" y="10" width="20" height="3" rx="1" fill="#fff" opacity="0.9"/>
+                  <rect x="8" y="16" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
+                  <rect x="8" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
+                  <rect x="8" y="30" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="8" y="33" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                  <rect x="8" y="36" width="22" height="1" rx="0.5" fill="#666" opacity="0.4"/>
+                </svg>
+              )},
+            ] as { id: TemplateType; label: string; preview: React.ReactNode }[]).map((template) => (
               <button
                 key={template.id}
                 onClick={() => props.setSelectedTemplate(template.id)}
-                className={`relative p-3 rounded-xl border-2 transition-all duration-300 ${props.selectedTemplate === template.id
-                  ? 'border-[#00e054] bg-[#00e054]/10'
+                className={`relative rounded-xl border-2 transition-all duration-300 overflow-hidden ${props.selectedTemplate === template.id
+                  ? 'border-[#00e054] bg-[#00e054]/10 shadow-[0_0_12px_rgba(0,224,84,0.15)]'
                   : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
                   }`}
               >
                 {props.selectedTemplate === template.id && (
-                  <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#00e054] rounded-full flex items-center justify-center">
+                  <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#00e054] rounded-full flex items-center justify-center z-10">
                     <svg className="w-2.5 h-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 )}
-                <p className={`font-medium text-xs ${props.selectedTemplate === template.id ? 'text-white' : 'text-zinc-400'}`}>
+                <div className="p-2 pb-1">
+                  <div className="w-full aspect-[9/16] rounded-md overflow-hidden">
+                    {template.preview}
+                  </div>
+                </div>
+                <p className={`font-medium text-[10px] pb-2 text-center ${props.selectedTemplate === template.id ? 'text-white' : 'text-zinc-500'}`}>
                   {template.label}
                 </p>
               </button>
@@ -347,27 +456,33 @@ export default function StoryControls(props: StoryControlsProps) {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {[
-                { color: '#00e054', label: 'Green' },
-                { color: '#d4a574', label: 'Gold' },
-                { color: '#40bcf4', label: 'Blue' },
-                { color: '#ff8000', label: 'Orange' },
-                { color: '#eb3f5c', label: 'Red' },
-                { color: '#e449a3', label: 'Pink' },
-                { color: '#9d4edd', label: 'Purple' },
-                { color: '#ffffff', label: 'White' },
-              ].map((preset) => (
-                <button
-                  key={preset.color}
-                  onClick={() => props.setAccentColor(preset.color)}
-                  className={`w-8 h-8 rounded-full border border-zinc-700 hover:scale-110 transition-transform focus:outline-none ${props.accentColor.toLowerCase() === preset.color.toLowerCase() ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''
-                    }`}
-                  style={{ backgroundColor: preset.color }}
-                  title={preset.label}
-                />
-              ))}
-            </div>
+            {/* Color Palettes */}
+            {([
+              { name: 'Classic', colors: ['#00e054', '#40bcf4', '#ff8000', '#eb3f5c', '#9d4edd', '#ffffff'] },
+              { name: 'Warm', colors: ['#d4a574', '#e8a87c', '#d35400', '#c0392b', '#f39c12', '#ffeaa7'] },
+              { name: 'Cool', colors: ['#74b9ff', '#a29bfe', '#00cec9', '#6c5ce7', '#0984e3', '#dfe6e9'] },
+              { name: 'Neon', colors: ['#00ff87', '#ff006e', '#ffbe0b', '#8338ec', '#3a86ff', '#00f5d4'] },
+              { name: 'Pastel', colors: ['#fab1a0', '#81ecec', '#ffeaa7', '#dfe6e9', '#a29bfe', '#fd79a8'] },
+              { name: 'Film', colors: ['#c8b88a', '#8b7355', '#a0522d', '#2f4f4f', '#b8860b', '#daa520'] },
+            ]).map((palette) => (
+              <div key={palette.name} className="flex items-center gap-2">
+                <span className="text-[10px] text-zinc-600 w-10 flex-shrink-0 uppercase tracking-wider">{palette.name}</span>
+                <div className="flex gap-1.5 flex-1">
+                  {palette.colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => props.setAccentColor(color)}
+                      className={`w-7 h-7 rounded-full border hover:scale-110 transition-transform focus:outline-none ${props.accentColor.toLowerCase() === color.toLowerCase()
+                        ? 'ring-2 ring-white ring-offset-1 ring-offset-black border-white/50'
+                        : 'border-zinc-700/50'
+                        }`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
