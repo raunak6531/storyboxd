@@ -715,6 +715,93 @@ export default function Home() {
           </div>
         )}
 
+        {/* Recent Reviews Gallery */}
+        {!reviewData && !loading && recentDownloads.length > 0 && (
+          <div className="max-w-4xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Recent Reviews</h3>
+              </div>
+              <button
+                onClick={() => {
+                  localStorage.removeItem(STORAGE_KEY);
+                  setRecentDownloads([]);
+                }}
+                className="text-xs text-zinc-600 hover:text-red-400 transition-colors"
+              >
+                Clear All
+              </button>
+            </div>
+
+            <div className="flex gap-3 overflow-x-auto pb-3 lg:grid lg:grid-cols-4 xl:grid-cols-6 lg:overflow-visible scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+              {recentDownloads.map((review, i) => {
+                const timeAgo = (() => {
+                  const mins = Math.floor((Date.now() - review.timestamp) / 60000);
+                  if (mins < 1) return 'Just now';
+                  if (mins < 60) return `${mins}m ago`;
+                  const hrs = Math.floor(mins / 60);
+                  if (hrs < 24) return `${hrs}h ago`;
+                  const days = Math.floor(hrs / 24);
+                  return `${days}d ago`;
+                })();
+
+                return (
+                  <button
+                    key={review.url + i}
+                    onClick={() => {
+                      setUrl(review.url);
+                      loadReviewFromUrl(review.url);
+                    }}
+                    className="group relative flex-shrink-0 w-[140px] lg:w-auto rounded-xl overflow-hidden border border-zinc-800 hover:border-[#00e054]/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,224,84,0.1)] active:scale-95 bg-zinc-900"
+                  >
+                    {/* Poster Image */}
+                    <div className="aspect-[2/3] relative overflow-hidden bg-zinc-800">
+                      {review.posterUrl ? (
+                        <img
+                          src={review.posterUrl}
+                          alt={review.movieTitle}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                          </svg>
+                        </div>
+                      )}
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+
+                      {/* Play/Edit Icon on Hover */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-10 h-10 rounded-full bg-[#00e054]/90 flex items-center justify-center shadow-lg">
+                          <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Title and metadata at bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                        <p className="text-white text-xs font-semibold leading-tight truncate">{review.movieTitle}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-zinc-400 text-[10px]">@{review.username}</span>
+                          <span className="text-zinc-500 text-[10px]">{timeAgo}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {loading && !reviewData && (
           <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-pulse">
             <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
