@@ -12,5 +12,4 @@ export * from './templates/TemplateCinematic';
 export * from './templates/TemplateGradient';
 export * from './templates/TemplateDuotone';
 export * from './templates/TemplateNewspaper';
-export * from './templates/TemplateVHS';
 export * from './templates/TemplateLetterboxd';

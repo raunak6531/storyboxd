@@ -286,21 +286,7 @@ export default function StoryControls(props: StoryControlsProps) {
                 )
               },
 
-              {
-                id: 'vhs', label: 'Retro VHS', preview: (
-                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                    <rect width="36" height="64" rx="2" fill="#0a0a0a" />
-                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3" />
-                    <circle cx="7" cy="5" r="1.5" fill="#ff0033" opacity="0.8" />
-                    <rect x="11" y="3.5" width="8" height="2" rx="1" fill="#fff" opacity="0.7" />
-                    <rect x="4" y="44" width="18" height="2.5" rx="1" fill="#fff" opacity="0.8" />
-                    <rect x="4" y="49" width="12" height="1.5" rx="0.75" fill="#888" opacity="0.5" />
-                    <rect x="4" y="53" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
-                    <rect x="4" y="57" width="28" height="1" rx="0.5" fill="#666" opacity="0.4" />
-                    <rect x="4" y="60" width="20" height="1" rx="0.5" fill="#666" opacity="0.4" />
-                  </svg>
-                )
-              },
+
               {
                 id: 'letterboxd', label: 'Letterboxd', preview: (
                   <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
