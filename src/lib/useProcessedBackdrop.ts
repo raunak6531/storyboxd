@@ -29,8 +29,13 @@ export function useProcessedBackdrop({
     // Determine source URL
     const sourceUrl = customBackdropUrl || originalUrl || null;
 
-    // Check if filters are at default values (no processing needed)
-    const needsProcessing = blur > 0 || brightness !== 100 || saturation !== 100;
+    // Check if filters are applied.
+    // CRITICAL FIX: If the sourceUrl is an external HTTP URL (like TMDB), it ALWAYS needs processing
+    // so it gets fetched via our proxy and converted to a local Base64 canvas data URL.
+    // Otherwise, html2canvas on mobile Chrome/Safari will fail to render it due to cross-origin CSS background rules.
+    const hasFilters = blur > 0 || brightness !== 100 || saturation !== 100;
+    const isExternalUrl = typeof sourceUrl === 'string' && sourceUrl.startsWith('http') && !sourceUrl.startsWith('blob:') && !sourceUrl.startsWith('data:');
+    const needsProcessing = hasFilters || isExternalUrl;
 
     const processImage = useCallback(async () => {
         if (!sourceUrl) {
@@ -38,7 +43,7 @@ export function useProcessedBackdrop({
             return;
         }
 
-        // If no filters applied, use original URL
+        // If no filters applied AND it's a local/safe URL (like an uploaded base64 data URI), use original URL
         if (!needsProcessing) {
             setProcessedUrl(null);
             return;
@@ -65,7 +70,7 @@ export function useProcessedBackdrop({
                 blur,
                 brightness,
                 saturation,
-                0.5 // Scale factor for performance
+                1.0 // Scale factor (1.0 = native resolution, ensures no quality loss)
             );
 
             // Only update if this is still the current process
