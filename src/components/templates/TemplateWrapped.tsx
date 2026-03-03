@@ -29,11 +29,11 @@ export function TemplateWrapped({
     // Smarter title sizing: aggressively scale down for longer titles
     const titleLen = data.movieTitle.length;
     let titleFontSize: number;
-    if (titleLen <= 8) titleFontSize = 160;
-    else if (titleLen <= 14) titleFontSize = 120;
-    else if (titleLen <= 20) titleFontSize = 100;
-    else if (titleLen <= 30) titleFontSize = 80;
-    else titleFontSize = 64;
+    if (titleLen <= 8) titleFontSize = 180;
+    else if (titleLen <= 14) titleFontSize = 140;
+    else if (titleLen <= 20) titleFontSize = 115;
+    else if (titleLen <= 30) titleFontSize = 95;
+    else titleFontSize = 76;
     titleFontSize = Math.round(titleFontSize * fontSizeMultiplier);
 
     const reviewFontSize = Math.round(36 * scale);
@@ -133,18 +133,23 @@ export function TemplateWrapped({
 
                     {/* Right: Username pill */}
                     <div style={{
-                        padding: '14px 30px',
+                        padding: '0 30px',
+                        height: '56px',
                         border: `3px solid ${dominantColor}`,
                         borderRadius: '100px',
                         backgroundColor: 'rgba(0,0,0,0.25)',
                         backdropFilter: 'blur(12px)',
                         whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}>
                         <span style={{
                             color: '#ffffff',
                             fontSize: '26px',
                             fontWeight: 700,
                             letterSpacing: '1px',
+                            transform: 'translateY(-12px)',
                         }}>
                             @{data.username}
                         </span>
@@ -189,8 +194,6 @@ export function TemplateWrapped({
                         margin: 0,
                         textTransform: 'uppercase',
                         textShadow: '0 8px 40px rgba(0,0,0,0.5)',
-                        maxHeight: showPoster && data.posterUrl ? '300px' : '500px',
-                        overflow: 'hidden',
                     }}>
                         {data.movieTitle}
                     </h1>
@@ -226,8 +229,6 @@ export function TemplateWrapped({
                             textAlign: 'left',
                             margin: 0,
                             textShadow: '0 2px 12px rgba(0,0,0,0.4)',
-                            maxHeight: '400px',
-                            overflow: 'hidden',
                         }}>
                             {data.reviewText}
                         </p>
@@ -266,7 +267,14 @@ export function TemplateWrapped({
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             zIndex: 2,
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            transform: 'translateY(-20px)',
                         }}>
                             <span style={{
                                 color: '#ffffff',
@@ -276,16 +284,6 @@ export function TemplateWrapped({
                                 letterSpacing: '-2px',
                             }}>
                                 {currentScore.toFixed(1)}
-                            </span>
-                            <span style={{
-                                color: dominantColor,
-                                fontSize: '14px',
-                                fontWeight: 800,
-                                letterSpacing: '3px',
-                                textTransform: 'uppercase',
-                                marginTop: '4px',
-                            }}>
-                                SCORE
                             </span>
                         </div>
                     </div>
