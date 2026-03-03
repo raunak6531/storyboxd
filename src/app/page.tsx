@@ -411,24 +411,30 @@ export default function Home() {
 
         {/* Mode Toggle */}
         <div className="flex justify-center mb-6">
-          <div className="inline-flex bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-xl p-1">
+          <div className="inline-flex bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-xl p-1 gap-1">
             <button
               onClick={() => setInputMode('import')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'import'
-                ? 'bg-[#00e054] text-black'
-                : 'text-zinc-400 hover:text-white'
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${inputMode === 'import'
+                ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                 }`}
             >
-              Import from Letterboxd
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              Import
             </button>
             <button
               onClick={() => setInputMode('custom')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inputMode === 'custom'
-                ? 'bg-[#00e054] text-black'
-                : 'text-zinc-400 hover:text-white'
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${inputMode === 'custom'
+                ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                 }`}
             >
-              Create Custom
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Custom
             </button>
           </div>
         </div>
@@ -437,27 +443,53 @@ export default function Home() {
         {inputMode === 'import' && (
           <form onSubmit={handleSubmit} className="mb-10 max-w-3xl mx-auto">
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-              <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-2">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-500" />
+              <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 group-focus-within:border-[#00e054]/30 rounded-2xl p-2 transition-colors duration-300">
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="Paste your Letterboxd review URL..."
-                    className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
-                  />
+                  <div className="flex-1 flex items-center gap-1">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="Paste your Letterboxd review URL..."
+                      className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
+                    />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) setUrl(text);
+                        } catch { }
+                      }}
+                      className="flex-shrink-0 p-2.5 rounded-xl text-zinc-500 hover:text-[#00e054] hover:bg-[#00e054]/10 transition-all active:scale-90"
+                      title="Paste from clipboard"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </button>
+                  </div>
                   <button
                     type="submit"
                     disabled={loading || !url}
-                    className="bg-[#00e054] text-black font-semibold px-6 py-3 rounded-xl hover:bg-[#00c948] disabled:opacity-40 transition-all flex items-center justify-center gap-2"
+                    className="bg-[#00e054] text-black font-semibold px-6 py-3 rounded-xl hover:bg-[#00c948] disabled:opacity-40 transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
-                    {loading ? 'Creating...' : 'Create Story'}
+                    {loading ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Creating...
+                      </>
+                    ) : 'Create Story'}
                   </button>
                 </div>
               </div>
             </div>
+            <p className="text-center text-xs text-zinc-600 mt-3">e.g. letterboxd.com/username/film/movie-name/</p>
           </form>
         )}
 
@@ -668,7 +700,19 @@ export default function Home() {
         )}
 
         {error && (
-          <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 text-center text-red-400">{error}</div>
+          <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 max-w-3xl mx-auto flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex-shrink-0 w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <p className="text-red-400 text-sm">{error}</p>
+            <button onClick={() => setError('')} className="ml-auto flex-shrink-0 text-red-500/60 hover:text-red-400 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         )}
 
         {loading && !reviewData && (
