@@ -31,6 +31,8 @@ interface StoryControlsProps {
   setShowPoster: (b: boolean) => void;
   backdropPositionPercent: number;
   setBackdropPositionPercent: (n: number) => void;
+  backdropPositionYPercent: number;
+  setBackdropPositionYPercent: (n: number) => void;
   customBackdrop: string | null;
   setCustomBackdrop: (s: string | null) => void;
   availableBackdrops: { url: string; thumbnail: string }[];
@@ -135,177 +137,203 @@ export default function StoryControls(props: StoryControlsProps) {
           <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-3 block">Template</label>
           <div className="grid grid-cols-3 gap-2">
             {([
-              { id: 'bottom', label: 'Classic', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
-                  <rect x="4" y="4" width="28" height="30" rx="1" fill="#333" opacity="0.5"/>
-                  <rect x="4" y="38" width="18" height="2" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="4" y="42" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="4" y="46" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="49" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="52" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="58" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
-                </svg>
-              )},
-              { id: 'topLeft', label: 'Editorial', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
-                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
-                  <rect x="4" y="6" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="4" y="11" width="14" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="4" y="15" width="8" height="8" rx="1" fill="#555" opacity="0.5"/>
-                  <rect x="4" y="40" width="28" height="1" rx="0.5" fill="#888" opacity="0.4"/>
-                  <rect x="4" y="43" width="24" height="1" rx="0.5" fill="#888" opacity="0.4"/>
-                  <rect x="4" y="46" width="20" height="1" rx="0.5" fill="#888" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'centered', label: 'Focused', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
-                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
-                  <rect x="6" y="14" width="24" height="36" rx="2" fill="#222" opacity="0.8" stroke="#444" strokeWidth="0.5"/>
-                  <rect x="13" y="18" width="10" height="2" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="14" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="10" y="28" width="16" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="11" y="31" width="14" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="12" y="34" width="12" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="14" y="42" width="8" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
-                </svg>
-              )},
-              { id: 'minimal', label: 'Minimal', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
-                  <rect x="10" y="16" width="16" height="2" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="12" y="20" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="8" y="28" width="20" height="1" rx="0.5" fill="#666" opacity="0.3"/>
-                  <rect x="9" y="31" width="18" height="1" rx="0.5" fill="#666" opacity="0.3"/>
-                  <rect x="10" y="34" width="16" height="1" rx="0.5" fill="#666" opacity="0.3"/>
-                  <rect x="13" y="42" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'split', label: 'Split', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
-                  <rect x="0" y="0" width="36" height="28" rx="2" fill="#333" opacity="0.5"/>
-                  <rect x="12" y="10" width="12" height="16" rx="1" fill="#555" opacity="0.6"/>
-                  <rect x="4" y="32" width="18" height="2" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="4" y="36" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="4" y="42" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="45" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'magazine', label: 'Magazine', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#1a1a1a"/>
-                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.4"/>
-                  <rect x="4" y="4" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.5"/>
-                  <rect x="4" y="44" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="24" y="42" width="8" height="12" rx="1" fill="#555" opacity="0.6"/>
-                  <rect x="4" y="49" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
-                  <rect x="4" y="54" width="18" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="57" width="15" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'cinematic', label: 'Cinematic', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#000"/>
-                  <rect x="0" y="10" width="36" height="44" fill="#333" opacity="0.4"/>
-                  <rect x="0" y="0" width="36" height="12" fill="#000" opacity="0.7"/>
-                  <rect x="0" y="52" width="36" height="12" fill="#000" opacity="0.7"/>
-                  <rect x="6" y="3" width="24" height="2.5" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="10" y="7" width="16" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
-                  <rect x="12" y="55" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="8" y="58" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'gradient', label: 'Gradient', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="grd" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00e054" stopOpacity="0.4"/>
-                      <stop offset="100%" stopColor="#1a1a2e"/>
-                    </linearGradient>
-                  </defs>
-                  <rect width="36" height="64" rx="2" fill="url(#grd)"/>
-                  <rect x="6" y="16" width="24" height="32" rx="3" fill="#fff" opacity="0.08" stroke="#fff" strokeWidth="0.3" strokeOpacity="0.2"/>
-                  <rect x="10" y="22" width="16" height="2" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="12" y="26" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7"/>
-                  <rect x="9" y="32" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                  <rect x="10" y="35" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                  <rect x="11" y="38" width="14" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                </svg>
-              )},
-              { id: 'duotone', label: 'Duotone', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
-                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#00e054" opacity="0.15"/>
-                  <rect x="4" y="4" width="1.5" height="56" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="8" y="10" width="20" height="3" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="8" y="16" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
-                  <rect x="8" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="8" y="30" width="24" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="8" y="33" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="8" y="36" width="22" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'newspaper', label: 'Newspaper', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#f5f0e8"/>
-                  <rect x="10" y="3" width="16" height="1.5" rx="0.75" fill="#111" opacity="0.3"/>
-                  <rect x="5" y="6" width="26" height="3" rx="1" fill="#111" opacity="0.8"/>
-                  <rect x="4" y="11" width="28" height="0.5" fill="#222" opacity="0.3"/>
-                  <rect x="4" y="14" width="22" height="3" rx="1" fill="#111" opacity="0.9"/>
-                  <rect x="4" y="19" width="14" height="1.5" rx="0.75" fill="#555" opacity="0.5"/>
-                  <rect x="4" y="24" width="28" height="12" rx="1" fill="#ccc" opacity="0.5"/>
-                  <rect x="4" y="40" width="12" height="1" rx="0.5" fill="#333" opacity="0.4"/>
-                  <rect x="4" y="43" width="28" height="1" rx="0.5" fill="#333" opacity="0.3"/>
-                  <rect x="4" y="46" width="24" height="1" rx="0.5" fill="#333" opacity="0.3"/>
-                  <rect x="4" y="49" width="28" height="1" rx="0.5" fill="#333" opacity="0.3"/>
-                </svg>
-              )},
-              { id: 'neon', label: 'Neon', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#050510"/>
-                  <rect x="4" y="4" width="28" height="56" rx="3" fill="none" stroke="#00e054" strokeWidth="0.5" strokeOpacity="0.6"/>
-                  <rect x="8" y="18" width="20" height="3" rx="1" fill="#fff" opacity="0.9"/>
-                  <rect x="10" y="23" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="14" y="30" width="8" height="2" rx="1" fill="#00e054" opacity="0.7"/>
-                  <rect x="12" y="35" width="12" height="0.5" fill="#00e054" opacity="0.4"/>
-                  <rect x="8" y="40" width="20" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                  <rect x="9" y="43" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                  <rect x="10" y="46" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3"/>
-                </svg>
-              )},
-              { id: 'vhs', label: 'Retro VHS', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#0a0a0a"/>
-                  <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3"/>
-                  <circle cx="7" cy="5" r="1.5" fill="#ff0033" opacity="0.8"/>
-                  <rect x="11" y="3.5" width="8" height="2" rx="1" fill="#fff" opacity="0.7"/>
-                  <rect x="4" y="44" width="18" height="2.5" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="4" y="49" width="12" height="1.5" rx="0.75" fill="#888" opacity="0.5"/>
-                  <rect x="4" y="53" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="4" y="57" width="28" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                  <rect x="4" y="60" width="20" height="1" rx="0.5" fill="#666" opacity="0.4"/>
-                </svg>
-              )},
-              { id: 'letterboxd', label: 'Letterboxd', preview: (
-                <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                  <rect width="36" height="64" rx="2" fill="#14181c"/>
-                  <rect x="0" y="0" width="36" height="6" fill="#1c2228"/>
-                  <circle cx="9" cy="3" r="1.2" fill="#ff8000"/>
-                  <circle cx="12" cy="3" r="1.2" fill="#00e054"/>
-                  <circle cx="15" cy="3" r="1.2" fill="#40bcf4"/>
-                  <rect x="0" y="6" width="36" height="26" fill="#333" opacity="0.4"/>
-                  <rect x="4" y="34" width="8" height="14" rx="1" fill="#555" opacity="0.6"/>
-                  <rect x="15" y="34" width="16" height="2.5" rx="1" fill="#fff" opacity="0.8"/>
-                  <rect x="15" y="38" width="10" height="1.5" rx="0.75" fill="#9ab" opacity="0.5"/>
-                  <rect x="15" y="42" width="6" height="1.5" rx="0.75" fill="#00e054" opacity="0.6"/>
-                  <rect x="15" y="46" width="17" height="1" rx="0.5" fill="#678" opacity="0.4"/>
-                  <rect x="15" y="49" width="14" height="1" rx="0.5" fill="#678" opacity="0.4"/>
-                  <rect x="0" y="60" width="36" height="4" fill="#1c2228"/>
-                </svg>
-              )},
+              {
+                id: 'bottom', label: 'Classic', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#1a1a1a" />
+                    <rect x="4" y="4" width="28" height="30" rx="1" fill="#333" opacity="0.5" />
+                    <rect x="4" y="38" width="18" height="2" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="42" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="4" y="46" width="28" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="49" width="24" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="52" width="20" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="58" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.5" />
+                  </svg>
+                )
+              },
+              {
+                id: 'topLeft', label: 'Editorial', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#1a1a1a" />
+                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3" />
+                    <rect x="4" y="6" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="4" y="11" width="14" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="4" y="15" width="8" height="8" rx="1" fill="#555" opacity="0.5" />
+                    <rect x="4" y="40" width="28" height="1" rx="0.5" fill="#888" opacity="0.4" />
+                    <rect x="4" y="43" width="24" height="1" rx="0.5" fill="#888" opacity="0.4" />
+                    <rect x="4" y="46" width="20" height="1" rx="0.5" fill="#888" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'centered', label: 'Focused', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#1a1a1a" />
+                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3" />
+                    <rect x="6" y="14" width="24" height="36" rx="2" fill="#222" opacity="0.8" stroke="#444" strokeWidth="0.5" />
+                    <rect x="13" y="18" width="10" height="2" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="14" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="10" y="28" width="16" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="11" y="31" width="14" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="12" y="34" width="12" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="14" y="42" width="8" height="1.5" rx="0.75" fill="#555" opacity="0.5" />
+                  </svg>
+                )
+              },
+              {
+                id: 'minimal', label: 'Minimal', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#0a0a0a" />
+                    <rect x="10" y="16" width="16" height="2" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="12" y="20" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="8" y="28" width="20" height="1" rx="0.5" fill="#666" opacity="0.3" />
+                    <rect x="9" y="31" width="18" height="1" rx="0.5" fill="#666" opacity="0.3" />
+                    <rect x="10" y="34" width="16" height="1" rx="0.5" fill="#666" opacity="0.3" />
+                    <rect x="13" y="42" width="10" height="1.5" rx="0.75" fill="#555" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'split', label: 'Split', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#1a1a1a" />
+                    <rect x="0" y="0" width="36" height="28" rx="2" fill="#333" opacity="0.5" />
+                    <rect x="12" y="10" width="12" height="16" rx="1" fill="#555" opacity="0.6" />
+                    <rect x="4" y="32" width="18" height="2" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="36" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="4" y="42" width="28" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="45" width="24" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'magazine', label: 'Magazine', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#1a1a1a" />
+                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.4" />
+                    <rect x="4" y="4" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.5" />
+                    <rect x="4" y="44" width="20" height="2.5" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="24" y="42" width="8" height="12" rx="1" fill="#555" opacity="0.6" />
+                    <rect x="4" y="49" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5" />
+                    <rect x="4" y="54" width="18" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="57" width="15" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'cinematic', label: 'Cinematic', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#000" />
+                    <rect x="0" y="10" width="36" height="44" fill="#333" opacity="0.4" />
+                    <rect x="0" y="0" width="36" height="12" fill="#000" opacity="0.7" />
+                    <rect x="0" y="52" width="36" height="12" fill="#000" opacity="0.7" />
+                    <rect x="6" y="3" width="24" height="2.5" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="10" y="7" width="16" height="1.5" rx="0.75" fill="#888" opacity="0.5" />
+                    <rect x="12" y="55" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="8" y="58" width="20" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'gradient', label: 'Gradient', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="grd" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#00e054" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#1a1a2e" />
+                      </linearGradient>
+                    </defs>
+                    <rect width="36" height="64" rx="2" fill="url(#grd)" />
+                    <rect x="6" y="16" width="24" height="32" rx="3" fill="#fff" opacity="0.08" stroke="#fff" strokeWidth="0.3" strokeOpacity="0.2" />
+                    <rect x="10" y="22" width="16" height="2" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="12" y="26" width="12" height="1.5" rx="0.75" fill="#00e054" opacity="0.7" />
+                    <rect x="9" y="32" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                    <rect x="10" y="35" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                    <rect x="11" y="38" width="14" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                  </svg>
+                )
+              },
+              {
+                id: 'duotone', label: 'Duotone', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#0a0a0a" />
+                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#00e054" opacity="0.15" />
+                    <rect x="4" y="4" width="1.5" height="56" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="8" y="10" width="20" height="3" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="8" y="16" width="14" height="1.5" rx="0.75" fill="#888" opacity="0.5" />
+                    <rect x="8" y="22" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="8" y="30" width="24" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="8" y="33" width="20" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="8" y="36" width="22" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'newspaper', label: 'Newspaper', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#f5f0e8" />
+                    <rect x="10" y="3" width="16" height="1.5" rx="0.75" fill="#111" opacity="0.3" />
+                    <rect x="5" y="6" width="26" height="3" rx="1" fill="#111" opacity="0.8" />
+                    <rect x="4" y="11" width="28" height="0.5" fill="#222" opacity="0.3" />
+                    <rect x="4" y="14" width="22" height="3" rx="1" fill="#111" opacity="0.9" />
+                    <rect x="4" y="19" width="14" height="1.5" rx="0.75" fill="#555" opacity="0.5" />
+                    <rect x="4" y="24" width="28" height="12" rx="1" fill="#ccc" opacity="0.5" />
+                    <rect x="4" y="40" width="12" height="1" rx="0.5" fill="#333" opacity="0.4" />
+                    <rect x="4" y="43" width="28" height="1" rx="0.5" fill="#333" opacity="0.3" />
+                    <rect x="4" y="46" width="24" height="1" rx="0.5" fill="#333" opacity="0.3" />
+                    <rect x="4" y="49" width="28" height="1" rx="0.5" fill="#333" opacity="0.3" />
+                  </svg>
+                )
+              },
+              {
+                id: 'neon', label: 'Neon', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#050510" />
+                    <rect x="4" y="4" width="28" height="56" rx="3" fill="none" stroke="#00e054" strokeWidth="0.5" strokeOpacity="0.6" />
+                    <rect x="8" y="18" width="20" height="3" rx="1" fill="#fff" opacity="0.9" />
+                    <rect x="10" y="23" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="14" y="30" width="8" height="2" rx="1" fill="#00e054" opacity="0.7" />
+                    <rect x="12" y="35" width="12" height="0.5" fill="#00e054" opacity="0.4" />
+                    <rect x="8" y="40" width="20" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                    <rect x="9" y="43" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                    <rect x="10" y="46" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3" />
+                  </svg>
+                )
+              },
+              {
+                id: 'vhs', label: 'Retro VHS', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#0a0a0a" />
+                    <rect x="0" y="0" width="36" height="64" rx="2" fill="#333" opacity="0.3" />
+                    <circle cx="7" cy="5" r="1.5" fill="#ff0033" opacity="0.8" />
+                    <rect x="11" y="3.5" width="8" height="2" rx="1" fill="#fff" opacity="0.7" />
+                    <rect x="4" y="44" width="18" height="2.5" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="49" width="12" height="1.5" rx="0.75" fill="#888" opacity="0.5" />
+                    <rect x="4" y="53" width="8" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="4" y="57" width="28" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                    <rect x="4" y="60" width="20" height="1" rx="0.5" fill="#666" opacity="0.4" />
+                  </svg>
+                )
+              },
+              {
+                id: 'letterboxd', label: 'Letterboxd', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <rect width="36" height="64" rx="2" fill="#14181c" />
+                    <rect x="0" y="0" width="36" height="6" fill="#1c2228" />
+                    <circle cx="9" cy="3" r="1.2" fill="#ff8000" />
+                    <circle cx="12" cy="3" r="1.2" fill="#00e054" />
+                    <circle cx="15" cy="3" r="1.2" fill="#40bcf4" />
+                    <rect x="0" y="6" width="36" height="26" fill="#333" opacity="0.4" />
+                    <rect x="4" y="34" width="8" height="14" rx="1" fill="#555" opacity="0.6" />
+                    <rect x="15" y="34" width="16" height="2.5" rx="1" fill="#fff" opacity="0.8" />
+                    <rect x="15" y="38" width="10" height="1.5" rx="0.75" fill="#9ab" opacity="0.5" />
+                    <rect x="15" y="42" width="6" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
+                    <rect x="15" y="46" width="17" height="1" rx="0.5" fill="#678" opacity="0.4" />
+                    <rect x="15" y="49" width="14" height="1" rx="0.5" fill="#678" opacity="0.4" />
+                    <rect x="0" y="60" width="36" height="4" fill="#1c2228" />
+                  </svg>
+                )
+              },
             ] as { id: TemplateType; label: string; preview: React.ReactNode }[]).map((template) => (
               <button
                 key={template.id}
@@ -431,50 +459,50 @@ export default function StoryControls(props: StoryControlsProps) {
               />
               <span className="text-xs text-zinc-500">Loose</span>
             </div>
-          {/* Text Alignment */}
-          <div>
-            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Text Alignment</label>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { id: 'left', label: 'Left', icon: '☰' },
-                { id: 'center', label: 'Center', icon: '☰' },
-                { id: 'right', label: 'Right', icon: '☰' },
-              ] as { id: TextAlign; label: string; icon: string }[]).map((align) => (
-                <button
-                  key={align.id}
-                  onClick={() => props.setTextAlign(align.id)}
-                  className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-1.5 ${props.textAlign === align.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {align.id === 'left' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M3 12h12M3 18h16" /></>}
-                    {align.id === 'center' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M6 12h12M4 18h16" /></>}
-                    {align.id === 'right' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M9 12h12M5 18h16" /></>}
-                  </svg>
-                  <span className="text-xs">{align.label}</span>
-                </button>
-              ))}
+            {/* Text Alignment */}
+            <div>
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Text Alignment</label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { id: 'left', label: 'Left', icon: '☰' },
+                  { id: 'center', label: 'Center', icon: '☰' },
+                  { id: 'right', label: 'Right', icon: '☰' },
+                ] as { id: TextAlign; label: string; icon: string }[]).map((align) => (
+                  <button
+                    key={align.id}
+                    onClick={() => props.setTextAlign(align.id)}
+                    className={`p-2 rounded-lg border transition-all duration-200 flex items-center justify-center gap-1.5 ${props.textAlign === align.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      {align.id === 'left' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M3 12h12M3 18h16" /></>}
+                      {align.id === 'center' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M6 12h12M4 18h16" /></>}
+                      {align.id === 'right' && <><path strokeLinecap="round" strokeWidth={2} d="M3 6h18M9 12h12M5 18h16" /></>}
+                    </svg>
+                    <span className="text-xs">{align.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Quote Style */}
-          <div>
-            <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Quote Style</label>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { id: 'double', label: '\u201C \u201D' },
-                { id: 'angle', label: '\u00AB \u00BB' },
-                { id: 'none', label: 'None' },
-              ] as { id: QuoteStyle; label: string }[]).map((quote) => (
-                <button
-                  key={quote.id}
-                  onClick={() => props.setQuoteStyle(quote.id)}
-                  className={`p-2 rounded-lg border transition-all duration-200 text-center ${props.quoteStyle === quote.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
-                >
-                  <span className="text-sm font-medium">{quote.label}</span>
-                </button>
-              ))}
+            {/* Quote Style */}
+            <div>
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-2 block">Quote Style</label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { id: 'double', label: '\u201C \u201D' },
+                  { id: 'angle', label: '\u00AB \u00BB' },
+                  { id: 'none', label: 'None' },
+                ] as { id: QuoteStyle; label: string }[]).map((quote) => (
+                  <button
+                    key={quote.id}
+                    onClick={() => props.setQuoteStyle(quote.id)}
+                    className={`p-2 rounded-lg border transition-all duration-200 text-center ${props.quoteStyle === quote.id ? 'border-[#00e054] bg-[#00e054]/10 text-white' : 'border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}
+                  >
+                    <span className="text-sm font-medium">{quote.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </ControlSection>
@@ -615,11 +643,10 @@ export default function StoryControls(props: StoryControlsProps) {
                 <button
                   key={i}
                   onClick={() => props.setCustomBackdrop(bd.url)}
-                  className={`shrink-0 w-24 h-14 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-                    props.customBackdrop === bd.url
+                  className={`shrink-0 w-24 h-14 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${props.customBackdrop === bd.url
                       ? 'border-[#00e054] ring-1 ring-[#00e054]/50'
                       : 'border-zinc-700/50 hover:border-zinc-500'
-                  }`}
+                    }`}
                 >
                   <img
                     src={`/api/proxy-image?url=${encodeURIComponent(bd.thumbnail)}`}
@@ -636,10 +663,10 @@ export default function StoryControls(props: StoryControlsProps) {
         {(!props.customBackdrop || !props.customBackdrop.includes('gradient')) && (
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Position</label>
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Position X</label>
               <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{props.backdropPositionPercent}%</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <span className="text-xs text-zinc-500">Left</span>
               <input
                 type="range"
@@ -651,6 +678,24 @@ export default function StoryControls(props: StoryControlsProps) {
                 className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
               />
               <span className="text-xs text-zinc-500">Right</span>
+            </div>
+
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Position Y</label>
+              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{props.backdropPositionYPercent}%</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-500">Top</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={props.backdropPositionYPercent}
+                onChange={(e) => props.setBackdropPositionYPercent(parseInt(e.target.value))}
+                className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
+              />
+              <span className="text-xs text-zinc-500">Bottom</span>
             </div>
           </div>
         )}

@@ -18,6 +18,7 @@ export function TemplateNewspaper({
     fontSizeMultiplier = 1,
     textStyle = DEFAULT_STYLE,
     backdropPositionPercent = 50,
+    backdropPositionYPercent = 50,
     showPoster = false,
     customBackdropUrl,
     processedBackdropUrl,
@@ -147,10 +148,10 @@ export function TemplateNewspaper({
                 ) : (
                     <div style={{
                         width: '100%',
-                        height: '300px',
+                        height: '450px',
                         backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
                         backgroundSize: 'cover',
-                        backgroundPosition: `${backdropPositionPercent}% center`,
+                        backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
                         filter: processedBackdropUrl ? 'grayscale(60%) contrast(1.1)' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(60%) contrast(1.1)`,
                         border: '1px solid #ccc',
                     }} />

@@ -18,6 +18,7 @@ export function TemplateGradient({
     fontSizeMultiplier = 1,
     textStyle = DEFAULT_STYLE,
     backdropPositionPercent = 50,
+    backdropPositionYPercent = 50,
     showPoster = false,
     customBackdropUrl,
     processedBackdropUrl,
@@ -51,7 +52,7 @@ export function TemplateGradient({
                 top: 0, left: 0, right: 0, bottom: 0,
                 backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
                 backgroundSize: 'cover',
-                backgroundPosition: `${backdropPositionPercent}% center`,
+                backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
                 filter: processedBackdropUrl ? 'none' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`,
             }} />
 

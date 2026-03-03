@@ -58,6 +58,7 @@ export default function Home() {
 
   // Visuals State
   const [backdropPositionPercent, setBackdropPositionPercent] = useState(50);
+  const [backdropPositionYPercent, setBackdropPositionYPercent] = useState(50);
   const [customBackdrop, setCustomBackdrop] = useState<string | null>(null);
   const [availableBackdrops, setAvailableBackdrops] = useState<{ url: string; thumbnail: string }[]>([]);
 
@@ -355,6 +356,7 @@ export default function Home() {
       fontSizeMultiplier,
       textStyle,
       backdropPositionPercent,
+      backdropPositionYPercent,
       showPoster,
       customBackdropUrl: customBackdrop,
       processedBackdropUrl,
@@ -699,6 +701,8 @@ export default function Home() {
                 setShowPoster={setShowPoster}
                 backdropPositionPercent={backdropPositionPercent}
                 setBackdropPositionPercent={setBackdropPositionPercent}
+                backdropPositionYPercent={backdropPositionYPercent}
+                setBackdropPositionYPercent={setBackdropPositionYPercent}
                 customBackdrop={customBackdrop}
                 setCustomBackdrop={setCustomBackdrop}
                 availableBackdrops={availableBackdrops}

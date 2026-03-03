@@ -18,6 +18,7 @@ export function TemplateLetterboxd({
     fontSizeMultiplier = 1,
     textStyle = DEFAULT_STYLE,
     backdropPositionPercent = 50,
+    backdropPositionYPercent = 50,
     showPoster = false,
     customBackdropUrl,
     processedBackdropUrl,
@@ -59,7 +60,7 @@ export function TemplateLetterboxd({
                 height: '720px',
                 backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
                 backgroundSize: 'cover',
-                backgroundPosition: `${backdropPositionPercent}% center`,
+                backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
                 filter: cssFilter,
             }} />
 

@@ -29,6 +29,7 @@ export interface TemplateProps {
     fontSizeMultiplier?: number;
     textStyle?: TextStyle;
     backdropPositionPercent?: number;
+    backdropPositionYPercent?: number;
     showPoster?: boolean;
     customBackdropUrl?: string | null;
     processedBackdropUrl?: string | null; // Pre-processed image with filters baked in
