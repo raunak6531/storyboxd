@@ -77,8 +77,6 @@ export function TemplateLetterboxd({
                 position: 'absolute',
                 top: 0, left: 0, right: 0,
                 height: '72px',
-                background: 'rgba(20,24,28,0.85)',
-                borderBottom: `1px solid ${lbBorder}`,
                 display: 'flex',
                 alignItems: 'center',
                 padding: '0 48px',
@@ -102,6 +100,7 @@ export function TemplateLetterboxd({
                         fontSize: '26px',
                         fontWeight: 700,
                         letterSpacing: '1px',
+                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
                     }}>Letterboxd</span>
                 </div>
             </div>
@@ -109,97 +108,105 @@ export function TemplateLetterboxd({
             {/* Content card area */}
             <div style={{
                 position: 'absolute',
-                top: '580px', left: '48px', right: '48px', bottom: '48px',
+                top: '480px', left: '64px', right: '64px', bottom: '64px',
                 display: 'flex',
-                flexDirection: 'row',
-                gap: '40px',
+                flexDirection: 'column',
                 zIndex: 5,
             }}>
-                {/* Poster column */}
-                <div style={{ flexShrink: 0 }}>
-                    <img
-                        src={proxyUrl(data.posterUrl)}
-                        alt=""
-                        style={{
-                            width: '260px',
-                            height: '390px',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                            border: `1px solid ${lbBorder}`,
-                            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
-                        }}
-                    />
-                </div>
-
-                {/* Info column */}
+                {/* Header Profile / Poster Row */}
                 <div style={{
-                    flex: 1,
                     display: 'flex',
-                    flexDirection: 'column',
+                    flexDirection: 'row',
+                    alignItems: showPoster && data.posterUrl ? 'flex-end' : 'center',
+                    gap: '40px',
+                    marginBottom: '32px',
+                    position: 'relative',
+                    zIndex: 6,
+                    height: showPoster && data.posterUrl ? 'auto' : '180px',
                 }}>
-                    {/* Title + year */}
-                    <h1 style={{
-                        color: '#ffffff',
-                        fontSize: '68px',
-                        fontWeight: 700,
-                        lineHeight: 1.0,
-                        marginBottom: '8px',
-                    }}>
-                        {data.movieTitle}
-                    </h1>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '24px',
-                    }}>
-                        <span style={{ color: '#9ab', fontSize: '28px' }}>{data.year}</span>
-                        {data.director && (
-                            <>
-                                <span style={{ color: '#456', fontSize: '24px' }}>•</span>
-                                <span style={{ color: '#9ab', fontSize: '26px' }}>
-                                    Directed by <span style={{ color: '#fff' }}>{data.director}</span>
-                                </span>
-                            </>
-                        )}
-                    </div>
+                    {/* Floating Poster */}
+                    {showPoster && data.posterUrl && (
+                        <div style={{ flexShrink: 0, marginTop: '-240px' }}>
+                            <img
+                                src={proxyUrl(data.posterUrl)}
+                                alt=""
+                                style={{
+                                    width: '280px',
+                                    height: '420px',
+                                    objectFit: 'cover',
+                                    borderRadius: '12px',
+                                    border: `2px solid #2c3440`,
+                                    boxShadow: '0 12px 40px rgba(0,0,0,0.8)',
+                                }}
+                            />
+                        </div>
+                    )}
 
-                    {/* Stars row */}
+                    {/* Movie Info */}
                     <div style={{
+                        flex: 1,
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        marginBottom: '32px',
+                        flexDirection: 'column',
+                        paddingBottom: showPoster && data.posterUrl ? '20px' : '0px',
                     }}>
-                        <StarRating rating={data.ratingNumber} size={44} color={lbGreen} />
-                        <span style={{
-                            color: '#678',
-                            fontSize: '24px',
+                        <h1 style={{
+                            color: '#ffffff',
+                            fontSize: '64px',
+                            fontWeight: 700,
+                            lineHeight: 1.1,
+                            marginBottom: '12px',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.8)',
                         }}>
-                            Reviewed by <span style={{ color: lbGreen }}>@{data.username}</span>
-                        </span>
+                            {data.movieTitle}
+                        </h1>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                        }}>
+                            <span style={{ color: '#9ab', fontSize: '28px', fontWeight: 500 }}>{data.year}</span>
+                            {data.director && (
+                                <>
+                                    <span style={{ color: '#456', fontSize: '24px' }}>•</span>
+                                    <span style={{ color: '#9ab', fontSize: '26px' }}>
+                                        Directed by <span style={{ color: '#fff', fontWeight: 600 }}>{data.director}</span>
+                                    </span>
+                                </>
+                            )}
+                        </div>
                     </div>
-
-                    {/* Divider */}
-                    <div style={{
-                        height: '1px',
-                        backgroundColor: lbBorder,
-                        marginBottom: '32px',
-                    }} />
-
-                    {/* Review text */}
-                    <p style={{
-                        color: '#9ab',
-                        fontSize: `${reviewFontSize}px`,
-                        fontWeight: fontWeight,
-                        fontStyle: fontStyleCss,
-                        letterSpacing: `${textStyle.letterSpacing}px`,
-                        lineHeight: textStyle.lineHeight,
-                        textAlign: textStyle.textAlign,
-                    }}>
-                        {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
-                    </p>
                 </div>
+
+                {/* Rating and Reviewer Row */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    padding: '24px 0',
+                    borderBottom: `1px solid ${lbBorder}`,
+                    marginBottom: '40px',
+                }}>
+                    <StarRating rating={data.ratingNumber} size={48} color={lbGreen} />
+                    <span style={{
+                        color: '#678',
+                        fontSize: '26px',
+                    }}>
+                        Reviewed by <span style={{ color: '#fff', fontWeight: 600 }}>@{data.username}</span>
+                    </span>
+                </div>
+
+                {/* Review text */}
+                <p style={{
+                    color: '#9ab',
+                    fontSize: `${reviewFontSize}px`,
+                    fontWeight: fontWeight,
+                    fontStyle: fontStyleCss,
+                    letterSpacing: `${textStyle.letterSpacing}px`,
+                    lineHeight: textStyle.lineHeight,
+                    textAlign: textStyle.textAlign === 'center' ? 'left' : textStyle.textAlign, // Force left-align unless user explicitly sets otherwise later
+                }}>
+                    {getQuoteWrapped(data.reviewText, textStyle.quoteStyle)}
+                </p>
             </div>
 
             {/* Bottom bar - Letterboxd style */}
