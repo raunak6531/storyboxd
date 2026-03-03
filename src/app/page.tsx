@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
 interface RecentReview {
@@ -284,7 +284,7 @@ export default function Home() {
 
   const handleRandomize = useCallback(() => {
     // 1. Template
-    const templates: TemplateType[] = ['bottom', 'topLeft', 'centered', 'minimal', 'split', 'magazine', 'cinematic', 'gradient', 'duotone', 'newspaper', 'letterboxd'];
+    const templates: TemplateType[] = ['bottom', 'topLeft', 'centered', 'minimal', 'split', 'magazine', 'cinematic', 'gradient', 'duotone', 'newspaper', 'letterboxd', 'wrapped'];
     const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
     setSelectedTemplate(randomTemplate);
 
@@ -381,6 +381,7 @@ export default function Home() {
       case 'duotone': return <TemplateDuotone {...props} />;
       case 'newspaper': return <TemplateNewspaper {...props} />;
       case 'letterboxd': return <TemplateLetterboxd {...props} />;
+      case 'wrapped': return <TemplateWrapped {...props} />;
     }
   };
 

@@ -306,6 +306,40 @@ export default function StoryControls(props: StoryControlsProps) {
                   </svg>
                 )
               },
+              {
+                id: 'wrapped', label: 'Wrapped', preview: (
+                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="wrapGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#ff006e" />
+                        <stop offset="100%" stopColor="#1a0033" />
+                      </linearGradient>
+                    </defs>
+                    <rect width="36" height="64" rx="2" fill="url(#wrapGrad)" />
+
+                    {/* Year & Director top left */}
+                    <rect x="4" y="6" width="6" height="2" fill="#ff006e" />
+                    <rect x="4" y="9" width="10" height="1.5" fill="#fff" opacity="0.9" />
+
+                    {/* Username top right */}
+                    <rect x="22" y="6" width="10" height="3" rx="1.5" fill="transparent" stroke="#ff006e" strokeWidth="0.5" />
+
+                    {/* Massive Title */}
+                    <rect x="4" y="22" width="28" height="6" fill="#fff" />
+                    <rect x="4" y="29" width="18" height="6" fill="#fff" />
+
+                    {/* Radial Rating Config */}
+                    <circle cx="28" cy="54" r="6" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" />
+                    <circle cx="28" cy="54" r="6" stroke="#ff006e" strokeWidth="1" fill="none" strokeDasharray="37" strokeDashoffset="9" />
+
+                    {/* Review text */}
+                    <rect x="4" y="48" width="14" height="1.5" rx="0.75" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="51" width="16" height="1.5" rx="0.75" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="54" width="12" height="1.5" rx="0.75" fill="#fff" opacity="0.8" />
+                    <rect x="4" y="57" width="15" height="1.5" rx="0.75" fill="#fff" opacity="0.8" />
+                  </svg>
+                )
+              },
             ] as { id: TemplateType; label: string; preview: React.ReactNode }[]).map((template) => (
               <button
                 key={template.id}

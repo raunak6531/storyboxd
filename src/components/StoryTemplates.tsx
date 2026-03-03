@@ -13,3 +13,4 @@ export * from './templates/TemplateGradient';
 export * from './templates/TemplateDuotone';
 export * from './templates/TemplateNewspaper';
 export * from './templates/TemplateLetterboxd';
+export * from './templates/TemplateWrapped';
