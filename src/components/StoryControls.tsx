@@ -285,21 +285,7 @@ export default function StoryControls(props: StoryControlsProps) {
                   </svg>
                 )
               },
-              {
-                id: 'neon', label: 'Neon', preview: (
-                  <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
-                    <rect width="36" height="64" rx="2" fill="#050510" />
-                    <rect x="4" y="4" width="28" height="56" rx="3" fill="none" stroke="#00e054" strokeWidth="0.5" strokeOpacity="0.6" />
-                    <rect x="8" y="18" width="20" height="3" rx="1" fill="#fff" opacity="0.9" />
-                    <rect x="10" y="23" width="16" height="1.5" rx="0.75" fill="#00e054" opacity="0.6" />
-                    <rect x="14" y="30" width="8" height="2" rx="1" fill="#00e054" opacity="0.7" />
-                    <rect x="12" y="35" width="12" height="0.5" fill="#00e054" opacity="0.4" />
-                    <rect x="8" y="40" width="20" height="1" rx="0.5" fill="#fff" opacity="0.3" />
-                    <rect x="9" y="43" width="18" height="1" rx="0.5" fill="#fff" opacity="0.3" />
-                    <rect x="10" y="46" width="16" height="1" rx="0.5" fill="#fff" opacity="0.3" />
-                  </svg>
-                )
-              },
+
               {
                 id: 'vhs', label: 'Retro VHS', preview: (
                   <svg viewBox="0 0 36 64" fill="none" className="w-full h-full">
@@ -644,8 +630,8 @@ export default function StoryControls(props: StoryControlsProps) {
                   key={i}
                   onClick={() => props.setCustomBackdrop(bd.url)}
                   className={`shrink-0 w-24 h-14 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${props.customBackdrop === bd.url
-                      ? 'border-[#00e054] ring-1 ring-[#00e054]/50'
-                      : 'border-zinc-700/50 hover:border-zinc-500'
+                    ? 'border-[#00e054] ring-1 ring-[#00e054]/50'
+                    : 'border-zinc-700/50 hover:border-zinc-500'
                     }`}
                 >
                   <img
