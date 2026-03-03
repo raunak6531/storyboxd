@@ -393,18 +393,18 @@ export default function Home() {
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className={`relative z-10 max-w-6xl mx-auto px-6 py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative z-10 max-w-6xl mx-auto px-4 py-6 lg:px-6 lg:py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
 
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-4 py-2 mb-6">
+        <div className="text-center mb-6 lg:mb-12">
+          <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6">
             <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
-            <span className="text-sm text-zinc-400">Letterboxd → Instagram</span>
+            <span className="text-xs lg:text-sm text-zinc-400">Letterboxd → Instagram</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-2 lg:mb-4 tracking-tight">
             <span className="bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">Story</span>
             <span className="bg-gradient-to-r from-[#00e054] to-emerald-400 bg-clip-text text-transparent">Boxd</span>
           </h1>
-          <p className="text-lg md:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
+          <p className="text-base lg:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
             Transform your Letterboxd reviews into stunning Instagram stories
           </p>
         </div>
@@ -680,7 +680,7 @@ export default function Home() {
 
         {reviewData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+            <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-center lg:items-start justify-center">
 
               <StoryControls
                 selectedTemplate={selectedTemplate}
@@ -754,7 +754,7 @@ export default function Home() {
         </div>
 
         {reviewData && (
-          <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-lg border-t border-zinc-800 p-4 lg:hidden z-50 flex gap-3 pb-safe">
+          <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-xl border-t border-zinc-800 px-4 py-3 lg:hidden z-50 flex gap-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
             <button
               onClick={handleShare}
               disabled={sharing}

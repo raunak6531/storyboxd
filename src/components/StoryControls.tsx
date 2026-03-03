@@ -81,7 +81,7 @@ const ControlSection = ({
   <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/30">
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between p-4 text-left font-medium text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-colors"
+      className="w-full flex items-center justify-between p-3 lg:p-4 text-left font-medium text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-colors"
     >
       <span>{title}</span>
       <svg
@@ -93,8 +93,8 @@ const ControlSection = ({
     </button>
 
     {isOpen && (
-      <div className="p-4 pt-0 border-t border-zinc-800/50 animate-in slide-in-from-top-2 duration-200">
-        <div className="pt-4 flex flex-col gap-6">
+      <div className="p-3 lg:p-4 pt-0 border-t border-zinc-800/50 animate-in slide-in-from-top-2 duration-200">
+        <div className="pt-3 lg:pt-4 flex flex-col gap-4 lg:gap-6">
           {children}
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function StoryControls(props: StoryControlsProps) {
   };
 
   return (
-    <div className="w-full lg:w-[560px] xl:w-[600px] flex-none flex flex-col gap-4">
+    <div className="w-full flex-none flex flex-col gap-3 lg:gap-4 lg:w-[560px] xl:w-[600px]">
       {/* SHUFFLE BUTTON */}
       <button
         onClick={props.onRandomize}
@@ -135,7 +135,7 @@ export default function StoryControls(props: StoryControlsProps) {
         {/* Template Selection with Mini Previews */}
         <div>
           <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-3 block">Template</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 lg:grid lg:grid-cols-3 -mx-1 px-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {([
               {
                 id: 'bottom', label: 'Classic', preview: (
@@ -344,7 +344,7 @@ export default function StoryControls(props: StoryControlsProps) {
               <button
                 key={template.id}
                 onClick={() => props.setSelectedTemplate(template.id)}
-                className={`relative rounded-xl border-2 transition-all duration-300 overflow-hidden ${props.selectedTemplate === template.id
+                className={`relative rounded-xl border-2 transition-all duration-300 overflow-hidden flex-shrink-0 w-[100px] lg:w-auto ${props.selectedTemplate === template.id
                   ? 'border-[#00e054] bg-[#00e054]/10 shadow-[0_0_12px_rgba(0,224,84,0.15)]'
                   : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
                   }`}
