@@ -98,27 +98,61 @@ export function TemplateNewspaper({
                 position: 'relative',
                 zIndex: 2,
             }}>
-                <h1 style={{
-                    color: '#111',
-                    fontSize: '88px',
-                    fontWeight: 900,
-                    lineHeight: 0.95,
-                    marginBottom: '20px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '-1px',
-                }}>
-                    {data.movieTitle}
-                </h1>
-                {data.director && (
-                    <p style={{
-                        color: '#555',
-                        fontSize: '28px',
-                        fontWeight: 500,
-                        fontStyle: 'italic',
+                <div style={{ maxWidth: '700px' }}>
+                    <h1 style={{
+                        color: '#111',
+                        fontSize: '88px',
+                        fontWeight: 900,
+                        lineHeight: 0.95,
+                        marginBottom: '20px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '-1px',
                     }}>
-                        Directed by {data.director}
-                    </p>
-                )}
+                        {data.movieTitle}
+                    </h1>
+                    {data.director && (
+                        <p style={{
+                            color: '#555',
+                            fontSize: '28px',
+                            fontWeight: 500,
+                            fontStyle: 'italic',
+                        }}>
+                            Directed by {data.director}
+                        </p>
+                    )}
+                </div>
+
+                {/* Verdict Box */}
+                <div style={{
+                    position: 'absolute',
+                    top: '40px',
+                    right: '64px',
+                    backgroundColor: '#f5f0e8',
+                    border: '3px solid #222',
+                    padding: '14px 24px',
+                    zIndex: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '8px 8px 0px rgba(0,0,0,0.15)',
+                    transform: 'rotate(-1.5deg)',
+                }}>
+                    <span style={{
+                        fontSize: '18px',
+                        fontWeight: 900,
+                        letterSpacing: '3px',
+                        color: '#111',
+                        marginBottom: '4px',
+                        textTransform: 'uppercase',
+                        borderBottom: '1px solid #222',
+                        width: '100%',
+                        textAlign: 'center',
+                        paddingBottom: '2px'
+                    }}>Verdict</span>
+                    <div style={{ marginTop: '0px', transform: 'translateY(-4px)' }}>
+                        <StarRating rating={data.ratingNumber} size={40} color="#111" shadow="none" />
+                    </div>
+                </div>
             </div>
 
             {/* Image + body section */}
@@ -130,42 +164,34 @@ export function TemplateNewspaper({
                 position: 'relative',
                 zIndex: 2,
             }}>
-                {/* Poster or backdrop image */}
-                {showPoster && data.posterUrl ? (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <img
-                            src={proxyUrl(data.posterUrl)}
-                            alt=""
-                            style={{
-                                width: '400px',
-                                height: '260px',
-                                objectFit: 'cover',
-                                border: '1px solid #ccc',
-                                filter: 'grayscale(60%) contrast(1.1)',
-                            }}
-                        />
-                    </div>
-                ) : (
-                    <div style={{
-                        width: '100%',
-                        height: '450px',
-                        backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
-                        backgroundSize: 'cover',
-                        backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
-                        filter: processedBackdropUrl ? 'grayscale(60%) contrast(1.1)' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(60%) contrast(1.1)`,
-                        border: '1px solid #ccc',
-                    }} />
-                )}
-
-                {/* Rating */}
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '20px',
-                    paddingBottom: '20px',
-                    borderBottom: '1px solid #ccc',
-                }}>
-                    <StarRating rating={data.ratingNumber} size={44} color={accentColor} shadow="none" />
+                {/* Image Section */}
+                <div style={{ position: 'relative' }}>
+                    {/* Poster or backdrop image */}
+                    {showPoster && data.posterUrl ? (
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <img
+                                src={proxyUrl(data.posterUrl)}
+                                alt=""
+                                style={{
+                                    width: '400px',
+                                    height: '600px',
+                                    objectFit: 'cover',
+                                    border: '1px solid #ccc',
+                                    filter: 'grayscale(60%) contrast(1.1)',
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <div style={{
+                            width: '100%',
+                            height: '450px',
+                            backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
+                            backgroundSize: 'cover',
+                            backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
+                            filter: processedBackdropUrl ? 'grayscale(60%) contrast(1.1)' : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%) grayscale(60%) contrast(1.1)`,
+                            border: '1px solid #ccc',
+                        }} />
+                    )}
                 </div>
 
                 {/* Review body - newspaper column style */}

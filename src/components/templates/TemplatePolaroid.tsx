@@ -150,8 +150,11 @@ export function TemplatePolaroid({
                         padding: '24px 0',
                         borderTop: '1px solid rgba(255,255,255,0.1)',
                         borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        textAlign: 'left', // Move toward the center
                     }}>
-                        <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+                        <div style={{ transform: 'translateY(-15px)' }}>
+                            <StarRating rating={data.ratingNumber} size={56} color={accentColor} />
+                        </div>
                     </div>
 
                     {/* Review */}

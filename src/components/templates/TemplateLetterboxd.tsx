@@ -186,13 +186,16 @@ export function TemplateLetterboxd({
                     borderBottom: `1px solid ${lbBorder}`,
                     marginBottom: '40px',
                 }}>
-                    <StarRating rating={data.ratingNumber} size={48} color={lbGreen} />
-                    <span style={{
-                        color: '#678',
-                        fontSize: '26px',
-                    }}>
-                        Reviewed by <span style={{ color: '#fff', fontWeight: 600 }}>@{data.username}</span>
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', transform: 'translateY(-10px)' }}>
+                        <StarRating rating={data.ratingNumber} size={48} color={lbGreen} />
+                        <span style={{
+                            color: '#678',
+                            fontSize: '26px',
+                            transform: 'translateY(5px)', // Adjusted for alignment
+                        }}>
+                            Reviewed by <span style={{ color: '#fff', fontWeight: 600 }}>@{data.username}</span>
+                        </span>
+                    </div>
                 </div>
 
                 {/* Review text */}

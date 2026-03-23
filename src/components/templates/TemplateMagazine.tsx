@@ -162,7 +162,7 @@ export function TemplateMagazine({
                         )}
                     </div>
 
-                    {/* Rating bar */}
+                     {/* Rating bar */}
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -171,9 +171,11 @@ export function TemplateMagazine({
                         paddingBottom: '24px',
                         borderBottom: '2px solid #333333',
                     }}>
-                        <StarRating rating={data.ratingNumber} size={44} color={accentColor} />
-                        <span style={{ color: '#666666', fontSize: '26px' }}>|</span>
-                        <span style={{ color: '#888888', fontSize: '26px' }}>@{data.username}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', transform: 'translateY(-10px)' }}>
+                            <StarRating rating={data.ratingNumber} size={44} color={accentColor} />
+                            <span style={{ color: '#666666', fontSize: '26px', transform: 'translateY(5px)' }}>|</span>
+                            <span style={{ color: '#888888', fontSize: '26px', transform: 'translateY(5px)' }}>@{data.username}</span>
+                        </div>
                     </div>
 
                     {/* Review text */}

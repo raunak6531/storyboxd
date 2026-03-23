@@ -147,15 +147,18 @@ export function TemplateDuotone({
                         gap: '24px',
                         marginBottom: '32px',
                     }}>
-                        <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '24px' }}>|</span>
-                        <span style={{
-                            color: 'rgba(255,255,255,0.5)',
-                            fontSize: '28px',
-                            fontWeight: 400,
-                        }}>
-                            @{data.username}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', transform: 'translateY(-10px)' }}>
+                            <StarRating rating={data.ratingNumber} size={48} color={accentColor} />
+                            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '24px', transform: 'translateY(5px)' }}>|</span>
+                            <span style={{
+                                color: 'rgba(255,255,255,0.5)',
+                                fontSize: '28px',
+                                fontWeight: 400,
+                                transform: 'translateY(5px)',
+                            }}>
+                                @{data.username}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Review text */}
