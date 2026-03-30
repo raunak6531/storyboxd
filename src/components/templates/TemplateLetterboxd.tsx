@@ -72,36 +72,22 @@ export function TemplateLetterboxd({
                 background: `linear-gradient(to bottom, transparent 0%, ${lbDark} 100%)`,
             }} />
 
-            {/* Letterboxd-style nav bar at top */}
+            {/* Top branding bar with dots */}
             <div style={{
                 position: 'absolute',
-                top: 0, left: 0, right: 0,
-                height: '72px',
+                top: '0', left: '0', right: '0',
+                height: '100px',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 48px',
+                padding: '0 64px',
                 zIndex: 10,
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+                pointerEvents: 'none',
             }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        gap: '4px',
-                    }}>
-                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#ff8000' }} />
-                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: lbGreen }} />
-                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#40bcf4' }} />
-                    </div>
-                    <span style={{
-                        color: '#fff',
-                        fontSize: '26px',
-                        fontWeight: 700,
-                        letterSpacing: '1px',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                    }}>Letterboxd</span>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#ff8000', flexShrink: 0 }} />
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: lbGreen, flexShrink: 0, boxShadow: '0 0 12px rgba(0,224,84,0.3)' }} />
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#40bcf4', flexShrink: 0 }} />
                 </div>
             </div>
 
@@ -163,6 +149,7 @@ export function TemplateLetterboxd({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '12px',
+                            marginTop: '12px',
                         }}>
                             <span style={{ color: '#9ab', fontSize: '28px', fontWeight: 500 }}>{data.year}</span>
                             {data.director && (
@@ -174,27 +161,24 @@ export function TemplateLetterboxd({
                                 </>
                             )}
                         </div>
+                        {/* New Attribution Location */}
+                        <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '20px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Review by</span>
+                            <span style={{ color: lbGreen, fontSize: '24px', fontWeight: 700, transform: 'translateY(-5px)' }}>@{data.username}</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Rating and Reviewer Row */}
+                {/* Rating Row */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '16px',
                     padding: '24px 0',
                     borderBottom: `1px solid ${lbBorder}`,
                     marginBottom: '40px',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', transform: 'translateY(-10px)' }}>
-                        <StarRating rating={data.ratingNumber} size={48} color={lbGreen} />
-                        <span style={{
-                            color: '#678',
-                            fontSize: '26px',
-                            transform: 'translateY(5px)', // Adjusted for alignment
-                        }}>
-                            Reviewed by <span style={{ color: '#fff', fontWeight: 600 }}>@{data.username}</span>
-                        </span>
+                    <div style={{ transform: 'translateY(-10px)' }}>
+                        <StarRating rating={data.ratingNumber} size={52} color={lbGreen} />
                     </div>
                 </div>
 
@@ -212,23 +196,22 @@ export function TemplateLetterboxd({
                 </p>
             </div>
 
-            {/* Bottom bar - Letterboxd style */}
+            {/* Bottom bar - Simplified Branding */}
             <div style={{
                 position: 'absolute',
                 bottom: 0, left: 0, right: 0,
-                height: '56px',
+                height: '72px',
                 background: lbMid,
                 borderTop: `1px solid ${lbBorder}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
                 zIndex: 10,
             }}>
                 <span style={{
                     color: '#678',
                     fontSize: '20px',
-                    letterSpacing: '2px',
+                    letterSpacing: '3px',
                     textTransform: 'uppercase',
                 }}>letterboxd.com</span>
             </div>
