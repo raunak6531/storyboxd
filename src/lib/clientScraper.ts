@@ -219,14 +219,45 @@ async function fetchMicrolink(targetUrl: string): Promise<ReviewData> {
     console.log('[Scraper] Got movie details - Director:', director, 'Poster:', posterUrl);
   }
 
-  // Clean the review text - remove Microlink's metadata prefix
-  let reviewText = data.description || '';
-  // Remove patterns like "Username's review published on Letterboxd: actual review"
-  reviewText = reviewText
-    .replace(/^[^']+?'s review published on Letterboxd:\s*/i, '')
-    .replace(/^.*?published on Letterboxd:\s*/i, '')
-    .replace(/^Review by .*?:\s*/i, '')
-    .trim();
+  // Try to get the FULL review text from the page HTML (Microlink description is truncated)
+  let reviewText = '';
+  const pageUrlForReview = expandedUrl || targetUrl;
+  try {
+    const html = await fetchHtml(pageUrlForReview);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    // First try JSON-LD reviewBody (most reliable, always complete)
+    const scriptTags = doc.querySelectorAll('script[type="application/ld+json"]');
+    scriptTags.forEach(script => {
+      try {
+        const json = JSON.parse(script.textContent || '{}');
+        if (json['@type'] === 'Review' && json.reviewBody) {
+          reviewText = json.reviewBody;
+        }
+      } catch (e) {}
+    });
+    // Fallback: .body-text div inside .review
+    if (!reviewText) {
+      const bodyText = doc.querySelector('.review .body-text');
+      if (bodyText) reviewText = bodyText.textContent || '';
+    }
+    console.log('[Scraper] Full review text from HTML, length:', reviewText.length);
+  } catch (htmlErr) {
+    console.warn('[Scraper] Could not fetch full review from HTML, falling back to Microlink description:', htmlErr);
+  }
+
+  // Fallback to Microlink's (truncated) description if HTML scraping failed
+  if (!reviewText) {
+    reviewText = data.description || '';
+    // Remove patterns like "Username's review published on Letterboxd: actual review"
+    reviewText = reviewText
+      .replace(/^[^']+?'s review published on Letterboxd:\s*/i, '')
+      .replace(/^.*?published on Letterboxd:\s*/i, '')
+      .replace(/^Review by .*?:\s*/i, '')
+      .trim();
+  } else {
+    reviewText = reviewText.trim();
+  }
 
   const result = {
     movieTitle: cleaned.title || 'Unknown Title',
