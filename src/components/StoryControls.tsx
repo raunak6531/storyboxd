@@ -375,7 +375,7 @@ export default function StoryControls(props: StoryControlsProps) {
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Size</label>
               <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                {props.fontSizeMultiplier === 1 ? 'Auto' : `${Math.round(props.fontSizeMultiplier * 100)}%`}
+                {props.fontSizeMultiplier === 1 ? 'Auto' : `${Math.round(props.fontSizeMultiplier * 100)}%`} {props.fontSizeMultiplier > 1.4 && <span style={{ color: '#00e054', fontSize: '10px' }}>↑ big</span>}
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -383,8 +383,8 @@ export default function StoryControls(props: StoryControlsProps) {
               <input
                 type="range"
                 min="0.6"
-                max="1.4"
-                step="0.1"
+                max="2.0"
+                step="0.05"
                 value={props.fontSizeMultiplier}
                 onChange={(e) => props.setFontSizeMultiplier(parseFloat(e.target.value))}
                 className="flex-1 h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#00e054]"
