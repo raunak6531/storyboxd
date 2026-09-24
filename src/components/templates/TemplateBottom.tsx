@@ -26,8 +26,11 @@ export function TemplateBottom({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(52 * scale);
 
@@ -58,8 +61,8 @@ export function TemplateBottom({
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#000000',
             overflow: 'hidden',
             fontFamily: font,
@@ -88,7 +91,7 @@ export function TemplateBottom({
             <div style={{
                 position: 'absolute',
                 bottom: 0, left: 0, right: 0,
-                padding: '80px 64px',
+                padding: aspectRatio === '1:1' || aspectRatio === '16:9' ? '40px 64px' : '80px 64px',
                 textAlign: 'center',
                 zIndex: 2,
             }}>
@@ -99,8 +102,8 @@ export function TemplateBottom({
                     fontStyle: fontStyleCss,
                     letterSpacing: `${textStyle.letterSpacing}px`,
                     lineHeight: textStyle.lineHeight,
-                    marginBottom: '48px',
-                    maxWidth: '950px',
+                    marginBottom: aspectRatio === '1:1' || aspectRatio === '16:9' ? '24px' : '48px',
+                    maxWidth: aspectRatio === '16:9' ? '1400px' : '950px',
                     marginLeft: 'auto',
                     marginRight: 'auto',
                     textShadow: colors.textShadow,

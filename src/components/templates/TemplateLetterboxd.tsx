@@ -26,8 +26,11 @@ export function TemplateLetterboxd({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(42 * scale);
 
@@ -44,11 +47,15 @@ export function TemplateLetterboxd({
     const lbMid = '#1c2228';
     const lbBorder = '#2c3440';
 
+    const isCompact = aspectRatio === '1:1' || aspectRatio === '16:9';
+    const backdropH = isCompact ? 380 : aspectRatio === '4:5' ? 520 : 720;
+    const cardTop = isCompact ? 280 : aspectRatio === '4:5' ? 380 : 480;
+
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: lbDark,
             overflow: 'hidden',
             fontFamily: font,
@@ -57,7 +64,7 @@ export function TemplateLetterboxd({
             <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0,
-                height: '720px',
+                height: `${backdropH}px`,
                 backgroundImage: getBackgroundImage(data, customBackdropUrl, processedBackdropUrl),
                 backgroundSize: 'cover',
                 backgroundPosition: `${backdropPositionPercent}% ${backdropPositionYPercent}%`,
@@ -67,7 +74,7 @@ export function TemplateLetterboxd({
             {/* Gradient fade from backdrop to dark */}
             <div style={{
                 position: 'absolute',
-                top: '480px', left: 0, right: 0,
+                top: `${cardTop}px`, left: 0, right: 0,
                 height: '280px',
                 background: `linear-gradient(to bottom, transparent 0%, ${lbDark} 100%)`,
             }} />
@@ -94,7 +101,7 @@ export function TemplateLetterboxd({
             {/* Content card area */}
             <div style={{
                 position: 'absolute',
-                top: '480px', left: '64px', right: '64px', bottom: '64px',
+                top: `${cardTop}px`, left: '64px', right: '64px', bottom: '64px',
                 display: 'flex',
                 flexDirection: 'column',
                 zIndex: 5,

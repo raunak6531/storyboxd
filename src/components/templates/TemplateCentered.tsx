@@ -26,8 +26,11 @@ export function TemplateCentered({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(44 * scale);
 
@@ -63,8 +66,8 @@ export function TemplateCentered({
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#000000',
             overflow: 'hidden',
             fontFamily: font,
@@ -107,10 +110,10 @@ export function TemplateCentered({
                     backgroundColor: cardBg,
                     backdropFilter: 'blur(14px)',
                     borderRadius: '24px',
-                    padding: '72px',
+                    padding: aspectRatio === '1:1' || aspectRatio === '16:9' ? '48px 56px' : '72px',
                     margin: '0 64px',
                     textAlign: 'center',
-                    maxWidth: '920px',
+                    maxWidth: aspectRatio === '16:9' ? '1200px' : '920px',
                     boxShadow: textStyle.colorTheme === 'neon'
                         ? '0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(79,209,197,0.12)'
                         : '0 40px 80px rgba(0,0,0,0.5)',

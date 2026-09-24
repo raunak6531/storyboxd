@@ -26,8 +26,11 @@ export function TemplateNewspaper({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(40 * scale);
 
@@ -38,8 +41,8 @@ export function TemplateNewspaper({
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#f5f0e8',
             overflow: 'hidden',
             fontFamily: font,

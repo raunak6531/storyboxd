@@ -26,8 +26,11 @@ export function TemplateTopLeft({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(48 * scale);
 
@@ -53,11 +56,13 @@ export function TemplateTopLeft({
         ? 'none'
         : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
+    const isCompact = aspectRatio === '1:1' || aspectRatio === '16:9';
+
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#000000',
             overflow: 'hidden',
             fontFamily: font,
@@ -96,7 +101,7 @@ export function TemplateTopLeft({
             <div style={{ position: 'relative', zIndex: 2 }}>
                 <div style={{
                     position: 'absolute',
-                    top: '100px',
+                    top: isCompact ? '48px' : '100px',
                     left: '64px',
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -144,7 +149,7 @@ export function TemplateTopLeft({
 
                 <div style={{
                     position: 'absolute',
-                    top: '500px',
+                    top: isCompact ? '380px' : '500px',
                     left: '64px',
                     right: '64px',
                 }}>

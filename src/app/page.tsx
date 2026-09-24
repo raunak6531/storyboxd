@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle } from '@/components/StoryTemplates';
+import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle, AspectRatio, ASPECT_RATIOS } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
 
 interface RecentReview {
@@ -31,8 +31,13 @@ export default function Home() {
   const [error, setError] = useState('');
   const [reviewData, setReviewData] = useState<ReviewData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('bottom');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
   const [mounted, setMounted] = useState(false);
   const [recentDownloads, setRecentDownloads] = useState<RecentReview[]>([]);
+
+  const currentRatioConfig = ASPECT_RATIOS[aspectRatio] || ASPECT_RATIOS['9:16'];
+  const canvasWidth = currentRatioConfig.width;
+  const canvasHeight = currentRatioConfig.height;
 
   // Custom mode form state
   const [customTitle, setCustomTitle] = useState('');
@@ -271,8 +276,8 @@ export default function Home() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const canvas = await html2canvas(storyRef.current, {
-      width: 1080,
-      height: 1920,
+      width: canvasWidth,
+      height: canvasHeight,
       scale: 1,
       useCORS: true,
       allowTaint: true,
@@ -312,7 +317,7 @@ export default function Home() {
     try {
       const dataUrl = await generateImage();
       const link = document.createElement('a');
-      link.download = `${reviewData.movieTitle || 'story'}-letterboxd.png`;
+      link.download = `${reviewData.movieTitle || 'story'}-${aspectRatio.replace(':', 'x')}.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
@@ -324,7 +329,7 @@ export default function Home() {
     } finally {
       setDownloading(false);
     }
-  }, [reviewData, url, saveToRecentDownloads]);
+  }, [reviewData, url, saveToRecentDownloads, canvasWidth, canvasHeight, aspectRatio]);
 
   const handleShare = async () => {
     if (!storyRef.current || !reviewData) return;
@@ -367,6 +372,9 @@ export default function Home() {
       backdropBrightness,
       backdropSaturation,
       accentColor,
+      canvasWidth,
+      canvasHeight,
+      aspectRatio,
     };
 
     switch (selectedTemplate) {
@@ -814,6 +822,8 @@ export default function Home() {
             <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-start justify-center">
 
               <StoryControls
+                aspectRatio={aspectRatio}
+                setAspectRatio={setAspectRatio}
                 selectedTemplate={selectedTemplate}
                 setSelectedTemplate={setSelectedTemplate}
                 fontSizeMultiplier={fontSizeMultiplier}
@@ -861,16 +871,45 @@ export default function Home() {
                 onRandomize={handleRandomize}
               />
 
-              <div className="flex-shrink-0 lg:sticky lg:top-8">
-                <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl">
-                  <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{
-                    width: '270px',
-                    height: '480px',
-                  }}>
-                    <div className="transform scale-[0.25] origin-top-left">
+              <div className="flex-shrink-0 lg:sticky lg:top-8 flex flex-col items-center">
+                <div className={`bg-zinc-800 p-2 shadow-2xl transition-all duration-300 ${
+                  aspectRatio === '9:16'
+                    ? 'rounded-[2.5rem]'
+                    : aspectRatio === '4:5'
+                      ? 'rounded-[2rem]'
+                      : 'rounded-[1.5rem]'
+                }`}>
+                  <div
+                    className={`bg-black overflow-hidden relative transition-all duration-300 ${
+                      aspectRatio === '9:16'
+                        ? 'rounded-[2rem]'
+                        : aspectRatio === '4:5'
+                          ? 'rounded-[1.5rem]'
+                          : 'rounded-[1rem]'
+                    }`}
+                    style={{
+                      width: `${currentRatioConfig.previewWidth}px`,
+                      height: `${currentRatioConfig.previewHeight}px`,
+                    }}
+                  >
+                    <div
+                      className="origin-top-left transition-transform duration-300"
+                      style={{
+                        transform: `scale(${currentRatioConfig.scale})`,
+                        width: `${canvasWidth}px`,
+                        height: `${canvasHeight}px`,
+                      }}
+                    >
                       {renderTemplate()}
                     </div>
                   </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500 font-medium">
+                  <span className="text-zinc-300 font-semibold">{currentRatioConfig.label}</span>
+                  <span>•</span>
+                  <span>{currentRatioConfig.sublabel}</span>
+                  <span>•</span>
+                  <span className="font-mono text-[11px] text-zinc-500">{canvasWidth}×{canvasHeight}px</span>
                 </div>
               </div>
 
@@ -916,8 +955,8 @@ export default function Home() {
             position: 'fixed',
             left: '-9999px',
             top: 0,
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             overflow: 'hidden',
             pointerEvents: 'none',
           }}>

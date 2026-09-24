@@ -24,6 +24,67 @@ export interface TextStyle {
     quoteStyle: QuoteStyle;
 }
 
+export type AspectRatio = '9:16' | '4:5' | '1:1' | '16:9';
+
+export interface AspectRatioConfig {
+    id: AspectRatio;
+    label: string;
+    sublabel: string;
+    description: string;
+    width: number;
+    height: number;
+    previewWidth: number;
+    previewHeight: number;
+    scale: number;
+}
+
+export const ASPECT_RATIOS: Record<AspectRatio, AspectRatioConfig> = {
+    '9:16': {
+        id: '9:16',
+        label: '9:16',
+        sublabel: 'Story',
+        description: 'Instagram Story, TikTok, Reels',
+        width: 1080,
+        height: 1920,
+        previewWidth: 270,
+        previewHeight: 480,
+        scale: 0.25,
+    },
+    '4:5': {
+        id: '4:5',
+        label: '4:5',
+        sublabel: 'Portrait',
+        description: 'Instagram Feed Post',
+        width: 1080,
+        height: 1350,
+        previewWidth: 270,
+        previewHeight: 337.5,
+        scale: 0.25,
+    },
+    '1:1': {
+        id: '1:1',
+        label: '1:1',
+        sublabel: 'Square',
+        description: 'Twitter / Bluesky / Feed',
+        width: 1080,
+        height: 1080,
+        previewWidth: 270,
+        previewHeight: 270,
+        scale: 0.25,
+    },
+    '16:9': {
+        id: '16:9',
+        label: '16:9',
+        sublabel: 'Landscape',
+        description: 'Twitter Banner / Desktop',
+        width: 1920,
+        height: 1080,
+        previewWidth: 320,
+        previewHeight: 180,
+        scale: 320 / 1920,
+    },
+};
+
 export interface TemplateProps {
     data: ReviewData;
     fontSizeMultiplier?: number;
@@ -37,6 +98,9 @@ export interface TemplateProps {
     backdropBrightness?: number;
     backdropSaturation?: number;
     accentColor?: string;
+    canvasWidth?: number;
+    canvasHeight?: number;
+    aspectRatio?: AspectRatio;
 }
 
 export function getQuoteWrapped(text: string, quoteStyle: QuoteStyle): string {
@@ -71,13 +135,19 @@ export function getBackgroundImage(data: ReviewData, customUrl?: string | null, 
     return data.backdropUrl ? `url(${proxyUrl(data.backdropUrl)})` : 'none';
 }
 
-export function getAutoScale(textLength: number): number {
-    if (textLength <= 80) return 1.1;
-    if (textLength <= 150) return 1.0;
-    if (textLength <= 250) return 0.85;
-    if (textLength <= 400) return 0.7;
-    if (textLength <= 600) return 0.55;
-    return 0.45;
+export function getAutoScale(textLength: number, aspectRatio: AspectRatio = '9:16'): number {
+    let base = 1.0;
+    if (textLength <= 80) base = 1.1;
+    else if (textLength <= 150) base = 1.0;
+    else if (textLength <= 250) base = 0.85;
+    else if (textLength <= 400) base = 0.7;
+    else if (textLength <= 600) base = 0.55;
+    else base = 0.45;
+
+    if (aspectRatio === '1:1') return base * 0.9;
+    if (aspectRatio === '4:5') return base * 0.95;
+    if (aspectRatio === '16:9') return base * 0.9;
+    return base;
 }
 
 // UPDATE FONTS MAPPING

@@ -22,8 +22,11 @@ export function TemplateWrapped({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
 
     // Smarter title sizing: aggressively scale down for longer titles
@@ -34,6 +37,9 @@ export function TemplateWrapped({
     else if (titleLen <= 20) titleFontSize = 115;
     else if (titleLen <= 30) titleFontSize = 95;
     else titleFontSize = 76;
+    if (aspectRatio === '1:1' || aspectRatio === '16:9') {
+        titleFontSize = Math.round(titleFontSize * 0.8);
+    }
     titleFontSize = Math.round(titleFontSize * fontSizeMultiplier);
 
     const reviewFontSize = Math.round(36 * scale);
@@ -57,8 +63,8 @@ export function TemplateWrapped({
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#0a0a0a',
             overflow: 'hidden',
             fontFamily: font,

@@ -25,8 +25,11 @@ export function TemplatePolaroid({
     backdropBrightness = 100,
     backdropSaturation = 100,
     accentColor = '#00e054',
+    canvasWidth = 1080,
+    canvasHeight = 1920,
+    aspectRatio = '9:16',
 }: TemplateProps) {
-    const autoScale = getAutoScale(data.reviewText.length);
+    const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
     const reviewFontSize = Math.round(40 * scale);
 
@@ -38,11 +41,14 @@ export function TemplatePolaroid({
         ? 'none'
         : `blur(${backdropBlur}px) brightness(${backdropBrightness}%) saturate(${backdropSaturation}%)`;
 
+    const posterW = aspectRatio === '1:1' ? 320 : aspectRatio === '16:9' ? 360 : 420;
+    const posterH = aspectRatio === '1:1' ? 480 : aspectRatio === '16:9' ? 540 : 630;
+
     return (
         <div style={{
             position: 'relative',
-            width: '1080px',
-            height: '1920px',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
             backgroundColor: '#0d0d0d',
             overflow: 'hidden',
             fontFamily: font,
@@ -65,8 +71,8 @@ export function TemplatePolaroid({
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                padding: '80px 64px',
-                gap: '64px',
+                padding: aspectRatio === '1:1' ? '48px 48px' : '80px 64px',
+                gap: aspectRatio === '1:1' ? '40px' : '64px',
             }}>
                 {/* Left side - Poster */}
                 <div style={{
@@ -77,8 +83,8 @@ export function TemplatePolaroid({
                         src={proxyUrl(data.posterUrl || data.backdropUrl)}
                         alt=""
                         style={{
-                            width: '420px',
-                            height: '630px',
+                            width: `${posterW}px`,
+                            height: `${posterH}px`,
                             objectFit: 'cover',
                             borderRadius: '12px',
                             boxShadow: '0 30px 80px rgba(0,0,0,0.8)',
