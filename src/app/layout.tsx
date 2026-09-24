@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"; // Add Viewport import
 import { Inter, Playfair_Display, Space_Mono, Courier_Prime, Permanent_Marker, Anton } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -67,6 +68,7 @@ export default function RootLayout({
         className={`${inter.variable} ${playfair.variable} ${spaceMono.variable} ${courierPrime.variable} ${permanentMarker.variable} ${anton.variable} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
