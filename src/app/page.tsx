@@ -386,9 +386,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white overflow-hidden pb-24 lg:pb-0">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white pb-24 lg:pb-0">
 
-      <div className="fixed inset-0 opacity-30 pointer-events-none">
+      <div className="fixed inset-0 opacity-30 pointer-events-none overflow-hidden">
         <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
         <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
@@ -811,7 +811,7 @@ export default function Home() {
 
         {reviewData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-center lg:items-start justify-center">
+            <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-start justify-center">
 
               <StoryControls
                 selectedTemplate={selectedTemplate}
@@ -861,7 +861,7 @@ export default function Home() {
                 onRandomize={handleRandomize}
               />
 
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 lg:sticky lg:top-8">
                 <div className="bg-zinc-800 rounded-[2.5rem] p-2 shadow-2xl">
                   <div className="bg-black rounded-[2rem] overflow-hidden relative" style={{
                     width: '270px',
@@ -911,16 +911,19 @@ export default function Home() {
           </div>
         )}
 
-        <div ref={storyRef} style={{
-          position: 'absolute',
-          left: '-9999px',
-          top: 0,
-          width: '1080px',
-          height: '1920px',
-          overflow: 'hidden',
-        }}>
-          {renderTemplate()}
-        </div>
+        {reviewData && (
+          <div ref={storyRef} style={{
+            position: 'fixed',
+            left: '-9999px',
+            top: 0,
+            width: '1080px',
+            height: '1920px',
+            overflow: 'hidden',
+            pointerEvents: 'none',
+          }}>
+            {renderTemplate()}
+          </div>
+        )}
 
       </div>
     </div>
