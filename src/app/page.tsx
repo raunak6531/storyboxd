@@ -8,6 +8,7 @@ import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle, AspectRatio, ASPECT_RATIOS } from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
+import { CustomStoryFields, deleteSavedProject, getSavedProject, listSavedProjects, newProjectId, putSavedProject, SavedProject, SavedProjectDesign } from '@/lib/savedProjects';
 
 interface RecentReview {
   url: string;
@@ -34,6 +35,11 @@ export default function Home() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
   const [mounted, setMounted] = useState(false);
   const [recentDownloads, setRecentDownloads] = useState<RecentReview[]>([]);
+  const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [activeProjectName, setActiveProjectName] = useState('');
+  const [savingProject, setSavingProject] = useState(false);
+  const [notice, setNotice] = useState('');
 
   const currentRatioConfig = ASPECT_RATIOS[aspectRatio] || ASPECT_RATIOS['9:16'];
   const canvasWidth = currentRatioConfig.width;
@@ -95,6 +101,7 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     loadRecentDownloads();
+    void refreshSavedProjects(false);
   }, []);
 
   useEffect(() => {
@@ -121,6 +128,115 @@ export default function Home() {
     }
   };
 
+  const refreshSavedProjects = async (notifyOnError = false) => {
+    try {
+      setSavedProjects(await listSavedProjects());
+    } catch (err) {
+      console.warn('Failed to load saved projects:', err);
+      if (notifyOnError) {
+        setError('Saved projects could not be loaded in this browser.');
+      }
+    }
+  };
+
+  const getCustomFields = (): CustomStoryFields => ({
+    title: customTitle, year: customYear, director: customDirector, rating: customRating,
+    review: customReview, username: customUsername, poster: customPoster,
+  });
+
+  const getDesign = (): SavedProjectDesign => ({
+    selectedTemplate, aspectRatio, fontSizeMultiplier, fontType, colorTheme, isBold, isItalic,
+    letterSpacing, lineHeight, showPoster, backdropPositionPercent, backdropPositionYPercent,
+    customBackdrop, availableBackdrops, backdropBlur, backdropBrightness, backdropSaturation,
+    accentColor, textAlign, quoteStyle,
+  });
+
+  const applyProject = (project: SavedProject) => {
+    const design = project.design || ({} as SavedProjectDesign);
+    const customFields = project.customFields || ({} as CustomStoryFields);
+    setInputMode(project.sourceMode);
+    setUrl(project.sourceUrl || '');
+    setReviewData(project.reviewData);
+    setCustomTitle(customFields.title || ''); setCustomYear(customFields.year || '');
+    setCustomDirector(customFields.director || ''); setCustomRating(customFields.rating || 0);
+    setCustomReview(customFields.review || ''); setCustomUsername(customFields.username || '');
+    setCustomPoster(customFields.poster || '');
+    setSelectedTemplate(design.selectedTemplate || 'bottom'); setAspectRatio(design.aspectRatio || '9:16');
+    setFontSizeMultiplier(design.fontSizeMultiplier ?? 1); setFontType(design.fontType || 'Inter');
+    setColorTheme(design.colorTheme || 'neutral'); setIsBold(!!design.isBold); setIsItalic(!!design.isItalic);
+    setLetterSpacing(design.letterSpacing ?? 0); setLineHeight(design.lineHeight ?? 1.4); setShowPoster(!!design.showPoster);
+    setBackdropPositionPercent(design.backdropPositionPercent ?? 50); setBackdropPositionYPercent(design.backdropPositionYPercent ?? 50);
+    setCustomBackdrop(design.customBackdrop || null); setAvailableBackdrops(design.availableBackdrops || []);
+    setBackdropBlur(design.backdropBlur ?? 0); setBackdropBrightness(design.backdropBrightness ?? 100);
+    setBackdropSaturation(design.backdropSaturation ?? 100); setAccentColor(design.accentColor || '#00e054');
+    setTextAlign(design.textAlign || 'center'); setQuoteStyle(design.quoteStyle || 'double');
+    setActiveProjectId(project.id); setActiveProjectName(project.name); setError('');
+    setNotice(`Opened “${project.name}”.`);
+  };
+
+  const openSavedProject = async (id: string) => {
+    try {
+      const project = await getSavedProject(id);
+      if (!project) throw new Error('The saved project was not found.');
+      applyProject(project);
+    } catch (err) {
+      console.error('Failed to open saved project:', err);
+      setError(err instanceof Error ? err.message : 'Could not open that saved project.');
+    }
+  };
+
+  const saveDraft = async () => {
+    if (!reviewData || savingProject) return;
+    const suggestedName = activeProjectName || `${reviewData.movieTitle || 'Untitled'} — Story`;
+    const name = window.prompt('Name this saved project', suggestedName)?.trim();
+    if (name === undefined) return;
+    if (!name) { setError('A saved project needs a name.'); return; }
+    setSavingProject(true);
+    try {
+      const now = Date.now();
+      const project: SavedProject = {
+        id: activeProjectId || newProjectId(), schemaVersion: 1, name,
+        createdAt: activeProjectId ? (savedProjects.find(p => p.id === activeProjectId)?.createdAt || now) : now,
+        updatedAt: now, sourceMode: inputMode, sourceUrl: inputMode === 'import' ? url : '',
+        reviewData, customFields: getCustomFields(), design: getDesign(),
+      };
+      await putSavedProject(project);
+      setActiveProjectId(project.id); setActiveProjectName(project.name); await refreshSavedProjects();
+      setNotice(activeProjectId ? 'Changes saved.' : 'Draft saved.'); setError('');
+    } catch (err) {
+      console.error('Failed to save project:', err);
+      setError('Could not save this draft. Your browser may be out of storage.');
+    } finally { setSavingProject(false); }
+  };
+
+  const renameSavedProject = async (project: SavedProject) => {
+    const name = window.prompt('Rename saved project', project.name)?.trim();
+    if (name === undefined) return;
+    if (!name) { setError('A saved project needs a name.'); return; }
+    try {
+      await putSavedProject({ ...project, name, updatedAt: Date.now() });
+      if (activeProjectId === project.id) setActiveProjectName(name);
+      await refreshSavedProjects(); setNotice('Project renamed.');
+    } catch { setError('Could not rename this project.'); }
+  };
+
+  const duplicateSavedProject = async (project: SavedProject) => {
+    try {
+      const now = Date.now();
+      const copy = { ...project, id: newProjectId(), name: `${project.name} (Copy)`, createdAt: now, updatedAt: now };
+      await putSavedProject(copy); await refreshSavedProjects(); setNotice('Project duplicated.');
+    } catch { setError('Could not duplicate this project.'); }
+  };
+
+  const removeSavedProject = async (project: SavedProject) => {
+    if (!window.confirm(`Delete “${project.name}”? This cannot be undone.`)) return;
+    try {
+      await deleteSavedProject(project.id);
+      if (activeProjectId === project.id) { setActiveProjectId(null); setActiveProjectName(''); }
+      await refreshSavedProjects(); setNotice('Project deleted.');
+    } catch { setError('Could not delete this project.'); }
+  };
+
   const saveToRecentDownloads = useCallback((data: ReviewData, reviewUrl: string) => {
     try {
       const recent: RecentReview = {
@@ -145,6 +261,7 @@ export default function Home() {
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) { setError('Background images must be 5 MB or smaller.'); return; }
       const reader = new FileReader();
       reader.onloadend = () => {
         setCustomBackdrop(reader.result as string);
@@ -210,12 +327,13 @@ export default function Home() {
       movieUrl: ''
     };
 
-    setReviewData(data);
+    setActiveProjectId(null); setActiveProjectName(''); setReviewData(data);
     setError('');
   };
 
   // --- LOADING FUNCTION FOR IMPORT MODE ---
   const loadReviewFromUrl = async (reviewUrl: string) => {
+    setActiveProjectId(null); setActiveProjectName('');
     setUrl(reviewUrl);
     setLoading(true);
     setError('');
@@ -257,10 +375,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (reviewData) setFontSizeMultiplier(1);
-  }, [reviewData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -723,6 +837,51 @@ export default function Home() {
           </div>
         )}
 
+        {notice && (
+          <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
+            <p className="text-emerald-300 text-sm">{notice}</p>
+            <button onClick={() => setNotice('')} className="ml-auto text-emerald-300/70 hover:text-emerald-200" aria-label="Dismiss message">×</button>
+          </div>
+        )}
+
+        {/* Saved Projects are complete editor snapshots, separate from imported review history. */}
+        <section className="max-w-4xl mx-auto mb-10" aria-labelledby="saved-projects-heading">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 id="saved-projects-heading" className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">Saved Projects</h2>
+              <p className="text-xs text-zinc-500 mt-1">Full editable designs, including custom backgrounds and styling.</p>
+            </div>
+            {reviewData && <button onClick={saveDraft} disabled={savingProject} className="text-sm font-semibold text-black bg-[#00e054] hover:bg-[#00c049] disabled:opacity-50 px-3 py-2 rounded-lg">{savingProject ? 'Saving…' : activeProjectId ? 'Save Changes' : 'Save Draft'}</button>}
+          </div>
+          {savedProjects.length === 0 ? (
+            <div className="border border-dashed border-zinc-800 rounded-xl p-6 text-center bg-zinc-900/30">
+              <p className="text-zinc-300 font-medium">No saved projects yet</p>
+              <p className="text-sm text-zinc-500 mt-1">Create a story, then save a draft to keep every design choice.</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {savedProjects.map(project => (
+                <article key={project.id} className="flex gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3">
+                  <div className="w-16 h-20 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+                    {project.reviewData.posterUrl ? <img src={project.reviewData.posterUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full grid place-items-center text-zinc-600">🎬</div>}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-white truncate">{project.name}</p>
+                    <p className="text-xs text-zinc-400 truncate">{project.reviewData.movieTitle}</p>
+                    <p className="text-xs text-zinc-500 mt-1">{project.design.selectedTemplate} · {project.design.aspectRatio} · {new Date(project.updatedAt).toLocaleDateString()}</p>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs">
+                      <button onClick={() => void openSavedProject(project.id)} className="text-[#00e054] hover:text-emerald-300 font-medium">Continue Editing</button>
+                      <button onClick={() => void renameSavedProject(project)} className="text-zinc-400 hover:text-white">Rename</button>
+                      <button onClick={() => void duplicateSavedProject(project)} className="text-zinc-400 hover:text-white">Duplicate</button>
+                      <button onClick={() => void removeSavedProject(project)} className="text-red-400 hover:text-red-300">Delete</button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* Recent Reviews Gallery */}
         {!reviewData && !loading && recentDownloads.length > 0 && (
           <div className="max-w-4xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -869,6 +1028,9 @@ export default function Home() {
                 hasReviewData={!!reviewData}
                 posterUrl={reviewData.posterUrl}
                 onRandomize={handleRandomize}
+                onSaveDraft={saveDraft}
+                savingProject={savingProject}
+                isSavedProject={!!activeProjectId}
               />
 
               <div className="flex-shrink-0 lg:sticky lg:top-8 flex flex-col items-center">
@@ -926,9 +1088,14 @@ export default function Home() {
         {reviewData && (
           <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-xl border-t border-zinc-800 px-4 py-3 lg:hidden z-50 flex gap-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
             <button
+              onClick={saveDraft}
+              disabled={savingProject}
+              className="flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform text-sm disabled:opacity-50"
+            >{savingProject ? 'Saving…' : activeProjectId ? 'Save Changes' : 'Save Draft'}</button>
+            <button
               onClick={handleShare}
               disabled={sharing}
-              className="flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+              className="hidden sm:flex flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -945,7 +1112,7 @@ export default function Home() {
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
               )}
-              Save
+              {downloading ? 'Saving...' : 'Download'}
             </button>
           </div>
         )}

@@ -69,6 +69,9 @@ interface StoryControlsProps {
   hasReviewData: boolean;
   posterUrl?: string;
   onRandomize: () => void;
+  onSaveDraft: () => void;
+  savingProject: boolean;
+  isSavedProject: boolean;
 }
 
 const ControlSection = ({
@@ -811,6 +814,13 @@ export default function StoryControls(props: StoryControlsProps) {
 
       {/* DESKTOP BUTTONS (RENAMED TO SHARE) */}
       <div className="hidden lg:flex gap-3 mt-4">
+        <button
+          onClick={props.onSaveDraft}
+          disabled={props.savingProject || !props.hasReviewData}
+          className="flex-1 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700"
+        >
+          {props.savingProject ? 'Saving…' : props.isSavedProject ? 'Save Changes' : 'Save Draft'}
+        </button>
         <button
           onClick={props.onShare}
           disabled={props.sharing || !props.hasReviewData}
