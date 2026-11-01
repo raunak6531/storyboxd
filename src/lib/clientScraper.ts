@@ -297,7 +297,19 @@ export async function scrapeLetterboxd(url: string): Promise<ReviewData> {
     const doc = parser.parseFromString(html, 'text/html');
 
     // 1. JSON-LD Extraction
-    let jsonLd: any = {};
+    let jsonLd: {
+      '@type'?: string;
+      itemReviewed?: {
+        name?: string;
+        dateCreated?: string;
+        sameAs?: string;
+        director?: Array<{ name?: string }> | { name?: string } | string;
+      };
+      reviewBody?: string;
+      author?: { name?: string };
+      reviewRating?: { ratingValue?: string | number };
+      image?: string;
+    } = {};
     const scriptTags = doc.querySelectorAll('script[type="application/ld+json"]');
     scriptTags.forEach(script => {
       try {
@@ -311,12 +323,12 @@ export async function scrapeLetterboxd(url: string): Promise<ReviewData> {
     let year = jsonLd.itemReviewed?.dateCreated?.substring(0, 4) || '';
     let reviewText = jsonLd.reviewBody || '';
     let displayName = jsonLd.author?.name || '';
-    let movieUrl = jsonLd.itemReviewed?.sameAs || '';
+    const movieUrl = jsonLd.itemReviewed?.sameAs || '';
     
     // Rating
     let ratingNumber = 0;
     if (jsonLd.reviewRating) {
-      ratingNumber = parseFloat(jsonLd.reviewRating.ratingValue);
+      ratingNumber = parseFloat(String(jsonLd.reviewRating.ratingValue));
     } else {
       const ratingEl = doc.querySelector('span.rating');
       if (ratingEl && ratingEl.textContent) {

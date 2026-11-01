@@ -37,7 +37,7 @@ export function TemplateBottom({
     const font = FONTS[textStyle.fontType] || textStyle.fontType;
 
     // 1. Get base colors
-    let colors = { ...COLORS[textStyle.colorTheme] };
+    const colors = { ...COLORS[textStyle.colorTheme] };
     let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
     // 2. If NEON, generate dynamic glow

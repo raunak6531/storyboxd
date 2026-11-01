@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bdSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#040812"/>
+      <stop offset="40%" stop-color="#0d233a"/>
+      <stop offset="65%" stop-color="#3c1d18"/>
+      <stop offset="82%" stop-color="#9a3412"/>
+      <stop offset="95%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <radialGradient id="bdGlow" cx="62%" cy="72%" r="48%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#c2410c" stop-opacity="0.45"/>
+      <stop offset="80%" stop-color="#040812" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bdBeam" x1="0%" y1="0%" x2="100%" y2="40%">
+      <stop offset="0%" stop-color="#fef9c3" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fef08a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bdSky)"/>
+  <circle cx="1190" cy="740" r="500" fill="url(#bdGlow)"/>
+
+  <!-- Distant mountain ridges -->
+  <path d="M0,740 Q400,680 800,720 T1600,700 Q1760,690 1920,710 L1920,1080 L0,1080 Z" fill="#150a0a" opacity="0.8"/>
+  <path d="M0,770 Q520,710 1100,750 T1920,735 L1920,1080 L0,1080 Z" fill="#0b0505"/>
+
+  <!-- Vanishing tracks -->
+  <polygon points="1185,745 1195,745 1450,1080 850,1080" fill="#080404" opacity="0.95"/>
+  <line x1="1188" y1="745" x2="950" y2="1080" stroke="#f59e0b" stroke-width="3" opacity="0.7"/>
+  <line x1="1192" y1="745" x2="1350" y2="1080" stroke="#f59e0b" stroke-width="3" opacity="0.7"/>
+
+  <!-- Locomotive -->
+  <path d="M1178,745 L1178,720 L1186,720 L1186,712 L1194,712 L1194,720 L1202,720 L1202,745 Z" fill="#040202"/>
+  <!-- Light beam -->
+  <polygon points="1190,730 400,640 420,820" fill="url(#bdBeam)" opacity="0.6"/>
+  <circle cx="1190" cy="730" r="6" fill="#fff" opacity="0.95"/>
+</svg>
+

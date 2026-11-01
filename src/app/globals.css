@@ -1,31 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #000000;
+  --panel: #101010;
+  --line: #242424;
+  --text: #f2f2f2;
+  --muted: #9b9b9b;
+  --green: #00e054;
+  --green-ink: #00200c;
+  --amber: #ff8000;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --color-bg: #000000;
+  --color-panel: #101010;
+  --color-line: #242424;
+  --color-text: #f2f2f2;
+  --color-muted: #9b9b9b;
+  --color-green: #00e054;
+  --color-green-ink: #00200c;
+  --color-amber: #ff8000;
+  --font-anton: var(--font-anton), Anton, Impact, sans-serif;
+  --font-inter: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-playfair: var(--font-playfair), "Playfair Display", serif;
+  --font-marker: var(--font-marker), "Permanent Marker", cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-padding-top: 80px;
+  scroll-behavior: smooth;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Focus ring: 2px green */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 /* Hide scrollbar for horizontal scroll strips */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

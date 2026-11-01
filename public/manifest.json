@@ -2,7 +2,7 @@
   "name": "StoryBoxd",
   "short_name": "StoryBoxd",
   "description": "Share your Letterboxd reviews as Instagram Stories",
-  "start_url": "/",
+  "start_url": "/studio",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#00e054",

@@ -1,60 +1,40 @@
-import type { Metadata, Viewport } from "next"; // Add Viewport import
-import { Inter, Playfair_Display, Space_Mono, Courier_Prime, Permanent_Marker, Anton } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Anton } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
-
-const spaceMono = Space_Mono({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
-
-const courierPrime = Courier_Prime({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-courier",
-});
-
-const permanentMarker = Permanent_Marker({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-marker",
+  display: "swap",
 });
 
 const anton = Anton({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-anton",
+  display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "StoryBoxd",
-  description: "Share your Letterboxd reviews as Instagram Stories",
-  manifest: "/manifest.json", // Link to PWA manifest
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "StoryBoxd",
-  },
-};
-
-// New Viewport export for theme color
 export const viewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false, // Prevents zooming like a native app
+};
+
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://storyboxd.vercel.app'
+  ),
+  title: 'StoryBoxd: Turn Letterboxd reviews into Instagram Stories',
+  description:
+    'Paste a Letterboxd review link and get a styled Instagram Story with the poster, rating and your words. 12 templates, custom fonts, no account needed.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'StoryBoxd',
+  },
 };
 
 export default function RootLayout({
@@ -64,9 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${playfair.variable} ${spaceMono.variable} ${courierPrime.variable} ${permanentMarker.variable} ${anton.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${anton.variable} antialiased`}>
         {children}
         <Analytics />
       </body>

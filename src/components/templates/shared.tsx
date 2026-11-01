@@ -113,6 +113,7 @@ export function getQuoteWrapped(text: string, quoteStyle: QuoteStyle): string {
 
 export function proxyUrl(url: string): string {
     if (!url) return '';
+    if (url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')) return url;
     return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 }
 

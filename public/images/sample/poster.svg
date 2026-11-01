@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200" width="800" height="1200">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#060d1a"/>
+      <stop offset="45%" stop-color="#142845"/>
+      <stop offset="70%" stop-color="#7c2d12"/>
+      <stop offset="85%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="75%" r="45%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#ea580c" stop-opacity="0.5"/>
+      <stop offset="80%" stop-color="#7c2d12" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a0f0a"/>
+      <stop offset="100%" stop-color="#090505"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#fef08a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="800" height="1200" fill="url(#skyGrad)"/>
+  <circle cx="400" cy="820" r="380" fill="url(#sunGlow)"/>
+  
+  <!-- Subtle Stars / Dust -->
+  <circle cx="140" cy="180" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="280" cy="120" r="1.5" fill="#fff" opacity="0.5"/>
+  <circle cx="620" cy="160" r="2.5" fill="#fff" opacity="0.7"/>
+  <circle cx="510" cy="240" r="1.5" fill="#fff" opacity="0.4"/>
+  <circle cx="710" cy="90" r="2" fill="#fff" opacity="0.8"/>
+  <circle cx="200" cy="310" r="1.5" fill="#fff" opacity="0.5"/>
+
+  <!-- Distant Dunes / Mountains -->
+  <path d="M0,860 Q220,780 440,840 T800,810 L800,1200 L0,1200 Z" fill="#1c0b08" opacity="0.85"/>
+  <path d="M0,890 Q340,820 620,880 T800,850 L800,1200 L0,1200 Z" fill="url(#groundGrad)"/>
+
+  <!-- Train Tracks vanishing into horizon -->
+  <polygon points="392,840 408,840 560,1200 240,1200" fill="#170c09" opacity="0.9"/>
+  <!-- Rails -->
+  <line x1="395" y1="840" x2="280" y2="1200" stroke="#f59e0b" stroke-width="3" opacity="0.8"/>
+  <line x1="405" y1="840" x2="520" y2="1200" stroke="#f59e0b" stroke-width="3" opacity="0.8"/>
+  <!-- Sleepers -->
+  <line x1="388" y1="860" x2="412" y2="860" stroke="#3b1d11" stroke-width="3"/>
+  <line x1="380" y1="890" x2="420" y2="890" stroke="#3b1d11" stroke-width="4"/>
+  <line x1="368" y1="930" x2="432" y2="930" stroke="#3b1d11" stroke-width="5"/>
+  <line x1="350" y1="980" x2="450" y2="980" stroke="#3b1d11" stroke-width="6"/>
+  <line x1="326" y1="1040" x2="474" y2="1040" stroke="#3b1d11" stroke-width="8"/>
+  <line x1="290" y1="1120" x2="510" y2="1120" stroke="#3b1d11" stroke-width="10"/>
+
+  <!-- Train Locomotive Silhouette on horizon -->
+  <path d="M380,838 L380,808 L392,808 L392,800 L408,800 L408,808 L420,808 L420,838 Z" fill="#0d0504"/>
+  <!-- Headlight and Beam -->
+  <polygon points="400,820 180,770 190,870" fill="url(#beam)" opacity="0.7"/>
+  <circle cx="400" cy="820" r="5" fill="#fef08a"/>
+</svg>
+

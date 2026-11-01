@@ -36,7 +36,7 @@ export function TemplateTopLeft({
 
     const font = FONTS[textStyle.fontType] || textStyle.fontType;
 
-    let colors = { ...COLORS[textStyle.colorTheme] };
+    const colors = { ...COLORS[textStyle.colorTheme] };
     let accentShadow = '0 2px 10px rgba(0,0,0,0.3)';
 
     if (textStyle.colorTheme === 'neon') {
