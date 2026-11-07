@@ -37,6 +37,7 @@ export interface SavedProjectDesign {
   accentColor: string;
   textAlign: TextAlign;
   quoteStyle: QuoteStyle;
+  showCredit?: boolean;
 }
 
 export interface SavedProject {

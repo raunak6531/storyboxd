@@ -8,7 +8,10 @@ import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
 import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle, AspectRatio, ASPECT_RATIOS } from '@/components/StoryTemplates';
+import Link from 'next/link';
 import StoryControls from '@/components/StoryControls';
+import { FeedbackLink } from '@/components/landing/ContactLink';
+import { SITE } from '@/lib/site';
 import { CustomStoryFields, deleteSavedProject, getSavedProject, listSavedProjects, newProjectId, putSavedProject, SavedProject, SavedProjectDesign } from '@/lib/savedProjects';
 
 interface RecentReview {
@@ -23,6 +26,7 @@ type InputMode = 'import' | 'custom';
 
 const STORAGE_KEY = 'storyboxd_recent_downloads';
 const MAX_RECENT_DOWNLOADS = 12;
+const FEEDBACK_SHOWN_KEY = 'storyboxd_feedback_prompt_date';
 
 function isValidLetterboxdUrl(urlStr: string): boolean {
   try {
@@ -103,6 +107,8 @@ function StudioContent() {
   // Text Alignment & Quote Style
   const [textAlign, setTextAlign] = useState<TextAlign>('center');
   const [quoteStyle, setQuoteStyle] = useState<QuoteStyle>('double');
+  const [showCredit, setShowCredit] = useState(true);
+  const [feedbackNotice, setFeedbackNotice] = useState(false);
 
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight, textAlign, quoteStyle };
   const storyRef = useRef<HTMLDivElement>(null);
@@ -167,7 +173,7 @@ function StudioContent() {
     selectedTemplate, aspectRatio, fontSizeMultiplier, fontType, colorTheme, isBold, isItalic,
     letterSpacing, lineHeight, showPoster, backdropPositionPercent, backdropPositionYPercent,
     customBackdrop, availableBackdrops, backdropBlur, backdropBrightness, backdropSaturation,
-    accentColor, textAlign, quoteStyle,
+    accentColor, textAlign, quoteStyle, showCredit,
   });
 
   const applyProject = (project: SavedProject) => {
@@ -188,7 +194,7 @@ function StudioContent() {
     setCustomBackdrop(design.customBackdrop || null); setAvailableBackdrops(design.availableBackdrops || []);
     setBackdropBlur(design.backdropBlur ?? 0); setBackdropBrightness(design.backdropBrightness ?? 100);
     setBackdropSaturation(design.backdropSaturation ?? 100); setAccentColor(design.accentColor || '#00e054');
-    setTextAlign(design.textAlign || 'center'); setQuoteStyle(design.quoteStyle || 'double');
+    setTextAlign(design.textAlign || 'center'); setQuoteStyle(design.quoteStyle || 'double'); setShowCredit(design.showCredit !== false);
     setActiveProjectId(project.id); setActiveProjectName(project.name); setError('');
     setNotice(`Opened “${project.name}”.`);
   };
@@ -255,6 +261,18 @@ function StudioContent() {
       await refreshSavedProjects(); setNotice('Project deleted.');
     } catch { setError('Could not delete this project.'); }
   };
+
+  const maybeShowFeedbackPrompt = useCallback(() => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastShown = localStorage.getItem(FEEDBACK_SHOWN_KEY);
+      if (lastShown === today) return;
+      localStorage.setItem(FEEDBACK_SHOWN_KEY, today);
+      setFeedbackNotice(true);
+    } catch {
+      // ignore storage error
+    }
+  }, []);
 
   const saveToRecentDownloads = useCallback((data: ReviewData, reviewUrl: string) => {
     try {
@@ -467,13 +485,14 @@ function StudioContent() {
       link.click();
       document.body.removeChild(link);
       if (url) saveToRecentDownloads(reviewData, url);
+      maybeShowFeedbackPrompt();
     } catch (err) {
       console.error(err);
       setError('Failed to generate image. Please try again.');
     } finally {
       setDownloading(false);
     }
-  }, [reviewData, url, saveToRecentDownloads, canvasWidth, canvasHeight, aspectRatio]);
+  }, [reviewData, url, saveToRecentDownloads, canvasWidth, canvasHeight, aspectRatio, maybeShowFeedbackPrompt]);
 
   const handleShare = async () => {
     if (!storyRef.current || !reviewData) return;
@@ -489,9 +508,11 @@ function StudioContent() {
           title: `My review of ${reviewData.movieTitle}`,
           text: 'Check out my review on Letterboxd!'
         });
+        maybeShowFeedbackPrompt();
       } else {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
         alert('Image copied to clipboard!');
+        maybeShowFeedbackPrompt();
       }
     } catch (err) {
       console.error('Share failed:', err);
@@ -519,6 +540,7 @@ function StudioContent() {
       canvasWidth,
       canvasHeight,
       aspectRatio,
+      showCredit,
     };
 
     switch (selectedTemplate) {
@@ -546,6 +568,22 @@ function StudioContent() {
       </div>
 
       <div className={`relative z-10 max-w-6xl mx-auto px-4 py-6 lg:px-6 lg:py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="flex items-center justify-between mb-4 lg:mb-6 max-w-4xl mx-auto">
+          <Link
+            href="/"
+            className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
+          >
+            ← Home
+          </Link>
+          <FeedbackLink
+            href={SITE.issues}
+            className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
+          >
+            <span>Feedback</span>
+            <span aria-hidden="true">↗</span>
+          </FeedbackLink>
+        </div>
+
 
         <div className="text-center mb-6 lg:mb-12">
           <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6">
@@ -867,6 +905,37 @@ function StudioContent() {
           </div>
         )}
 
+        
+        {feedbackNotice && (
+          <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
+            <p className="text-emerald-300 text-sm">
+              Enjoying StoryBoxd? Tag{' '}
+              <a
+                href={SITE.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
+              >
+                {SITE.instagramHandle}
+              </a>{' '}
+              or{' '}
+              <FeedbackLink
+                href={SITE.issues}
+                className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
+              >
+                send feedback
+              </FeedbackLink>
+            </p>
+            <button
+              onClick={() => setFeedbackNotice(false)}
+              className="ml-auto text-emerald-300/70 hover:text-emerald-200"
+              aria-label="Dismiss message"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {notice && (
           <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
             <p className="text-emerald-300 text-sm">{notice}</p>
@@ -1031,6 +1100,8 @@ function StudioContent() {
                 setLineHeight={setLineHeight}
                 showPoster={showPoster}
                 setShowPoster={setShowPoster}
+                showCredit={showCredit}
+                setShowCredit={setShowCredit}
                 backdropPositionPercent={backdropPositionPercent}
                 setBackdropPositionPercent={setBackdropPositionPercent}
                 backdropPositionYPercent={backdropPositionYPercent}

@@ -10,7 +10,8 @@ import {
     hexToRgba,
     proxyUrl,
     StarRating,
-    getQuoteWrapped
+    getQuoteWrapped,
+    StoryBoxdCredit,
 } from './shared';
 
 export function TemplateNewspaper({
@@ -29,6 +30,7 @@ export function TemplateNewspaper({
     canvasWidth = 1080,
     canvasHeight = 1920,
     aspectRatio = '9:16',
+    showCredit = false,
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
@@ -233,6 +235,7 @@ export function TemplateNewspaper({
                     textTransform: 'uppercase',
                 }}>— Film Critique —</span>
             </div>
+            <StoryBoxdCredit show={showCredit} />
         </div>
     );
 }

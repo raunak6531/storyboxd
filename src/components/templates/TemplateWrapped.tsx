@@ -7,6 +7,7 @@ import {
     getAutoScale,
     getBackgroundImage,
     proxyUrl,
+    StoryBoxdCredit,
 } from './shared';
 
 export function TemplateWrapped({
@@ -25,6 +26,7 @@ export function TemplateWrapped({
     canvasWidth = 1080,
     canvasHeight = 1920,
     aspectRatio = '9:16',
+    showCredit = false,
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
@@ -295,6 +297,7 @@ export function TemplateWrapped({
                     </div>
                 </div>
             </div>
+            <StoryBoxdCredit show={showCredit} />
         </div>
     );
 }

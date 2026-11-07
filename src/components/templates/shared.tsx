@@ -101,6 +101,7 @@ export interface TemplateProps {
     canvasWidth?: number;
     canvasHeight?: number;
     aspectRatio?: AspectRatio;
+    showCredit?: boolean;
 }
 
 export function getQuoteWrapped(text: string, quoteStyle: QuoteStyle): string {
@@ -211,5 +212,26 @@ export function StarRating({ rating, size = 48, color, shadow }: { rating: numbe
             {'★'.repeat(fullStars)}
             {hasHalf && '½'}
         </span>
+    );
+}
+
+export function StoryBoxdCredit({ show }: { show?: boolean }) {
+    if (!show) return null;
+    return (
+        <div style={{
+            position: 'absolute',
+            bottom: '24px',
+            right: '28px',
+            fontSize: '18px',
+            color: 'rgba(255, 255, 255, 0.32)',
+            fontFamily: 'var(--font-inter), Inter, -apple-system, sans-serif',
+            fontWeight: 400,
+            letterSpacing: '0.04em',
+            zIndex: 60,
+            pointerEvents: 'none',
+            userSelect: 'none',
+        }}>
+            made with StoryBoxd
+        </div>
     );
 }

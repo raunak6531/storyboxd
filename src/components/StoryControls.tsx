@@ -33,6 +33,8 @@ interface StoryControlsProps {
   // Visuals State
   showPoster: boolean;
   setShowPoster: (b: boolean) => void;
+  showCredit: boolean;
+  setShowCredit: (b: boolean) => void;
   backdropPositionPercent: number;
   setBackdropPositionPercent: (n: number) => void;
   backdropPositionYPercent: number;
@@ -777,6 +779,16 @@ export default function StoryControls(props: StoryControlsProps) {
             className={`relative inline-flex items-center h-6 w-11 rounded-full border transition-colors ${props.showPoster ? 'bg-[#00e054] border-[#00e054]' : 'bg-zinc-800 border-zinc-700'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${props.showPoster ? 'translate-x-5' : 'translate-x-1'}`}></span>
+          </button>
+        </div>
+        {/* Credit Toggle */}
+        <div className="flex items-center justify-between pt-2">
+          <label className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Show StoryBoxd credit</label>
+          <button
+            onClick={() => props.setShowCredit(!props.showCredit)}
+            className={`relative inline-flex items-center h-6 w-11 rounded-full border transition-colors ${props.showCredit ? 'bg-[#00e054] border-[#00e054]' : 'bg-zinc-800 border-zinc-700'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${props.showCredit ? 'translate-x-5' : 'translate-x-1'}`}></span>
           </button>
         </div>
       </ControlSection>

@@ -10,7 +10,8 @@ import {
     hexToRgba,
     proxyUrl,
     StarRating,
-    getQuoteWrapped
+    getQuoteWrapped,
+    StoryBoxdCredit,
 } from './shared';
 
 export function TemplateBottom({
@@ -29,6 +30,7 @@ export function TemplateBottom({
     canvasWidth = 1080,
     canvasHeight = 1920,
     aspectRatio = '9:16',
+    showCredit = false,
 }: TemplateProps) {
     const autoScale = getAutoScale(data.reviewText.length, aspectRatio);
     const scale = fontSizeMultiplier * autoScale;
@@ -164,6 +166,7 @@ export function TemplateBottom({
                     Review by <span style={{ color: accentColor, textShadow: accentShadow }}>{data.username}</span>
                 </p>
             </div>
+            <StoryBoxdCredit show={showCredit} />
         </div>
     );
 }
