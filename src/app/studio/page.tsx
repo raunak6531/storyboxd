@@ -3,16 +3,49 @@
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import html2canvas from 'html2canvas';
-// IMPORT THE NEW CLIENT SCRAPER
+import Link from 'next/link';
+
+// Libs & components
 import { scrapeLetterboxd, ReviewData } from '@/lib/clientScraper';
 import { POPULAR_GOOGLE_FONTS } from '@/lib/googleFontsList';
 import { useProcessedBackdrop } from '@/lib/useProcessedBackdrop';
-import { TemplateBottom, TemplateTopLeft, TemplateCentered, TemplateMinimal, TemplatePolaroid, TemplateMagazine, TemplateCinematic, TemplateGradient, TemplateDuotone, TemplateNewspaper, TemplateLetterboxd, TemplateWrapped, TemplateType, FontType, ColorTheme, TextStyle, TextAlign, QuoteStyle, AspectRatio, ASPECT_RATIOS } from '@/components/StoryTemplates';
-import Link from 'next/link';
+import {
+  TemplateBottom,
+  TemplateTopLeft,
+  TemplateCentered,
+  TemplateMinimal,
+  TemplatePolaroid,
+  TemplateMagazine,
+  TemplateCinematic,
+  TemplateGradient,
+  TemplateDuotone,
+  TemplateNewspaper,
+  TemplateLetterboxd,
+  TemplateWrapped,
+  TemplateType,
+  FontType,
+  ColorTheme,
+  TextStyle,
+  TextAlign,
+  QuoteStyle,
+  AspectRatio,
+  ASPECT_RATIOS,
+} from '@/components/StoryTemplates';
 import StoryControls from '@/components/StoryControls';
+import { MobileStudio } from '@/components/studio/MobileStudio';
 import { FeedbackLink } from '@/components/landing/ContactLink';
 import { SITE } from '@/lib/site';
-import { CustomStoryFields, deleteSavedProject, getSavedProject, listSavedProjects, newProjectId, putSavedProject, SavedProject, SavedProjectDesign } from '@/lib/savedProjects';
+import { SAMPLE_REVIEW } from '@/lib/sampleReview';
+import {
+  CustomStoryFields,
+  deleteSavedProject,
+  getSavedProject,
+  listSavedProjects,
+  newProjectId,
+  putSavedProject,
+  SavedProject,
+  SavedProjectDesign,
+} from '@/lib/savedProjects';
 
 interface RecentReview {
   url: string;
@@ -47,6 +80,8 @@ function StudioContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialUrlHandled = useRef(false);
+
+  // Core state
   const [inputMode, setInputMode] = useState<InputMode>('import');
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,6 +98,17 @@ function StudioContent() {
   const [activeProjectName, setActiveProjectName] = useState('');
   const [savingProject, setSavingProject] = useState(false);
   const [notice, setNotice] = useState('');
+  const [feedbackNotice, setFeedbackNotice] = useState(false);
+
+  // Mobile layout state
+  const [mobileView, setMobileView] = useState<'editor' | 'projects'>('projects');
+  const [undoState, setUndoState] = useState<{
+    selectedTemplate: TemplateType;
+    fontType: FontType;
+    accentColor: string;
+    isBold: boolean;
+    isItalic: boolean;
+  } | null>(null);
 
   const currentRatioConfig = ASPECT_RATIOS[aspectRatio] || ASPECT_RATIOS['9:16'];
   const canvasWidth = currentRatioConfig.width;
@@ -89,6 +135,7 @@ function StudioContent() {
   const [letterSpacing, setLetterSpacing] = useState(0);
   const [lineHeight, setLineHeight] = useState(1.4);
   const [showPoster, setShowPoster] = useState(false);
+  const [showCredit, setShowCredit] = useState(true);
 
   // Visuals State
   const [backdropPositionPercent, setBackdropPositionPercent] = useState(50);
@@ -107,15 +154,13 @@ function StudioContent() {
   // Text Alignment & Quote Style
   const [textAlign, setTextAlign] = useState<TextAlign>('center');
   const [quoteStyle, setQuoteStyle] = useState<QuoteStyle>('double');
-  const [showCredit, setShowCredit] = useState(true);
-  const [feedbackNotice, setFeedbackNotice] = useState(false);
 
   const textStyle: TextStyle = { fontType, colorTheme, isBold, isItalic, letterSpacing, lineHeight, textAlign, quoteStyle };
   const storyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Hook for canvas-based backdrop processing
-  const { processedBackdropUrl, isProcessing } = useProcessedBackdrop({
+  const { processedBackdropUrl } = useProcessedBackdrop({
     originalUrl: reviewData?.backdropUrl,
     customBackdropUrl: customBackdrop,
     blur: backdropBlur,
@@ -142,9 +187,9 @@ function StudioContent() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const downloads = JSON.parse(stored) as RecentReview[];
-        const updatedDownloads = downloads.map(d => ({
+        const updatedDownloads = downloads.map((d) => ({
           ...d,
-          posterUrl: d.posterUrl || ''
+          posterUrl: d.posterUrl || '',
         }));
         setRecentDownloads(updatedDownloads);
       }
@@ -165,15 +210,37 @@ function StudioContent() {
   };
 
   const getCustomFields = (): CustomStoryFields => ({
-    title: customTitle, year: customYear, director: customDirector, rating: customRating,
-    review: customReview, username: customUsername, poster: customPoster,
+    title: customTitle,
+    year: customYear,
+    director: customDirector,
+    rating: customRating,
+    review: customReview,
+    username: customUsername,
+    poster: customPoster,
   });
 
   const getDesign = (): SavedProjectDesign => ({
-    selectedTemplate, aspectRatio, fontSizeMultiplier, fontType, colorTheme, isBold, isItalic,
-    letterSpacing, lineHeight, showPoster, backdropPositionPercent, backdropPositionYPercent,
-    customBackdrop, availableBackdrops, backdropBlur, backdropBrightness, backdropSaturation,
-    accentColor, textAlign, quoteStyle, showCredit,
+    selectedTemplate,
+    aspectRatio,
+    fontSizeMultiplier,
+    fontType,
+    colorTheme,
+    isBold,
+    isItalic,
+    letterSpacing,
+    lineHeight,
+    showPoster,
+    backdropPositionPercent,
+    backdropPositionYPercent,
+    customBackdrop,
+    availableBackdrops,
+    backdropBlur,
+    backdropBrightness,
+    backdropSaturation,
+    accentColor,
+    textAlign,
+    quoteStyle,
+    showCredit,
   });
 
   const applyProject = (project: SavedProject) => {
@@ -182,21 +249,39 @@ function StudioContent() {
     setInputMode(project.sourceMode);
     setUrl(project.sourceUrl || '');
     setReviewData(project.reviewData);
-    setCustomTitle(customFields.title || ''); setCustomYear(customFields.year || '');
-    setCustomDirector(customFields.director || ''); setCustomRating(customFields.rating || 0);
-    setCustomReview(customFields.review || ''); setCustomUsername(customFields.username || '');
+    setCustomTitle(customFields.title || '');
+    setCustomYear(customFields.year || '');
+    setCustomDirector(customFields.director || '');
+    setCustomRating(customFields.rating || 0);
+    setCustomReview(customFields.review || '');
+    setCustomUsername(customFields.username || '');
     setCustomPoster(customFields.poster || '');
-    setSelectedTemplate(design.selectedTemplate || 'bottom'); setAspectRatio(design.aspectRatio || '9:16');
-    setFontSizeMultiplier(design.fontSizeMultiplier ?? 1); setFontType(design.fontType || 'Inter');
-    setColorTheme(design.colorTheme || 'neutral'); setIsBold(!!design.isBold); setIsItalic(!!design.isItalic);
-    setLetterSpacing(design.letterSpacing ?? 0); setLineHeight(design.lineHeight ?? 1.4); setShowPoster(!!design.showPoster);
-    setBackdropPositionPercent(design.backdropPositionPercent ?? 50); setBackdropPositionYPercent(design.backdropPositionYPercent ?? 50);
-    setCustomBackdrop(design.customBackdrop || null); setAvailableBackdrops(design.availableBackdrops || []);
-    setBackdropBlur(design.backdropBlur ?? 0); setBackdropBrightness(design.backdropBrightness ?? 100);
-    setBackdropSaturation(design.backdropSaturation ?? 100); setAccentColor(design.accentColor || '#00e054');
-    setTextAlign(design.textAlign || 'center'); setQuoteStyle(design.quoteStyle || 'double'); setShowCredit(design.showCredit !== false);
-    setActiveProjectId(project.id); setActiveProjectName(project.name); setError('');
+    setSelectedTemplate(design.selectedTemplate || 'bottom');
+    setAspectRatio(design.aspectRatio || '9:16');
+    setFontSizeMultiplier(design.fontSizeMultiplier ?? 1);
+    setFontType(design.fontType || 'Inter');
+    setColorTheme(design.colorTheme || 'neutral');
+    setIsBold(!!design.isBold);
+    setIsItalic(!!design.isItalic);
+    setLetterSpacing(design.letterSpacing ?? 0);
+    lineHeight: setLineHeight(design.lineHeight ?? 1.4);
+    setShowPoster(!!design.showPoster);
+    setBackdropPositionPercent(design.backdropPositionPercent ?? 50);
+    setBackdropPositionYPercent(design.backdropPositionYPercent ?? 50);
+    setCustomBackdrop(design.customBackdrop || null);
+    setAvailableBackdrops(design.availableBackdrops || []);
+    setBackdropBlur(design.backdropBlur ?? 0);
+    setBackdropBrightness(design.backdropBrightness ?? 100);
+    setBackdropSaturation(design.backdropSaturation ?? 100);
+    setAccentColor(design.accentColor || '#00e054');
+    setTextAlign(design.textAlign || 'center');
+    setQuoteStyle(design.quoteStyle || 'double');
+    setShowCredit(design.showCredit !== false);
+    setActiveProjectId(project.id);
+    setActiveProjectName(project.name);
+    setError('');
     setNotice(`Opened “${project.name}”.`);
+    setMobileView('editor');
   };
 
   const openSavedProject = async (id: string) => {
@@ -215,51 +300,81 @@ function StudioContent() {
     const suggestedName = activeProjectName || `${reviewData.movieTitle || 'Untitled'} — Story`;
     const name = window.prompt('Name this saved project', suggestedName)?.trim();
     if (name === undefined) return;
-    if (!name) { setError('A saved project needs a name.'); return; }
+    if (!name) {
+      setError('A saved project needs a name.');
+      return;
+    }
     setSavingProject(true);
     try {
       const now = Date.now();
       const project: SavedProject = {
-        id: activeProjectId || newProjectId(), schemaVersion: 1, name,
-        createdAt: activeProjectId ? (savedProjects.find(p => p.id === activeProjectId)?.createdAt || now) : now,
-        updatedAt: now, sourceMode: inputMode, sourceUrl: inputMode === 'import' ? url : '',
-        reviewData, customFields: getCustomFields(), design: getDesign(),
+        id: activeProjectId || newProjectId(),
+        schemaVersion: 1,
+        name,
+        createdAt: activeProjectId ? savedProjects.find((p) => p.id === activeProjectId)?.createdAt || now : now,
+        updatedAt: now,
+        sourceMode: inputMode,
+        sourceUrl: inputMode === 'import' ? url : '',
+        reviewData,
+        customFields: getCustomFields(),
+        design: getDesign(),
       };
       await putSavedProject(project);
-      setActiveProjectId(project.id); setActiveProjectName(project.name); await refreshSavedProjects();
-      setNotice(activeProjectId ? 'Changes saved.' : 'Draft saved.'); setError('');
+      setActiveProjectId(project.id);
+      setActiveProjectName(project.name);
+      await refreshSavedProjects();
+      setNotice(activeProjectId ? 'Changes saved.' : 'Draft saved.');
+      setError('');
     } catch (err) {
       console.error('Failed to save project:', err);
       setError('Could not save this draft. Your browser may be out of storage.');
-    } finally { setSavingProject(false); }
+    } finally {
+      setSavingProject(false);
+    }
   };
 
   const renameSavedProject = async (project: SavedProject) => {
     const name = window.prompt('Rename saved project', project.name)?.trim();
     if (name === undefined) return;
-    if (!name) { setError('A saved project needs a name.'); return; }
+    if (!name) {
+      setError('A saved project needs a name.');
+      return;
+    }
     try {
       await putSavedProject({ ...project, name, updatedAt: Date.now() });
       if (activeProjectId === project.id) setActiveProjectName(name);
-      await refreshSavedProjects(); setNotice('Project renamed.');
-    } catch { setError('Could not rename this project.'); }
+      await refreshSavedProjects();
+      setNotice('Project renamed.');
+    } catch {
+      setError('Could not rename this project.');
+    }
   };
 
   const duplicateSavedProject = async (project: SavedProject) => {
     try {
       const now = Date.now();
       const copy = { ...project, id: newProjectId(), name: `${project.name} (Copy)`, createdAt: now, updatedAt: now };
-      await putSavedProject(copy); await refreshSavedProjects(); setNotice('Project duplicated.');
-    } catch { setError('Could not duplicate this project.'); }
+      await putSavedProject(copy);
+      await refreshSavedProjects();
+      setNotice('Project duplicated.');
+    } catch {
+      setError('Could not duplicate this project.');
+    }
   };
 
   const removeSavedProject = async (project: SavedProject) => {
     if (!window.confirm(`Delete “${project.name}”? This cannot be undone.`)) return;
     try {
       await deleteSavedProject(project.id);
-      if (activeProjectId === project.id) { setActiveProjectId(null); setActiveProjectName(''); }
-      await refreshSavedProjects(); setNotice('Project deleted.');
-    } catch { setError('Could not delete this project.'); }
+      if (activeProjectId === project.id) {
+        setActiveProjectId(null);
+        setActiveProjectName('');
+      }
+      await refreshSavedProjects();
+      setNotice('Project deleted.');
+    } catch {
+      setError('Could not delete this project.');
+    }
   };
 
   const maybeShowFeedbackPrompt = useCallback(() => {
@@ -270,7 +385,7 @@ function StudioContent() {
       localStorage.setItem(FEEDBACK_SHOWN_KEY, today);
       setFeedbackNotice(true);
     } catch {
-      // ignore storage error
+      // ignore
     }
   }, []);
 
@@ -284,8 +399,8 @@ function StudioContent() {
         timestamp: Date.now(),
       };
 
-      setRecentDownloads(prev => {
-        const existing = prev.filter(r => r.url !== reviewUrl);
+      setRecentDownloads((prev) => {
+        const existing = prev.filter((r) => r.url !== reviewUrl);
         const updated = [recent, ...existing].slice(0, MAX_RECENT_DOWNLOADS);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         return updated;
@@ -298,7 +413,10 @@ function StudioContent() {
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { setError('Background images must be 5 MB or smaller.'); return; }
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Background images must be 5 MB or smaller.');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setCustomBackdrop(reader.result as string);
@@ -330,7 +448,6 @@ function StudioContent() {
     setTmdbResults([]);
     setTmdbSearchQuery('');
 
-    // Also fetch director
     try {
       const res = await fetch(`/api/movie-details?title=${encodeURIComponent(movie.title)}&year=${movie.year}&slug=`);
       const data = await res.json();
@@ -360,17 +477,21 @@ function StudioContent() {
       username: customUsername || 'User',
       displayName: customUsername || 'User',
       posterUrl: customPoster,
-      backdropUrl: customPoster, // Use poster as backdrop
-      movieUrl: ''
+      backdropUrl: customPoster,
+      movieUrl: '',
     };
 
-    setActiveProjectId(null); setActiveProjectName(''); setReviewData(data);
+    setActiveProjectId(null);
+    setActiveProjectName('');
+    setReviewData(data);
     setError('');
+    setMobileView('editor');
   };
 
   // --- LOADING FUNCTION FOR IMPORT MODE ---
   const loadReviewFromUrl = async (reviewUrl: string) => {
-    setActiveProjectId(null); setActiveProjectName('');
+    setActiveProjectId(null);
+    setActiveProjectName('');
     setUrl(reviewUrl);
     setLoading(true);
     setError('');
@@ -382,8 +503,14 @@ function StudioContent() {
     setBackdropSaturation(100);
     setAccentColor('#00e054');
 
+    if (reviewUrl.includes('last-train-to-jaipur') || reviewUrl.includes('sample')) {
+      setReviewData(SAMPLE_REVIEW);
+      setLoading(false);
+      setMobileView('editor');
+      return;
+    }
+
     try {
-      // Direct Client Call - No server API needed!
       const data = await scrapeLetterboxd(reviewUrl);
 
       if (!data || !data.movieTitle) {
@@ -391,8 +518,8 @@ function StudioContent() {
       }
 
       setReviewData(data);
+      setMobileView('editor');
 
-      // Fetch available backdrops from TMDB
       if (data.movieTitle) {
         try {
           const params = new URLSearchParams({ title: data.movieTitle, ...(data.year ? { year: data.year } : {}) });
@@ -415,6 +542,13 @@ function StudioContent() {
 
   useEffect(() => {
     if (initialUrlHandled.current) return;
+    const isSample = searchParams.get('sample') === 'true' || searchParams.get('demo') === 'true';
+    if (isSample) {
+      initialUrlHandled.current = true;
+      setReviewData(SAMPLE_REVIEW);
+      setMobileView('editor');
+      return;
+    }
     const initialUrl = searchParams.get('url');
     if (initialUrl && isValidLetterboxdUrl(initialUrl)) {
       initialUrlHandled.current = true;
@@ -434,8 +568,7 @@ function StudioContent() {
     if (!storyRef.current) throw new Error('Story ref not available');
 
     await document.fonts.ready;
-    // Wait for processed image if needed (though hook handles this reactively)
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const canvas = await html2canvas(storyRef.current, {
       width: canvasWidth,
@@ -449,29 +582,38 @@ function StudioContent() {
     return canvas.toDataURL('image/png');
   };
 
+  const handleUndoRandomize = useCallback(() => {
+    if (!undoState) return;
+    setSelectedTemplate(undoState.selectedTemplate);
+    setFontType(undoState.fontType);
+    setAccentColor(undoState.accentColor);
+    setIsBold(undoState.isBold);
+    setIsItalic(undoState.isItalic);
+    setUndoState(null);
+  }, [undoState]);
+
   const handleRandomize = useCallback(() => {
-    // 1. Template
+    setUndoState({
+      selectedTemplate,
+      fontType,
+      accentColor,
+      isBold,
+      isItalic,
+    });
+
     const templates: TemplateType[] = ['bottom', 'topLeft', 'centered', 'minimal', 'split', 'magazine', 'cinematic', 'gradient', 'duotone', 'newspaper', 'letterboxd', 'wrapped'];
     const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
     setSelectedTemplate(randomTemplate);
 
-    // 2. Font
     const randomFont = POPULAR_GOOGLE_FONTS[Math.floor(Math.random() * POPULAR_GOOGLE_FONTS.length)].family;
     setFontType(randomFont);
 
-    // 3. Color - Generate random vibrant hex
-    // Using HSL to Hex manually or just random Hex. For "absolute random", random Hex is fine.
     const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
     setAccentColor(randomHex);
 
-    // 4. Filters - REMOVED per user request
-    // Keep existing filters
-
-    // 5. Formatting
     setIsBold(Math.random() > 0.5);
     setIsItalic(Math.random() > 0.85);
-    // setBackdropPositionPercent(Math.floor(Math.random() * 100)); // Also removed
-  }, []);
+  }, [selectedTemplate, fontType, accentColor, isBold, isItalic]);
 
   const handleDownload = useCallback(async () => {
     if (!storyRef.current || !reviewData) return;
@@ -506,7 +648,7 @@ function StudioContent() {
         await navigator.share({
           files: [file],
           title: `My review of ${reviewData.movieTitle}`,
-          text: 'Check out my review on Letterboxd!'
+          text: 'Check out my review on Letterboxd!',
         });
         maybeShowFeedbackPrompt();
       } else {
@@ -559,667 +701,870 @@ function StudioContent() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white pb-24 lg:pb-0">
-
-      <div className="fixed inset-0 opacity-30 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
-        <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      <div className={`relative z-10 max-w-6xl mx-auto px-4 py-6 lg:px-6 lg:py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="flex items-center justify-between mb-4 lg:mb-6 max-w-4xl mx-auto">
-          <Link
-            href="/"
-            className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
-          >
-            ← Home
-          </Link>
-          <FeedbackLink
-            href={SITE.issues}
-            className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
-          >
-            <span>Feedback</span>
-            <span aria-hidden="true">↗</span>
-          </FeedbackLink>
-        </div>
-
-
-        <div className="text-center mb-6 lg:mb-12">
-          <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6">
-            <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
-            <span className="text-xs lg:text-sm text-zinc-400">Letterboxd → Instagram</span>
+  // Reusable sub-renders for Notices, Forms, Projects & Recents
+  const renderNoticesUI = () => (
+    <>
+      {error && (
+        <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-6 max-w-3xl mx-auto flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex-shrink-0 w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+            <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-2 lg:mb-4 tracking-tight">
-            <span className="bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">Story</span>
-            <span className="bg-gradient-to-r from-[#00e054] to-emerald-400 bg-clip-text text-transparent">Boxd</span>
-          </h1>
-          <p className="text-base lg:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Transform your Letterboxd reviews into stunning Instagram stories
+          <p className="text-red-400 text-sm">{error}</p>
+          <button onClick={() => setError('')} className="ml-auto flex-shrink-0 text-red-500/60 hover:text-red-400 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {feedbackNotice && (
+        <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
+          <p className="text-emerald-300 text-sm">
+            Enjoying StoryBoxd? Tag{' '}
+            <a
+              href={SITE.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
+            >
+              {SITE.instagramHandle}
+            </a>{' '}
+            or{' '}
+            <FeedbackLink
+              href={SITE.issues}
+              className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
+            >
+              send feedback
+            </FeedbackLink>
           </p>
+          <button
+            onClick={() => setFeedbackNotice(false)}
+            className="ml-auto text-emerald-300/70 hover:text-emerald-200"
+            aria-label="Dismiss message"
+          >
+            ×
+          </button>
         </div>
+      )}
 
-        {/* Mode Toggle */}
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-xl p-1 gap-1">
+      {notice && (
+        <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
+          <p className="text-emerald-300 text-sm">{notice}</p>
+          <button onClick={() => setNotice('')} className="ml-auto text-emerald-300/70 hover:text-emerald-200" aria-label="Dismiss message">×</button>
+        </div>
+      )}
+    </>
+  );
+
+  const renderModeToggleUI = () => (
+    <div className="flex justify-center mb-6">
+      <div className="inline-flex bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-xl p-1 gap-1">
+        <button
+          type="button"
+          onClick={() => setInputMode('import')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+            inputMode === 'import'
+              ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Import
+        </button>
+        <button
+          type="button"
+          onClick={() => setInputMode('custom')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+            inputMode === 'custom'
+              ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Custom
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderImportFormUI = () => (
+    <form onSubmit={handleSubmit} className="mb-8 max-w-3xl mx-auto">
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-500" />
+        <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 group-focus-within:border-[#00e054]/30 rounded-2xl p-2 transition-colors duration-300">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1 flex items-center gap-1">
+              <input
+                ref={inputRef}
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Paste your Letterboxd review URL..."
+                className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) setUrl(text);
+                  } catch {}
+                }}
+                className="flex-shrink-0 p-2.5 rounded-xl text-zinc-500 hover:text-[#00e054] hover:bg-[#00e054]/10 transition-all active:scale-90"
+                title="Paste from clipboard"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </button>
+            </div>
             <button
-              onClick={() => setInputMode('import')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${inputMode === 'import'
-                ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                }`}
+              type="submit"
+              disabled={loading || !url}
+              className="bg-[#00e054] text-black font-semibold px-6 py-3 rounded-xl hover:bg-[#00c948] disabled:opacity-40 transition-all flex items-center justify-center gap-2 active:scale-95"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              Import
-            </button>
-            <button
-              onClick={() => setInputMode('custom')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${inputMode === 'custom'
-                ? 'bg-[#00e054] text-black shadow-lg shadow-[#00e054]/20'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Custom
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                'Create Story'
+              )}
             </button>
           </div>
         </div>
+      </div>
+      <p className="text-center text-xs text-zinc-600 mt-3">e.g. letterboxd.com/username/film/movie-name/</p>
+    </form>
+  );
 
-        {/* Import Mode Form */}
-        {inputMode === 'import' && (
-          <form onSubmit={handleSubmit} className="mb-10 max-w-3xl mx-auto">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-500" />
-              <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 group-focus-within:border-[#00e054]/30 rounded-2xl p-2 transition-colors duration-300">
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="flex-1 flex items-center gap-1">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      placeholder="Paste your Letterboxd review URL..."
-                      className="flex-1 bg-transparent px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-sm md:text-base"
-                    />
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const text = await navigator.clipboard.readText();
-                          if (text) setUrl(text);
-                        } catch { }
-                      }}
-                      className="flex-shrink-0 p-2.5 rounded-xl text-zinc-500 hover:text-[#00e054] hover:bg-[#00e054]/10 transition-all active:scale-90"
-                      title="Paste from clipboard"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                    </button>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading || !url}
-                    className="bg-[#00e054] text-black font-semibold px-6 py-3 rounded-xl hover:bg-[#00c948] disabled:opacity-40 transition-all flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Creating...
-                      </>
-                    ) : 'Create Story'}
-                  </button>
-                </div>
+  const renderCustomFormUI = () => (
+    <div className="mb-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-3xl blur opacity-40 group-hover:opacity-60 transition duration-500" />
+        <div className="relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-3xl overflow-hidden">
+          {/* TMDB Search Header */}
+          <div className="bg-gradient-to-r from-zinc-800/50 to-zinc-900/50 border-b border-zinc-800 p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 bg-[#00e054]/10 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-medium">Find Your Movie</h3>
+                <p className="text-xs text-zinc-500">Search TMDB to auto-fill details</p>
               </div>
             </div>
-            <p className="text-center text-xs text-zinc-600 mt-3">e.g. letterboxd.com/username/film/movie-name/</p>
-          </form>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={tmdbSearchQuery}
+                  onChange={(e) => setTmdbSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchTmdb(tmdbSearchQuery))}
+                  placeholder="Search movies..."
+                  className="w-full bg-zinc-800/80 border border-zinc-700/50 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => searchTmdb(tmdbSearchQuery)}
+                disabled={searchingTmdb || !tmdbSearchQuery.trim()}
+                className="bg-[#00e054] hover:bg-[#00c948] disabled:bg-zinc-700 disabled:text-zinc-400 text-black font-medium px-5 py-3 rounded-xl transition-all flex items-center gap-2"
+              >
+                {searchingTmdb ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                )}
+                <span className="hidden sm:inline">Search</span>
+              </button>
+            </div>
+            {tmdbResults.length > 0 && (
+              <div className="mt-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                {tmdbResults.map((movie) => (
+                  <button
+                    key={movie.id}
+                    type="button"
+                    onClick={() => selectTmdbMovie(movie)}
+                    className="w-full px-4 py-3 text-left hover:bg-[#00e054]/10 flex items-center gap-4 border-b border-zinc-700/30 last:border-0 transition-colors"
+                  >
+                    {movie.poster ? (
+                      <img src={movie.poster} alt="" className="w-10 h-14 object-cover rounded-lg shadow-lg" />
+                    ) : (
+                      <div className="w-10 h-14 bg-zinc-700 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-medium truncate">{movie.title}</div>
+                      <div className="text-sm text-zinc-400">{movie.year}</div>
+                    </div>
+                    <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Form Body */}
+          <div className="p-5 space-y-5">
+            <div className="flex items-center gap-4 py-1">
+              <div className="flex-1 h-px bg-zinc-800"></div>
+              <span className="text-xs text-zinc-500 font-medium">OR ENTER MANUALLY</span>
+              <div className="flex-1 h-px bg-zinc-800"></div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Movie Title</label>
+                <input
+                  type="text"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  placeholder="Enter movie title"
+                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Year</label>
+                <input
+                  type="text"
+                  value={customYear}
+                  onChange={(e) => setCustomYear(e.target.value)}
+                  placeholder="e.g. 2024"
+                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Director</label>
+                <input
+                  type="text"
+                  value={customDirector}
+                  onChange={(e) => setCustomDirector(e.target.value)}
+                  placeholder="Director name"
+                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Your Username</label>
+                <input
+                  type="text"
+                  value={customUsername}
+                  onChange={(e) => setCustomUsername(e.target.value)}
+                  placeholder="Username"
+                  className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Poster URL or File */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Poster Image</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customPoster}
+                  onChange={(e) => setCustomPoster(e.target.value)}
+                  placeholder="Paste poster image URL or upload →"
+                  className="flex-1 bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all text-sm"
+                />
+                <label className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl px-4 py-2.5 cursor-pointer flex items-center gap-2 text-zinc-300 hover:text-white transition-colors text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Upload</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => setCustomPoster(reader.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Rating Stars */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Rating ({customRating} stars)</label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setCustomRating(customRating === star ? star - 0.5 : star)}
+                    className="p-1 hover:scale-110 transition-transform text-2xl"
+                  >
+                    {customRating >= star ? (
+                      <span className="text-[#00e054]">★</span>
+                    ) : customRating >= star - 0.5 ? (
+                      <span className="text-[#00e054]">½</span>
+                    ) : (
+                      <span className="text-zinc-600">☆</span>
+                    )}
+                  </button>
+                ))}
+                {customRating > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCustomRating(0)}
+                    className="text-xs text-zinc-500 hover:text-red-400 ml-2 transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Review Text */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Your Review</label>
+              <textarea
+                value={customReview}
+                onChange={(e) => setCustomReview(e.target.value)}
+                placeholder="Write your thoughts about the movie..."
+                rows={4}
+                className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all resize-none"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCustomSubmit}
+              disabled={!customTitle.trim()}
+              className="w-full bg-gradient-to-r from-[#00e054] to-emerald-500 hover:from-[#00c948] hover:to-emerald-400 disabled:from-zinc-700 disabled:to-zinc-700 disabled:text-zinc-400 text-black font-bold px-6 py-4 rounded-xl transition-all shadow-lg shadow-[#00e054]/20 hover:shadow-[#00e054]/30 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Create Story
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSavedProjectsUI = () => (
+    <section className="max-w-4xl mx-auto mb-10" aria-labelledby="saved-projects-heading">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 id="saved-projects-heading" className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+            Saved Projects
+          </h2>
+          <p className="text-xs text-zinc-500 mt-1">Full editable designs, including custom backgrounds and styling.</p>
+        </div>
+        {reviewData && (
+          <button
+            type="button"
+            onClick={saveDraft}
+            disabled={savingProject}
+            className="text-sm font-semibold text-black bg-[#00e054] hover:bg-[#00c049] disabled:opacity-50 px-3 py-2 rounded-lg"
+          >
+            {savingProject ? 'Saving…' : activeProjectId ? 'Save Changes' : 'Save Draft'}
+          </button>
         )}
+      </div>
 
-        {/* Custom Mode Form */}
-        {inputMode === 'custom' && (
-          <div className="mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#00e054]/20 to-orange-500/20 rounded-3xl blur opacity-40 group-hover:opacity-60 transition duration-500" />
-              <div className="relative bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-3xl overflow-hidden">
-
-                {/* TMDB Search Header */}
-                <div className="bg-gradient-to-r from-zinc-800/50 to-zinc-900/50 border-b border-zinc-800 p-5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 bg-[#00e054]/10 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-medium">Find Your Movie</h3>
-                      <p className="text-xs text-zinc-500">Search TMDB to auto-fill details</p>
-                    </div>
+      {savedProjects.length === 0 ? (
+        <div className="border border-dashed border-zinc-800 rounded-2xl p-6 text-center text-zinc-500 text-sm">
+          No saved projects yet. Click “Save Draft” while editing any review to keep your designs here.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {savedProjects.map((project) => {
+            const isActive = activeProjectId === project.id;
+            return (
+              <div
+                key={project.id}
+                className={`border rounded-2xl p-4 bg-zinc-900/60 backdrop-blur-sm transition-colors ${
+                  isActive ? 'border-[#00e054]' : 'border-zinc-800 hover:border-zinc-700'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white truncate text-sm">{project.name}</p>
+                    <p className="text-xs text-zinc-400 truncate mt-0.5">{project.reviewData.movieTitle} ({project.reviewData.year || '—'})</p>
+                    <p className="text-[11px] text-zinc-500 mt-2">
+                      {project.design.selectedTemplate} • {project.design.aspectRatio} • {new Date(project.updatedAt).toLocaleDateString()}
+                    </p>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        value={tmdbSearchQuery}
-                        onChange={(e) => setTmdbSearchQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchTmdb(tmdbSearchQuery))}
-                        placeholder="Search movies..."
-                        className="w-full bg-zinc-800/80 border border-zinc-700/50 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => searchTmdb(tmdbSearchQuery)}
-                      disabled={searchingTmdb || !tmdbSearchQuery.trim()}
-                      className="bg-[#00e054] hover:bg-[#00c948] disabled:bg-zinc-700 disabled:text-zinc-400 text-black font-medium px-5 py-3 rounded-xl transition-all flex items-center gap-2"
-                    >
-                      {searchingTmdb ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      )}
-                      <span className="hidden sm:inline">Search</span>
-                    </button>
-                  </div>
-                  {tmdbResults.length > 0 && (
-                    <div className="mt-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
-                      {tmdbResults.map((movie) => (
-                        <button
-                          key={movie.id}
-                          onClick={() => selectTmdbMovie(movie)}
-                          className="w-full px-4 py-3 text-left hover:bg-[#00e054]/10 flex items-center gap-4 border-b border-zinc-700/30 last:border-0 transition-colors"
-                        >
-                          {movie.poster ? (
-                            <img src={movie.poster} alt="" className="w-10 h-14 object-cover rounded-lg shadow-lg" />
-                          ) : (
-                            <div className="w-10 h-14 bg-zinc-700 rounded-lg flex items-center justify-center">
-                              <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="text-white font-medium truncate">{movie.title}</div>
-                            <div className="text-sm text-zinc-400">{movie.year}</div>
-                          </div>
-                          <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                        </button>
-                      ))}
-                    </div>
+                  {project.reviewData.posterUrl && (
+                    <img
+                      src={project.reviewData.posterUrl}
+                      alt=""
+                      className="w-10 h-14 object-cover rounded-md flex-shrink-0 bg-zinc-800"
+                    />
                   )}
                 </div>
 
-                {/* Form Body */}
-                <div className="p-5 space-y-5">
-
-                  {/* Divider with OR */}
-                  <div className="flex items-center gap-4 py-1">
-                    <div className="flex-1 h-px bg-zinc-800"></div>
-                    <span className="text-xs text-zinc-500 font-medium">OR ENTER MANUALLY</span>
-                    <div className="flex-1 h-px bg-zinc-800"></div>
-                  </div>
-
-                  {/* Movie Details Section */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Movie Title</label>
-                      <input
-                        type="text"
-                        value={customTitle}
-                        onChange={(e) => setCustomTitle(e.target.value)}
-                        placeholder="Enter movie title"
-                        className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Year</label>
-                      <input
-                        type="text"
-                        value={customYear}
-                        onChange={(e) => setCustomYear(e.target.value)}
-                        placeholder="2024"
-                        className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Director</label>
-                      <input
-                        type="text"
-                        value={customDirector}
-                        onChange={(e) => setCustomDirector(e.target.value)}
-                        placeholder="Director name"
-                        className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Your Name</label>
-                      <input
-                        type="text"
-                        value={customUsername}
-                        onChange={(e) => setCustomUsername(e.target.value)}
-                        placeholder="Your username"
-                        className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Star Rating */}
-                  <div className="bg-zinc-800/30 rounded-xl p-4">
-                    <label className="block text-xs font-medium text-zinc-400 mb-3 uppercase tracking-wide">Your Rating</label>
-                    <div className="flex items-center gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setCustomRating(customRating === star ? star - 0.5 : star)}
-                          className="text-4xl transition-all transform hover:scale-110 active:scale-95"
-                        >
-                          <span className={`${customRating >= star
-                            ? 'text-[#00e054] drop-shadow-[0_0_8px_rgba(0,224,84,0.5)]'
-                            : customRating >= star - 0.5
-                              ? 'text-[#00e054]/50'
-                              : 'text-zinc-700 hover:text-zinc-500'
-                            } transition-all`}>
-                            ★
-                          </span>
-                        </button>
-                      ))}
-                      <div className="ml-3 flex items-center gap-2">
-                        {customRating > 0 ? (
-                          <>
-                            <span className="text-xl font-bold text-white">{customRating}</span>
-                            <button
-                              onClick={() => setCustomRating(0)}
-                              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-                            >
-                              Clear
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-sm text-zinc-500">Click to rate</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Review Text */}
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wide">Your Review</label>
-                    <textarea
-                      value={customReview}
-                      onChange={(e) => setCustomReview(e.target.value)}
-                      placeholder="Write your thoughts about the movie..."
-                      rows={4}
-                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e054]/50 focus:ring-1 focus:ring-[#00e054]/20 transition-all resize-none"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-zinc-800 text-xs">
                   <button
                     type="button"
-                    onClick={handleCustomSubmit}
-                    disabled={!customTitle.trim()}
-                    className="w-full bg-gradient-to-r from-[#00e054] to-emerald-500 hover:from-[#00c948] hover:to-emerald-400 disabled:from-zinc-700 disabled:to-zinc-700 disabled:text-zinc-400 text-black font-bold px-6 py-4 rounded-xl transition-all shadow-lg shadow-[#00e054]/20 hover:shadow-[#00e054]/30 flex items-center justify-center gap-2"
+                    onClick={() => openSavedProject(project.id)}
+                    className="flex-1 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Create Story
+                    Open
                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-950/50 border border-red-900/50 rounded-xl p-4 mb-8 max-w-3xl mx-auto flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex-shrink-0 w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <p className="text-red-400 text-sm">{error}</p>
-            <button onClick={() => setError('')} className="ml-auto flex-shrink-0 text-red-500/60 hover:text-red-400 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )}
-
-        
-        {feedbackNotice && (
-          <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
-            <p className="text-emerald-300 text-sm">
-              Enjoying StoryBoxd? Tag{' '}
-              <a
-                href={SITE.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
-              >
-                {SITE.instagramHandle}
-              </a>{' '}
-              or{' '}
-              <FeedbackLink
-                href={SITE.issues}
-                className="underline font-medium hover:text-white transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#00e054]"
-              >
-                send feedback
-              </FeedbackLink>
-            </p>
-            <button
-              onClick={() => setFeedbackNotice(false)}
-              className="ml-auto text-emerald-300/70 hover:text-emerald-200"
-              aria-label="Dismiss message"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        {notice && (
-          <div className="bg-emerald-950/50 border border-[#00e054]/30 rounded-xl p-3 mb-6 max-w-4xl mx-auto flex items-center gap-3">
-            <p className="text-emerald-300 text-sm">{notice}</p>
-            <button onClick={() => setNotice('')} className="ml-auto text-emerald-300/70 hover:text-emerald-200" aria-label="Dismiss message">×</button>
-          </div>
-        )}
-
-        {/* Saved Projects are complete editor snapshots, separate from imported review history. */}
-        <section className="max-w-4xl mx-auto mb-10" aria-labelledby="saved-projects-heading">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 id="saved-projects-heading" className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">Saved Projects</h2>
-              <p className="text-xs text-zinc-500 mt-1">Full editable designs, including custom backgrounds and styling.</p>
-            </div>
-            {reviewData && <button onClick={saveDraft} disabled={savingProject} className="text-sm font-semibold text-black bg-[#00e054] hover:bg-[#00c049] disabled:opacity-50 px-3 py-2 rounded-lg">{savingProject ? 'Saving…' : activeProjectId ? 'Save Changes' : 'Save Draft'}</button>}
-          </div>
-          {savedProjects.length === 0 ? (
-            <div className="border border-dashed border-zinc-800 rounded-xl p-6 text-center bg-zinc-900/30">
-              <p className="text-zinc-300 font-medium">No saved projects yet</p>
-              <p className="text-sm text-zinc-500 mt-1">Create a story, then save a draft to keep every design choice.</p>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-3">
-              {savedProjects.map(project => (
-                <article key={project.id} className="flex gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3">
-                  <div className="w-16 h-20 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
-                    {project.reviewData.posterUrl ? <img src={project.reviewData.posterUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full grid place-items-center text-zinc-600">🎬</div>}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-white truncate">{project.name}</p>
-                    <p className="text-xs text-zinc-400 truncate">{project.reviewData.movieTitle}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{project.design.selectedTemplate} · {project.design.aspectRatio} · {new Date(project.updatedAt).toLocaleDateString()}</p>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs">
-                      <button onClick={() => void openSavedProject(project.id)} className="text-[#00e054] hover:text-emerald-300 font-medium">Continue Editing</button>
-                      <button onClick={() => void renameSavedProject(project)} className="text-zinc-400 hover:text-white">Rename</button>
-                      <button onClick={() => void duplicateSavedProject(project)} className="text-zinc-400 hover:text-white">Duplicate</button>
-                      <button onClick={() => void removeSavedProject(project)} className="text-red-400 hover:text-red-300">Delete</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Recent Reviews Gallery */}
-        {!reviewData && !loading && recentDownloads.length > 0 && (
-          <div className="max-w-4xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Recent Reviews</h3>
-              </div>
-              <button
-                onClick={() => {
-                  localStorage.removeItem(STORAGE_KEY);
-                  setRecentDownloads([]);
-                }}
-                className="text-xs text-zinc-600 hover:text-red-400 transition-colors"
-              >
-                Clear All
-              </button>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto pb-3 lg:grid lg:grid-cols-4 xl:grid-cols-6 lg:overflow-visible scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-              {recentDownloads.map((review, i) => {
-                const timeAgo = (() => {
-                  const mins = Math.floor((Date.now() - review.timestamp) / 60000);
-                  if (mins < 1) return 'Just now';
-                  if (mins < 60) return `${mins}m ago`;
-                  const hrs = Math.floor(mins / 60);
-                  if (hrs < 24) return `${hrs}h ago`;
-                  const days = Math.floor(hrs / 24);
-                  return `${days}d ago`;
-                })();
-
-                return (
                   <button
-                    key={review.url + i}
-                    onClick={() => {
-                      setUrl(review.url);
-                      loadReviewFromUrl(review.url);
-                    }}
-                    className="group relative flex-shrink-0 w-[140px] lg:w-auto rounded-xl overflow-hidden border border-zinc-800 hover:border-[#00e054]/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,224,84,0.1)] active:scale-95 bg-zinc-900"
+                    type="button"
+                    onClick={() => duplicateSavedProject(project)}
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white"
                   >
-                    {/* Poster Image */}
-                    <div className="aspect-[2/3] relative overflow-hidden bg-zinc-800">
-                      {review.posterUrl ? (
-                        <img
-                          src={review.posterUrl}
-                          alt={review.movieTitle}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg className="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                          </svg>
-                        </div>
-                      )}
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
-
-                      {/* Play/Edit Icon on Hover */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-10 h-10 rounded-full bg-[#00e054]/90 flex items-center justify-center shadow-lg">
-                          <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </div>
-                      </div>
-
-                      {/* Title and metadata at bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                        <p className="text-white text-xs font-semibold leading-tight truncate">{review.movieTitle}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-zinc-400 text-[10px]">@{review.username}</span>
-                          <span className="text-zinc-500 text-[10px]">{timeAgo}</span>
-                        </div>
-                      </div>
-                    </div>
+                    Copy
                   </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {loading && !reviewData && (
-          <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-pulse">
-            <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
-            <div className="w-[270px] h-[480px] bg-zinc-900/30 rounded-[2.5rem]" />
-          </div>
-        )}
-
-        {reviewData && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-start justify-center">
-
-              <StoryControls
-                aspectRatio={aspectRatio}
-                setAspectRatio={setAspectRatio}
-                selectedTemplate={selectedTemplate}
-                setSelectedTemplate={setSelectedTemplate}
-                fontSizeMultiplier={fontSizeMultiplier}
-                setFontSizeMultiplier={setFontSizeMultiplier}
-                fontType={fontType}
-                setFontType={setFontType}
-                colorTheme={colorTheme}
-                setColorTheme={setColorTheme}
-                isBold={isBold}
-                setIsBold={setIsBold}
-                isItalic={isItalic}
-                setIsItalic={setIsItalic}
-                letterSpacing={letterSpacing}
-                setLetterSpacing={setLetterSpacing}
-                lineHeight={lineHeight}
-                setLineHeight={setLineHeight}
-                showPoster={showPoster}
-                setShowPoster={setShowPoster}
-                showCredit={showCredit}
-                setShowCredit={setShowCredit}
-                backdropPositionPercent={backdropPositionPercent}
-                setBackdropPositionPercent={setBackdropPositionPercent}
-                backdropPositionYPercent={backdropPositionYPercent}
-                setBackdropPositionYPercent={setBackdropPositionYPercent}
-                customBackdrop={customBackdrop}
-                setCustomBackdrop={setCustomBackdrop}
-                availableBackdrops={availableBackdrops}
-                handleBackgroundUpload={handleBackgroundUpload}
-                backdropBlur={backdropBlur}
-                setBackdropBlur={setBackdropBlur}
-                backdropBrightness={backdropBrightness}
-                setBackdropBrightness={setBackdropBrightness}
-                backdropSaturation={backdropSaturation}
-                setBackdropSaturation={setBackdropSaturation}
-                accentColor={accentColor}
-                setAccentColor={setAccentColor}
-                textAlign={textAlign}
-                setTextAlign={setTextAlign}
-                quoteStyle={quoteStyle}
-                setQuoteStyle={setQuoteStyle}
-                onDownload={handleDownload}
-                onShare={handleShare}
-                downloading={downloading}
-                sharing={sharing}
-                hasReviewData={!!reviewData}
-                posterUrl={reviewData.posterUrl}
-                onRandomize={handleRandomize}
-                onSaveDraft={saveDraft}
-                savingProject={savingProject}
-                isSavedProject={!!activeProjectId}
-              />
-
-              <div className="flex-shrink-0 lg:sticky lg:top-8 flex flex-col items-center">
-                <div className={`bg-zinc-800 p-2 shadow-2xl transition-all duration-300 ${
-                  aspectRatio === '9:16'
-                    ? 'rounded-[2.5rem]'
-                    : aspectRatio === '4:5'
-                      ? 'rounded-[2rem]'
-                      : 'rounded-[1.5rem]'
-                }`}>
-                  <div
-                    className={`bg-black overflow-hidden relative transition-all duration-300 ${
-                      aspectRatio === '9:16'
-                        ? 'rounded-[2rem]'
-                        : aspectRatio === '4:5'
-                          ? 'rounded-[1.5rem]'
-                          : 'rounded-[1rem]'
-                    }`}
-                    style={{
-                      width: `${currentRatioConfig.previewWidth}px`,
-                      height: `${currentRatioConfig.previewHeight}px`,
-                    }}
+                  <button
+                    type="button"
+                    onClick={() => renameSavedProject(project)}
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white"
                   >
-                    <div
-                      className="origin-top-left transition-transform duration-300"
-                      style={{
-                        transform: `scale(${currentRatioConfig.scale})`,
-                        width: `${canvasWidth}px`,
-                        height: `${canvasHeight}px`,
-                      }}
-                    >
-                      {renderTemplate()}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                  <span className="text-zinc-300 font-semibold">{currentRatioConfig.label}</span>
-                  <span>•</span>
-                  <span>{currentRatioConfig.sublabel}</span>
-                  <span>•</span>
-                  <span className="font-mono text-[11px] text-zinc-500">{canvasWidth}×{canvasHeight}px</span>
+                    Rename
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeSavedProject(project)}
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-red-900/80 text-zinc-500 hover:text-red-400"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
 
+  const renderRecentReviewsUI = () => (
+    <>
+      {recentDownloads.length > 0 && (
+        <div className="max-w-4xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-zinc-800 rounded-lg flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-[#00e054]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Recent Reviews</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem(STORAGE_KEY);
+                setRecentDownloads([]);
+              }}
+              className="text-xs text-zinc-600 hover:text-red-400 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-3 lg:grid lg:grid-cols-4 xl:grid-cols-6 lg:overflow-visible scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+            {recentDownloads.map((review, i) => {
+              const timeAgo = (() => {
+                const mins = Math.floor((Date.now() - review.timestamp) / 60000);
+                if (mins < 1) return 'Just now';
+                if (mins < 60) return `${mins}m ago`;
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return `${hrs}h ago`;
+                const days = Math.floor(hrs / 24);
+                return `${days}d ago`;
+              })();
+
+              return (
+                <button
+                  key={review.url + i}
+                  type="button"
+                  onClick={() => {
+                    setUrl(review.url);
+                    loadReviewFromUrl(review.url);
+                  }}
+                  className="group relative flex-shrink-0 w-[140px] lg:w-auto rounded-xl overflow-hidden border border-zinc-800 hover:border-[#00e054]/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,224,84,0.1)] active:scale-95 bg-zinc-900"
+                >
+                  <div className="aspect-[2/3] relative overflow-hidden bg-zinc-800">
+                    {review.posterUrl ? (
+                      <img
+                        src={review.posterUrl}
+                        alt={review.movieTitle}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-10 h-10 rounded-full bg-[#00e054]/90 flex items-center justify-center shadow-lg">
+                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <p className="text-white text-xs font-semibold leading-tight truncate">{review.movieTitle}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-zinc-400 text-[10px]">@{review.username}</span>
+                        <span className="text-zinc-500 text-[10px]">{timeAgo}</span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {/* ============================================================== */}
+      {/* MOBILE-ONLY LAYOUT (< lg breakpoint, e.g. < 1024px)           */}
+      {/* ============================================================== */}
+      <div className="lg:hidden">
+        {reviewData && mobileView === 'editor' ? (
+          <MobileStudio
+            aspectRatio={aspectRatio}
+            setAspectRatio={setAspectRatio}
+            selectedTemplate={selectedTemplate}
+            setSelectedTemplate={setSelectedTemplate}
+            fontSizeMultiplier={fontSizeMultiplier}
+            setFontSizeMultiplier={setFontSizeMultiplier}
+            fontType={fontType}
+            setFontType={setFontType}
+            colorTheme={colorTheme}
+            setColorTheme={setColorTheme}
+            isBold={isBold}
+            setIsBold={setIsBold}
+            isItalic={isItalic}
+            setIsItalic={setIsItalic}
+            letterSpacing={letterSpacing}
+            setLetterSpacing={setLetterSpacing}
+            lineHeight={lineHeight}
+            setLineHeight={setLineHeight}
+            showPoster={showPoster}
+            setShowPoster={setShowPoster}
+            showCredit={showCredit}
+            setShowCredit={setShowCredit}
+            backdropPositionPercent={backdropPositionPercent}
+            setBackdropPositionPercent={setBackdropPositionPercent}
+            backdropPositionYPercent={backdropPositionYPercent}
+            setBackdropPositionYPercent={setBackdropPositionYPercent}
+            customBackdrop={customBackdrop}
+            setCustomBackdrop={setCustomBackdrop}
+            availableBackdrops={availableBackdrops}
+            handleBackgroundUpload={handleBackgroundUpload}
+            backdropBlur={backdropBlur}
+            setBackdropBlur={setBackdropBlur}
+            backdropBrightness={backdropBrightness}
+            setBackdropBrightness={setBackdropBrightness}
+            backdropSaturation={backdropSaturation}
+            setBackdropSaturation={setBackdropSaturation}
+            accentColor={accentColor}
+            setAccentColor={setAccentColor}
+            textAlign={textAlign}
+            setTextAlign={setTextAlign}
+            quoteStyle={quoteStyle}
+            setQuoteStyle={setQuoteStyle}
+            onDownload={handleDownload}
+            onShare={handleShare}
+            downloading={downloading}
+            sharing={sharing}
+            onRandomize={handleRandomize}
+            onUndoRandomize={handleUndoRandomize}
+            canUndoRandomize={!!undoState}
+            onSaveDraft={saveDraft}
+            savingProject={savingProject}
+            isSavedProject={!!activeProjectId}
+            renderTemplate={renderTemplate}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            onOpenProjects={() => setMobileView('projects')}
+          />
+        ) : (
+          <div
+            className="min-h-[100dvh] bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white flex flex-col"
+            style={{ overscrollBehavior: 'contain' }}
+          >
+            {/* Mobile Projects Screen Top Bar */}
+            <header
+              className="flex-none px-4 py-3 border-b border-zinc-800/80 bg-zinc-950/95 backdrop-blur-md flex items-center justify-between z-20"
+              style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
+            >
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/"
+                  className="min-h-[44px] text-xs text-zinc-400 hover:text-white px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 inline-flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
+                >
+                  ← Home
+                </Link>
+                <div className="flex items-center gap-0.5 text-base font-bold tracking-tight ml-1">
+                  <span className="text-white">Story</span>
+                  <span className="text-[#00e054]">Boxd</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {reviewData && (
+                  <button
+                    type="button"
+                    onClick={() => setMobileView('editor')}
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#00e054] text-black text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shadow-md shadow-[#00e054]/20"
+                  >
+                    <span>Editor</span>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                )}
+                <FeedbackLink
+                  href={SITE.issues}
+                  className="min-h-[44px] text-xs text-zinc-400 hover:text-white px-3 py-2 rounded-xl border border-zinc-800/80 bg-zinc-900 inline-flex items-center justify-center"
+                >
+                  Feedback ↗
+                </FeedbackLink>
+              </div>
+            </header>
+
+            {/* Mobile Projects Scrollable Body */}
+            <div
+              className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
+              style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+            >
+              <div className="text-center mb-2">
+                <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-3 py-1.5 mb-3">
+                  <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
+                  <span className="text-xs text-zinc-400">Letterboxd → Instagram</span>
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight mb-1">
+                  <span>Story</span>
+                  <span className="text-[#00e054]">Boxd</span>
+                </h1>
+                <p className="text-xs text-zinc-400 max-w-xs mx-auto">
+                  Transform your Letterboxd reviews into stunning Instagram stories
+                </p>
+              </div>
+
+              {renderNoticesUI()}
+              {renderModeToggleUI()}
+              {inputMode === 'import' && renderImportFormUI()}
+              {inputMode === 'custom' && renderCustomFormUI()}
+              {renderSavedProjectsUI()}
+              {renderRecentReviewsUI()}
             </div>
           </div>
         )}
+      </div>
 
-        <div className="mt-16 pt-8 border-t border-zinc-900 text-center lg:block hidden">
-          <p className="text-zinc-600 text-sm">
-            Made with <span className="text-orange-500">♥</span> for movie lovers
-          </p>
+      {/* ============================================================== */}
+      {/* DESKTOP-ONLY LAYOUT (>= 1024px, lg breakpoint - PIXEL IDENTICAL)*/}
+      {/* ============================================================== */}
+      <div className="hidden lg:block min-h-screen bg-gradient-to-b from-zinc-950 via-black to-zinc-950 text-white pb-24 lg:pb-0">
+        <div className="fixed inset-0 opacity-30 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 -left-40 w-80 h-80 bg-[#00e054] rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" />
+          <div className="absolute bottom-0 -right-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
-        {reviewData && (
-          <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-xl border-t border-zinc-800 px-4 py-3 lg:hidden z-50 flex gap-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-            <button
-              onClick={saveDraft}
-              disabled={savingProject}
-              className="flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform text-sm disabled:opacity-50"
-            >{savingProject ? 'Saving…' : activeProjectId ? 'Save Changes' : 'Save Draft'}</button>
-            <button
-              onClick={handleShare}
-              disabled={sharing}
-              className="hidden sm:flex flex-1 bg-zinc-800 text-white font-medium py-3 rounded-xl active:scale-95 transition-transform items-center justify-center gap-2"
+        <div className={`relative z-10 max-w-6xl mx-auto px-4 py-6 lg:px-6 lg:py-12 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="flex items-center justify-between mb-4 lg:mb-6 max-w-4xl mx-auto">
+            <Link
+              href="/"
+              className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              Share
-            </button>
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="flex-1 bg-[#00e054] text-black font-bold py-3 rounded-xl active:scale-95 transition-transform shadow-lg shadow-[#00e054]/20 flex items-center justify-center gap-2"
+              ← Home
+            </Link>
+            <FeedbackLink
+              href={SITE.issues}
+              className="text-xs text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg border border-zinc-800/80 hover:border-zinc-700 bg-zinc-900/60 inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#00e054]"
             >
-              {downloading ? (
-                <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              )}
-              {downloading ? 'Saving...' : 'Download'}
-            </button>
+              <span>Feedback</span>
+              <span aria-hidden="true">↗</span>
+            </FeedbackLink>
           </div>
-        )}
 
-        {reviewData && (
-          <div ref={storyRef} style={{
+          <div className="text-center mb-6 lg:mb-12">
+            <div className="inline-flex items-center gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 mb-4 lg:mb-6">
+              <span className="w-2 h-2 bg-[#00e054] rounded-full animate-pulse" />
+              <span className="text-xs lg:text-sm text-zinc-400">Letterboxd → Instagram</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-2 lg:mb-4 tracking-tight">
+              <span className="bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">Story</span>
+              <span className="bg-gradient-to-r from-[#00e054] to-emerald-400 bg-clip-text text-transparent">Boxd</span>
+            </h1>
+            <p className="text-base lg:text-xl text-zinc-400 max-w-md mx-auto leading-relaxed">
+              Transform your Letterboxd reviews into stunning Instagram stories
+            </p>
+          </div>
+
+          {renderModeToggleUI()}
+          {inputMode === 'import' && renderImportFormUI()}
+          {inputMode === 'custom' && renderCustomFormUI()}
+          {renderNoticesUI()}
+          {renderSavedProjectsUI()}
+
+          {!reviewData && !loading && renderRecentReviewsUI()}
+
+          {loading && !reviewData && (
+            <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-pulse">
+              <div className="w-full lg:w-[600px] h-96 bg-zinc-900/30 rounded-xl" />
+              <div className="w-[270px] h-[480px] bg-zinc-900/30 rounded-[2.5rem]" />
+            </div>
+          )}
+
+          {reviewData && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-start justify-center">
+                <StoryControls
+                  aspectRatio={aspectRatio}
+                  setAspectRatio={setAspectRatio}
+                  selectedTemplate={selectedTemplate}
+                  setSelectedTemplate={setSelectedTemplate}
+                  fontSizeMultiplier={fontSizeMultiplier}
+                  setFontSizeMultiplier={setFontSizeMultiplier}
+                  fontType={fontType}
+                  setFontType={setFontType}
+                  colorTheme={colorTheme}
+                  setColorTheme={setColorTheme}
+                  isBold={isBold}
+                  setIsBold={setIsBold}
+                  isItalic={isItalic}
+                  setIsItalic={setIsItalic}
+                  letterSpacing={letterSpacing}
+                  setLetterSpacing={setLetterSpacing}
+                  lineHeight={lineHeight}
+                  setLineHeight={setLineHeight}
+                  showPoster={showPoster}
+                  setShowPoster={setShowPoster}
+                  showCredit={showCredit}
+                  setShowCredit={setShowCredit}
+                  backdropPositionPercent={backdropPositionPercent}
+                  setBackdropPositionPercent={setBackdropPositionPercent}
+                  backdropPositionYPercent={backdropPositionYPercent}
+                  setBackdropPositionYPercent={setBackdropPositionYPercent}
+                  customBackdrop={customBackdrop}
+                  setCustomBackdrop={setCustomBackdrop}
+                  availableBackdrops={availableBackdrops}
+                  handleBackgroundUpload={handleBackgroundUpload}
+                  backdropBlur={backdropBlur}
+                  setBackdropBlur={setBackdropBlur}
+                  backdropBrightness={backdropBrightness}
+                  setBackdropBrightness={setBackdropBrightness}
+                  backdropSaturation={backdropSaturation}
+                  setBackdropSaturation={setBackdropSaturation}
+                  accentColor={accentColor}
+                  setAccentColor={setAccentColor}
+                  textAlign={textAlign}
+                  setTextAlign={setTextAlign}
+                  quoteStyle={quoteStyle}
+                  setQuoteStyle={setQuoteStyle}
+                  onDownload={handleDownload}
+                  onShare={handleShare}
+                  downloading={downloading}
+                  sharing={sharing}
+                  hasReviewData={!!reviewData}
+                  posterUrl={reviewData.posterUrl}
+                  onRandomize={handleRandomize}
+                  onSaveDraft={saveDraft}
+                  savingProject={savingProject}
+                  isSavedProject={!!activeProjectId}
+                />
+
+                <div className="flex-shrink-0 lg:sticky lg:top-8 flex flex-col items-center">
+                  <div
+                    className={`bg-zinc-800 p-2 shadow-2xl transition-all duration-300 ${
+                      aspectRatio === '9:16'
+                        ? 'rounded-[2.5rem]'
+                        : aspectRatio === '4:5'
+                          ? 'rounded-[2rem]'
+                          : 'rounded-[1.5rem]'
+                    }`}
+                  >
+                    <div
+                      className={`bg-black overflow-hidden relative transition-all duration-300 ${
+                        aspectRatio === '9:16'
+                          ? 'rounded-[2rem]'
+                          : aspectRatio === '4:5'
+                            ? 'rounded-[1.5rem]'
+                            : 'rounded-[1rem]'
+                      }`}
+                      style={{
+                        width: `${currentRatioConfig.previewWidth}px`,
+                        height: `${currentRatioConfig.previewHeight}px`,
+                      }}
+                    >
+                      <div
+                        className="origin-top-left transition-transform duration-300"
+                        style={{
+                          transform: `scale(${currentRatioConfig.scale})`,
+                          width: `${canvasWidth}px`,
+                          height: `${canvasHeight}px`,
+                        }}
+                      >
+                        {renderTemplate()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500 font-medium">
+                    <span className="text-zinc-300 font-semibold">{currentRatioConfig.label}</span>
+                    <span>•</span>
+                    <span>{currentRatioConfig.sublabel}</span>
+                    <span>•</span>
+                    <span className="font-mono text-[11px] text-zinc-500">{canvasWidth}×{canvasHeight}px</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-16 pt-8 border-t border-zinc-900 text-center lg:block hidden">
+            <p className="text-zinc-600 text-sm">
+              Made with <span className="text-orange-500">♥</span> for movie lovers
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Offscreen element for high-res export (unaffected by display scaling) */}
+      {reviewData && (
+        <div
+          ref={storyRef}
+          style={{
             position: 'fixed',
             left: '-9999px',
             top: 0,
@@ -1227,16 +1572,14 @@ function StudioContent() {
             height: `${canvasHeight}px`,
             overflow: 'hidden',
             pointerEvents: 'none',
-          }}>
-            {renderTemplate()}
-          </div>
-        )}
-
-      </div>
-    </div>
+          }}
+        >
+          {renderTemplate()}
+        </div>
+      )}
+    </>
   );
 }
-
 
 export default function Studio() {
   return (
